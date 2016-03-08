@@ -2,7 +2,7 @@
 layout: post
 title: Hello World
 ---
-This blog entry is to test out code snippets, and to teach you how to code hello world!
+This blog entry is to test out code snippets, and to teach you how to code Hello World!
 
 {% highlight csharp linenos %}
 
