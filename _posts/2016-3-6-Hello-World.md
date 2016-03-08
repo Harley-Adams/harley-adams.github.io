@@ -17,3 +17,5 @@ public class Hello
 
 Console applications always start from the Main method, which needs to be static and needs to not have a return type.
 The secret here is that it actually does return an int, but is only used by the OS to figure out if our program has run successfully (0) or not (1 or larger).
+
+Hopefully this is a new paragraph!

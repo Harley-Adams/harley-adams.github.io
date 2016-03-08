@@ -10,7 +10,7 @@ The idea behind this blog is to share some of the more intersting problems I've 
 ### More Information
 
 I come from a land down under. No not Australia, the other down under! New Zealand born and raised. 
-I've had the opportunity to work on video games, financial mobile apps and Storytelling applications.
+I've had the opportunity to work on video games, financial mobile apps and storytelling applications.
 
 
 ### Contact me
