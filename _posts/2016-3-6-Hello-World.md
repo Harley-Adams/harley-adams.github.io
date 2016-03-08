@@ -4,7 +4,7 @@ title: Hello World
 ---
 This blog entry is to test out code snippets, and to teach you how to code hello world!
 
-{% highlight csharp %}
+{% highlight csharp linenos %}
 
 public class Hello
 {
