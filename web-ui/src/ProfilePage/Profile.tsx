@@ -6,7 +6,6 @@ import * as reactRouterDom from "react-router-dom";
 
 class Profile extends React.Component<{}, {}> {
   render() {
-    const compData = ProfessionalConstants[0];
     const professionalDataPoints = ProfessionalConstants.map((dataPoint) => (
       <ProfessionalComponent {...dataPoint} key={dataPoint.Header} />
     ));
@@ -133,23 +132,6 @@ class Profile extends React.Component<{}, {}> {
             </div>
           </div>
         </section>
-        {/* <section className="section" data-section="section1">
-                    <div className="section-heading">
-                        <h2>Skills</h2>
-                    </div>
-                    <div className="row">
-                        <div className="column">
-                            <div className="service-item">
-                                <img src="dotnetfoundation.png" alt="" />
-                                <h4>.NET Core</h4>
-                                <p>
-                                    I've been using .NET for aaaages.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                </section> */}
       </div>
     );
   }
