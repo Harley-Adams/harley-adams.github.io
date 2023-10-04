@@ -1,125 +1,51 @@
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import PlayFabClient from "../PlayFab/PlayFabClient";
-import { CTable } from "@coreui/react";
-import "@coreui/coreui/dist/css/coreui.min.css";
-import PfLoginResult, {
-  EntityTokenResponse,
-} from "../PlayFab/models/PfLoginResult";
-import PfV2LeaderboardResult, {
-  LBV2Ranking,
-} from "../PlayFab/models/PfV2LeaderboardResult";
+import PfV2LeaderboardResult from "../PlayFab/models/PfV2LeaderboardResult";
+import {
+  GetLeaderboardAroundEntity,
+  GetTopNLeaderboard,
+} from "./LeaderboardFetcher";
+import LeaderboardTable from "./LeaderboardTable";
 
 const statName = "HarleyStat";
-
-interface displayTableType {
-  rank: number;
-  displayName: string;
-  col_1: number;
-  col_2: number;
-  col_3: number;
-  col_4: number;
-  col_5: number;
-}
+// Prod
+const titleId = "A691C";
+// Match
+// const titleId = "F1098BBF";
+const useProd: boolean = true;
 
 function Leaderboard() {
-  // const [numColumns, setNumColumns] = useState(1);
-  const [data, setData] = useState<PfV2LeaderboardResult>();
+  const [topNData, setTopNData] = useState<PfV2LeaderboardResult>();
+  const [aroundEntityData, setAroundEntityData] =
+    useState<PfV2LeaderboardResult>();
 
   useEffect(() => {
-    // Prod
-    // let pfClient = new PlayFabClient(
-    //   "A691C",
-    //   "",
-    //   true
-    // );
-
-    // Matchmaking
-    let pfClient = new PlayFabClient("F1098BBF", "", false);
-
-    pfClient.LoginWithCustomId("customId", (loginResult: PfLoginResult) => {
-      pfClient.GetEntityKey(
-        loginResult.EntityToken,
-        loginResult.SessionTicket,
-        async (loginResult: EntityTokenResponse) => {
-          if (loginResult !== null) {
-            pfClient.GetV2Leaderboard(
-              loginResult.EntityToken,
-              statName,
-              (leaderboardResult: PfV2LeaderboardResult) => {
-                if (leaderboardResult !== null) {
-                  setData(leaderboardResult);
-                } else {
-                  // tslint:disable-next-line: no-console
-                  console.log(`playfab getleaderboards error}`);
-                }
-              }
-            );
-          } else {
-            // tslint:disable-next-line: no-console
-            console.log(`playfab login error}`);
-          }
-        }
-      );
-    });
+    let pfClient = new PlayFabClient(titleId, "", useProd);
+    GetTopNLeaderboard(pfClient, statName, setTopNData);
   }, []);
 
-  const columns = [
-    {
-      key: "rank",
-      label: "rank",
-      _props: { scope: "col" },
-    },
-    {
-      key: "displayName",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_1",
-      label: "Score1",
-      _props: { scope: "col" },
-    },
-    // {
-    //   key: "col_2",
-    //   _props: { scope: "col" },
-    // },
-    // {
-    //   key: "col_3",
-    //   _props: { scope: "col" },
-    // },
-    // {
-    //   key: "col_4",
-    //   _props: { scope: "col" },
-    // },
-    // {
-    //   key: "col_5",
-    //   _props: { scope: "col" },
-    // },
-    // {
-    //   key: "metadata",
-    //   _props: { scope: "col" },
-    // },
-  ];
+  useEffect(() => {
+    let pfClient = new PlayFabClient(titleId, "", useProd);
+    GetLeaderboardAroundEntity(pfClient, statName, setTopNData);
+  }, []);
 
-  let projectedDataItems: displayTableType[] | undefined = data?.Rankings.map(
-    (item: LBV2Ranking) => ({
-      rank: item.Rank,
-      displayName: item.Entity.Id,
-      col_1: item.Scores[0],
-      col_2: item.Scores[1],
-      col_3: item.Scores[2],
-      col_4: item.Scores[3],
-      col_5: item.Scores[4],
-      // metadata: "nothereyet",
-      _cellProps: { id: { scope: "row" } },
-    })
+  return (
+    <div>
+      <h1>Leaderboards</h1>
+      <h2>GetTopNLeaderboard</h2>
+      {topNData !== undefined ? (
+        <LeaderboardTable rankings={topNData?.Rankings} />
+      ) : (
+        <div />
+      )}
+      <h2>GetLeaderboardAroundEntity</h2>
+      {topNData !== undefined ? (
+        <LeaderboardTable rankings={topNData?.Rankings} />
+      ) : (
+        <div />
+      )}
+    </div>
   );
-
-  return <CTable columns={columns} items={projectedDataItems} striped={true} />;
 }
-
-// function Leaderboard() {
-//   const [leaderboardData] = useState("taylor");
-//   return <h1>this is the Leaderboard</h1>;
-// }
 
 export default Leaderboard;

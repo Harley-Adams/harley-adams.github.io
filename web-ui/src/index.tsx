@@ -10,6 +10,7 @@ import MarkdownHost from "./Blog/MarkdownHost";
 
 const router = createBrowserRouter([
   {
+    path: "/",
     element: <Layout />,
     children: [
       {

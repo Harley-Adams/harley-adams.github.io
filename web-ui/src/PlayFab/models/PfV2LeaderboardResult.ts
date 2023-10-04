@@ -1,5 +1,3 @@
-import PlayerLeaderboardEntry from "./PlayerLeaderboardEntry";
-
 export default interface PfV2LeaderboardResult {
     Rankings: LBV2Ranking[];
     StatisticVersion: number;
