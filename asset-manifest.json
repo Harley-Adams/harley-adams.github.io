@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.9f561a48.css",
-    "main.js": "/static/js/main.9d6d6b22.js",
+    "main.css": "/static/css/main.32b66aba.css",
+    "main.js": "/static/js/main.33ef5874.js",
     "static/js/787.62449090.chunk.js": "/static/js/787.62449090.chunk.js",
     "static/media/page-bg.jpg": "/static/media/page-bg.fd87df84fbb90bc87ec2.jpg",
     "static/media/ninjakiwi.png": "/static/media/ninjakiwi.d5ed1b7961ed6eb87b7c.png",
@@ -10,12 +10,12 @@
     "static/media/xboxlogo.png": "/static/media/xboxlogo.198a136fb179f7d9a4fe.png",
     "index.html": "/index.html",
     "static/media/markdownsample.md": "/static/media/markdownsample.75b595ad12a3864fe8ff.md",
-    "main.9f561a48.css.map": "/static/css/main.9f561a48.css.map",
-    "main.9d6d6b22.js.map": "/static/js/main.9d6d6b22.js.map",
+    "main.32b66aba.css.map": "/static/css/main.32b66aba.css.map",
+    "main.33ef5874.js.map": "/static/js/main.33ef5874.js.map",
     "787.62449090.chunk.js.map": "/static/js/787.62449090.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.9f561a48.css",
-    "static/js/main.9d6d6b22.js"
+    "static/css/main.32b66aba.css",
+    "static/js/main.33ef5874.js"
   ]
 }
