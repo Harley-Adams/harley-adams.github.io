@@ -213,6 +213,7 @@ export default class PlayFabClient {
   public GetV2LeaderboardAroundPlayer(
     entityKey: string,
     statName: string,
+    entityId: string,
     callback: (leaderboardResult: PfV2LeaderboardResult) => void
   ) {
     let apiEndpoint = this.apiBase + `Leaderboard/GetLeaderboardAroundEntity`;

@@ -11,7 +11,7 @@ class Profile extends React.Component<{}, {}> {
     ));
 
     return (
-      <div className="portfolio">
+      <div className="profile">
         <section className="section" data-section="section2">
           <div className="section-heading">
             <h2>Professional</h2>

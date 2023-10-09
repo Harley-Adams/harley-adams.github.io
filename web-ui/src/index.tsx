@@ -7,6 +7,7 @@ import Leaderboard from "./LeaderboardPage/Leaderboard";
 import Layout from "./Layout";
 import Profile from "./ProfilePage/Profile";
 import MarkdownHost from "./Blog/MarkdownHost";
+import FivePM from "./FivePMPage/FivePM";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
       {
         path: "/Leaderboard",
         element: <Leaderboard />,
+      },
+      {
+        path: "/FivePM",
+        element: <FivePM />,
       },
       {
         path: "/Posts",

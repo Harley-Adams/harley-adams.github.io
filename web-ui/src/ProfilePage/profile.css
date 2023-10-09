@@ -1,5 +1,5 @@
 /* Section */
-.section {
+.profile .section {
   /* color: #fff; */
   width: 60%;
   right: 20%;
@@ -10,32 +10,32 @@
   border-bottom: 3px solid rgba(250, 250, 250, 0.25);
 }
 
-.section-heading {
+.profile .section-heading {
   text-align: center;
   padding: 60px 45px;
 }
 
-.section-heading h2 {
+.profile .section-heading h2 {
   font-size: 32px;
   font-weight: 700;
   color: #fff;
 }
 
-.section-heading .line-dec {
+.profile .section-heading .line-dec {
   width: 60px;
   height: 3px;
   background-color: #a43f49;
   margin: 10px auto;
 }
 
-.section-heading span {
+.profile .section-heading span {
   margin-top: 5px;
   font-size: 16px;
   color: #fff;
   letter-spacing: 0.5px;
 }
 
-.portfolio {
+.profile {
   background: url("../images/page-bg.jpg") no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -45,80 +45,80 @@
   min-height: 100vh;
 }
 
-h4 {
+.profile h4 {
   font-size: 26px;
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.25px;
 }
 
-.portfolio p {
+.profile p {
   font-size: 16px;
   line-height: 24px;
   color: #fff;
 }
 
-label {
+.profile label {
   font-size: 16px;
   line-height: 24px;
   color: #fff;
 }
 
 /* Left & Right Post */
-.right-image-post {
+.profile .right-image-post {
   margin-top: 60px;
   padding-top: 60px;
   border-top: 2px solid rgba(250, 250, 250, 0.1);
 }
 
-.left-image-post {
+.profile .left-image-post {
   margin-top: 60px;
   padding-top: 60px;
   border-top: 2px solid rgba(250, 250, 250, 0.1);
 }
 
-.left-image-post:nth-child(2) {
+.profile .left-image-post:nth-child(2) {
   margin-top: 0px;
   padding-top: 0px;
   border-top: none;
 }
 
-.left-image-post img {
+.profile .left-image-post img {
   margin-bottom: 30px;
 }
 
-.right-image-post img {
+.profile .right-image-post img {
   margin-top: 30px;
 }
 
-.left-image img,
-.right-image img {
+.profile .left-image img,
+.profile .right-image img {
   border-radius: 5px;
   width: 60%;
 }
 
-.right-image-post h4,
-.left-image-post h4 {
+.profile .right-image-post h4,
+.profile .left-image-post h4 {
   margin-top: 30px;
 }
 
-.right-image-post p,
-.left-image-post p {
+.profile .right-image-post p,
+.profile .left-image-post p {
   margin-top: 20px;
 }
 
-.right-image-post .white-button,
-.left-image-post .white-button {
+.profile .right-image-post .white-button,
+.profile .left-image-post .white-button {
   margin-top: 30px;
 }
 
-.column {
+.profile .column {
   -ms-flex: 0 0 50%;
   flex: 0 0 50%;
   max-width: 50%;
 }
 
-.row {
+.profile .row {
   display: -ms-flexbox;
   display: flex;
   -ms-flex-wrap: wrap;
@@ -129,7 +129,7 @@ label {
 
 /* Buttons */
 
-.white-button a {
+.profile .white-button a {
   display: inline-block;
   padding: 12px 20px;
   background-color: #fff;
@@ -141,12 +141,12 @@ label {
   transition: all 0.5s;
 }
 
-.white-button a:hover {
+.profile .white-button a:hover {
   background-color: #325fb3;
   color: #fff;
 }
 
-button {
+.profile button {
   display: inline-block;
   padding: 10px 20px;
   background-color: #fff;
@@ -161,53 +161,53 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+.profile button:hover {
   outline: none;
   background-color: #325fb3;
   /* color: #fff; */
 }
 
-.google-play-width {
+.profile .google-play-width {
   max-width: 100%;
 }
-.google-play-icon {
+.profile .google-play-icon {
   max-width: 50%;
 }
 
 /* Services */
-.my-services .col-md-6 {
+.profile .my-services .col-md-6 {
   padding-left: 5px;
   padding-right: 5px;
 }
 
-.service-item {
+.profile .service-item {
   margin-bottom: 10px;
   padding: 50px;
   background-color: rgba(250, 250, 250, 0.1);
   transition: all 0.5s;
 }
 
-.service-item h4 {
+.profile .service-item h4 {
   transition: all 0.5s;
 }
 
-.service-item p {
+.profile .service-item p {
   transition: all 0.5s;
 }
 
-.service-item:hover {
+.profile .service-item:hover {
   background-color: rgba(250, 250, 250, 1);
 }
 
-.service-item:hover h4 {
+.profile .service-item:hover h4 {
   color: #1e1e1e;
 }
 
-.service-item:hover p {
+.profile .service-item:hover p {
   color: #4a4a4a;
 }
 
-.service-item img {
+.profile .service-item img {
   border-radius: 5px;
   width: 50%;
   display: inline-block;
