@@ -13,7 +13,8 @@ export default class PlayFabClient {
     if (useProd) {
       this.apiBase = `https://${titleId}.playfabapi.com/`;
     } else {
-      this.apiBase = `https://${titleId}.matchmaking.playfabapi.com/`;
+      // this.apiBase = `https://${titleId}.matchmaking.playfabapi.com/`;
+      this.apiBase = `https://${titleId}.api.mm.azureplayfabdev.com/`;
     }
   }
 
@@ -173,7 +174,7 @@ export default class PlayFabClient {
   }
 
   public GetV2Leaderboard(
-    entityKey: string,
+    entityToken: EntityTokenResponse,
     statName: string,
     callback: (leaderboardResult: PfV2LeaderboardResult) => void
   ) {
@@ -190,7 +191,7 @@ export default class PlayFabClient {
       body: JSON.stringify(data),
       headers: {
         "Content-Type": "application/json",
-        "X-EntityToken": `${entityKey}`,
+        "X-EntityToken": `${entityToken.EntityToken}`,
       },
     }).then(async (response) => {
       if (response.status === 200) {
@@ -211,9 +212,9 @@ export default class PlayFabClient {
   }
 
   public GetV2LeaderboardAroundPlayer(
-    entityKey: string,
+    entityToken: EntityTokenResponse,
     statName: string,
-    entityId: string,
+    centerEntity: string,
     callback: (leaderboardResult: PfV2LeaderboardResult) => void
   ) {
     let apiEndpoint = this.apiBase + `Leaderboard/GetLeaderboardAroundEntity`;
@@ -222,17 +223,55 @@ export default class PlayFabClient {
       EntityType: "title_player_account",
       StatisticName: statName,
       MaxResults: 20,
+      EntityId: centerEntity,
     };
-
-    // tslint:disable-next-line: no-console
-    console.log(`entityKey: ${entityKey}`);
 
     fetch(apiEndpoint, {
       method: "POST",
       body: JSON.stringify(data),
       headers: {
         "Content-Type": "application/json",
-        "X-EntityToken": `${entityKey}`,
+        "X-EntityToken": `${entityToken.EntityToken}`,
+      },
+    }).then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse = await response.json();
+        let lbResponse: PfV2LeaderboardResult = {
+          Rankings: rawResponse.data.Rankings,
+          StatisticVersion: rawResponse.data.StatisticVersion,
+        };
+
+        callback(lbResponse);
+        // tslint:disable-next-line: no-console
+        console.log(`playfab v2lb fetch: ${JSON.stringify(rawResponse)}`);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab v2lb fetch error: ${await response.text()}`);
+      }
+    });
+  }
+
+  public GetV2LeaderboardForPlayers(
+    entityToken: EntityTokenResponse,
+    statName: string,
+    entities: string[],
+    callback: (leaderboardResult: PfV2LeaderboardResult) => void
+  ) {
+    let apiEndpoint = this.apiBase + `Leaderboard/GetLeaderboardForEntities`;
+
+    const data = {
+      EntityType: "title_player_account",
+      StatisticName: statName,
+      Entity: entityToken.Entity,
+      Entities: entities,
+    };
+
+    fetch(apiEndpoint, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+        "X-EntityToken": `${entityToken.EntityToken}`,
       },
     }).then(async (response) => {
       if (response.status === 200) {

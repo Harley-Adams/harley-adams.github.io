@@ -13,12 +13,6 @@ export interface LeaderboardTableRow {
   metadata: string;
 }
 
-export enum LeaderboardType {
-  TopN,
-  AroundEntity,
-  Entities,
-}
-
 interface Props {
   rankings: LBV2Ranking[];
 }
@@ -73,7 +67,11 @@ function LeaderboardTable(props: Props) {
     _cellProps: { id: { scope: "row" } },
   }));
 
-  return <CTable columns={columns} items={projectedDataItems} striped={true} />;
+  return (
+    <div>
+      <CTable columns={columns} items={projectedDataItems} striped={true} />
+    </div>
+  );
 }
 
 export default LeaderboardTable;

@@ -2,10 +2,11 @@ import {
   CForm,
   CInputGroup,
   CRow,
-  CCol,
-  CFormLabel,
   CFormInput,
   CButton,
+  CCol,
+  CFormCheck,
+  CContainer,
 } from "@coreui/react";
 import PlayFabClient from "../PlayFab/PlayFabClient";
 import PfLoginResult, {
@@ -13,8 +14,11 @@ import PfLoginResult, {
 } from "../PlayFab/models/PfLoginResult";
 
 export interface LoginProps {
-  titleId: string;
-  loggedInCallback: (entityToken: EntityTokenResponse) => void;
+  loggedInCallback: (
+    entityToken: EntityTokenResponse,
+    titleId: string,
+    useProd: boolean
+  ) => void;
 }
 
 function Login(props: LoginProps) {
@@ -24,12 +28,22 @@ function Login(props: LoginProps) {
     let formData = new FormData(event.currentTarget);
     let newCustomId = formData.get("customIdInput");
     let newTitleId = formData.get("tilteIdInput");
-    if (newCustomId !== null && newTitleId !== null) {
-      let pfClient = new PlayFabClient(newTitleId.toString(), "", true);
+    let prodRadio = formData.get("prodRadio");
+
+    if (newCustomId !== null && newTitleId !== null && prodRadio !== null) {
+      let titleId = newTitleId.toString();
+      let isProd = prodRadio === "Production";
+
+      let pfClient = new PlayFabClient(titleId, "", isProd);
+
       pfClient.LoginWithCustomId(
         newCustomId.toString(),
         (loginResult: PfLoginResult) => {
-          props.loggedInCallback(loginResult.EntityToken);
+          props.loggedInCallback(
+            loginResult.EntityToken,
+            titleId,
+            prodRadio === "Production"
+          );
         }
       );
     }
@@ -41,38 +55,41 @@ function Login(props: LoginProps) {
       <div className="loginForm">
         <CForm onSubmit={onLoginSubmit}>
           <CInputGroup className="mb-3">
-            <CRow className="g-3">
-              <CCol xs>
-                <CFormLabel
-                  htmlFor="customIdInput"
-                  className="col-sm-2 col-form-label"
-                >
-                  CustomId
-                </CFormLabel>
+            <CContainer fluid>
+              <CRow xs={{ cols: 2, gutter: 2 }} lg={{ cols: 5, gutter: 3 }}>
                 <CFormInput
                   id="customIdInput"
                   placeholder="PlayFabCustomId"
                   aria-label="CustomID"
                   name="customIdInput"
                   defaultValue="CustomId"
+                  floatingLabel="CustomId"
                 />
-              </CCol>
-              <CCol xs>
-                <CFormLabel
-                  htmlFor="titleIdInput"
-                  className="col-sm-2 col-form-label"
-                >
-                  TitleId
-                </CFormLabel>
                 <CFormInput
                   id="tilteIdInput"
                   placeholder="PlayFabTitleId"
                   aria-label="TitleId"
                   name="tilteIdInput"
-                  defaultValue={props.titleId}
+                  defaultValue="A691C"
+                  floatingLabel="TitleId"
                 />
-              </CCol>
-              <CCol lg>
+                <CCol>
+                  <CFormCheck
+                    type="radio"
+                    name="prodRadio"
+                    id="flexRadioDefault1"
+                    label="Production"
+                    value="Production"
+                    defaultChecked
+                  />
+                  <CFormCheck
+                    type="radio"
+                    name="prodRadio"
+                    id="flexRadioDefault2"
+                    label="Not Production"
+                    value="Not Production"
+                  />
+                </CCol>
                 <CButton
                   type="submit"
                   color="primary"
@@ -81,8 +98,8 @@ function Login(props: LoginProps) {
                 >
                   Login
                 </CButton>
-              </CCol>
-            </CRow>
+              </CRow>
+            </CContainer>
           </CInputGroup>
         </CForm>
       </div>
