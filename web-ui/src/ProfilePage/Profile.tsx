@@ -3,6 +3,7 @@ import "./profile.css";
 import { ProfessionalConstants } from "./ProfessionalConstants";
 import { ProfessionalComponent } from "./ProfessionalComponent";
 import * as reactRouterDom from "react-router-dom";
+import harleyImg from "../images/harley.jpg";
 
 class Profile extends React.Component<{}, {}> {
   render() {
@@ -12,6 +13,14 @@ class Profile extends React.Component<{}, {}> {
 
     return (
       <div className="profile">
+        <section className="section" data-section="section1">
+          <div className="section-heading">
+            <h2>Hi! I'm Harley</h2>
+          </div>
+          <div className="profileImage">
+            <img src={harleyImg} id="profileimage" />
+          </div>
+        </section>
         <section className="section" data-section="section2">
           <div className="section-heading">
             <h2>Professional</h2>
@@ -45,7 +54,6 @@ class Profile extends React.Component<{}, {}> {
                   <div className="google-play-wrapper">
                     <form action="lolmatchup">
                       <label>
-                        {" "}
                         Summoner Name:
                         <input type="text" name="summonerName" />
                       </label>

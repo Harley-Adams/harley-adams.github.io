@@ -45,6 +45,15 @@
   min-height: 100vh;
 }
 
+.profile img#profileimage {
+  border-radius: 50%;
+  width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  /* align-self: center; */
+}
+
 .profile h4 {
   font-size: 26px;
   font-weight: 700;
