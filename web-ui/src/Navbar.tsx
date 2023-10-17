@@ -8,9 +8,9 @@ function Navbar() {
         <li>
           <Link to="/">Profile</Link>
         </li>
-        <li>
+        {/* <li>
           <Link to="/Leaderboard">Leaderboard</Link>
-        </li>
+        </li> */}
         <li>
           <Link to="/FivePM">FivePM</Link>
         </li>

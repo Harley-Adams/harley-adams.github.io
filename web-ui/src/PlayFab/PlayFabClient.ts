@@ -220,10 +220,15 @@ export default class PlayFabClient {
     let apiEndpoint = this.apiBase + `Leaderboard/GetLeaderboardAroundEntity`;
 
     const data = {
-      EntityType: "title_player_account",
       StatisticName: statName,
-      MaxResults: 20,
-      EntityId: centerEntity,
+      MaxSurroundingEntries: 20,
+      AuthenticationContext: {
+        EntityToken: entityToken.EntityToken,
+      },
+      Entity: {
+        Id: entityToken.Entity.Id,
+        Type: "title_player_account",
+      },
     };
 
     fetch(apiEndpoint, {
