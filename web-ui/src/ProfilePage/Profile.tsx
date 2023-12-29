@@ -14,24 +14,31 @@ class Profile extends React.Component<{}, {}> {
     return (
       <div className="profile">
         <section className="section" data-section="section1">
-          <div className="section-heading">
-            <h2>Hi! I'm Harley</h2>
-          </div>
-          <div className="profileImage">
-            <img src={harleyImg} id="profileimage" />
+          <div className="row">
+            <div className="column">
+              <div className="section-heading">
+                <h2>Hi! I'm Harley</h2>
+                <h3>International Software Engineer</h3>
+              </div>
+            </div>
+            <div className="column">
+              <div className="profileImage">
+                <img src={harleyImg} id="profileimage" />
+              </div>
+            </div>
           </div>
         </section>
         <section className="section" data-section="section2">
           <div className="section-heading">
-            <h2>Professional</h2>
+            <h2>Professional work</h2>
           </div>
           {professionalDataPoints}
         </section>
         <section className="section" data-section="section3">
           <div className="section-heading">
-            <h2>Projects</h2>
+            <h2>For fun Side Projects</h2>
           </div>
-          <div className="left-image-post">
+          {/* <div className="left-image-post">
             <div className="row">
               <div className="column">
                 <div className="left-image">
@@ -42,7 +49,6 @@ class Profile extends React.Component<{}, {}> {
               <div className="column">
                 <div className="right-text">
                   <h4>League of Legends matchup analysis tool</h4>
-                  <p>Android game published on the Google Play store</p>
                   <p>
                     Utilizing the League of Legends API provided by Riot Games,
                     I made a to see a player's champion (in-game character)
@@ -63,8 +69,8 @@ class Profile extends React.Component<{}, {}> {
                 </div>
               </div>
             </div>
-          </div>
-          <div className="right-image-post">
+          </div> */}
+          {/* <div className="right-image-post">
             <div className="row">
               <div className="column">
                 <div className="left-text">
@@ -80,6 +86,31 @@ class Profile extends React.Component<{}, {}> {
                 <div className="white-button">
                   <reactRouterDom.Link to="/game">
                     Play Paper Scissors Rock
+                  </reactRouterDom.Link>
+                </div>
+              </div>
+              <div className="column">
+                <div className="right-image">
+                  <img src="paperscissorsrock.png" alt="" />
+                </div>
+              </div>
+            </div>
+          </div> */}
+          <div className="right-image-post">
+            <div className="row">
+              <div className="column">
+                <div className="left-text">
+                  <h4>Crossword game</h4>
+                  <p>
+                    A "live service" crossword game that includes stat tracking
+                    via PlayFab. Starting from a list of valid words, I generate
+                    a valid 2d crossword for players to complete. They are
+                    logged into playfab with a customId.
+                  </p>
+                </div>
+                <div className="white-button">
+                  <reactRouterDom.Link to="/Crossword">
+                    Play crosswords
                   </reactRouterDom.Link>
                 </div>
               </div>
@@ -105,16 +136,18 @@ class Profile extends React.Component<{}, {}> {
                     During my time at University, I created an android game
                     called Run Box Run. I made it without using any frameworks
                     or libraries besides from built in Java and Android
-                    functionality.
+                    functionality. Unfortunatley I didn't maintain my google
+                    play account, so RunBoxRun is no longer available on the app
+                    store :(.
                   </p>
                   <div className="google-play-wrapper">
-                    <a href="https://play.google.com/store/apps/details?id=net.harleyadams.runboxrun&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1">
+                    {/* <a href="https://play.google.com/store/apps/details?id=net.harleyadams.runboxrun">
                       <img
                         alt="Get it on Google Play"
                         src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
                         className="google-play-icon"
                       />
-                    </a>
+                    </a> */}
                   </div>
                 </div>
               </div>

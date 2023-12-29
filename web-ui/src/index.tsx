@@ -8,6 +8,7 @@ import Layout from "./Layout";
 import Profile from "./ProfilePage/Profile";
 import MarkdownHost from "./Blog/MarkdownHost";
 import FivePM from "./FivePMPage/FivePM";
+import Crossword from "./Crossword/Crossword";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "/Leaderboard",
         element: <Leaderboard />,
+      },
+      {
+        path: "/Crossword",
+        element: <Crossword />,
       },
       {
         path: "/FivePM",

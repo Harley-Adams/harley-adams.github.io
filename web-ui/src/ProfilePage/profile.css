@@ -6,7 +6,7 @@
   left: 20%;
   position: relative;
   /* min-height: 100vh; */
-  padding-bottom: 80px;
+  /* padding-bottom: 40px; */
   border-bottom: 3px solid rgba(250, 250, 250, 0.25);
 }
 
@@ -17,6 +17,12 @@
 
 .profile .section-heading h2 {
   font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.profile .section-heading h3 {
+  font-size: 24px;
   font-weight: 700;
   color: #fff;
 }
@@ -50,8 +56,9 @@
   width: 200px;
   margin-left: auto;
   margin-right: auto;
+  margin-top: 15px;
+  margin-bottom: 15px;
   display: block;
-  /* align-self: center; */
 }
 
 .profile h4 {
@@ -75,14 +82,14 @@
 
 /* Left & Right Post */
 .profile .right-image-post {
-  margin-top: 60px;
-  padding-top: 60px;
+  margin-top: 30px;
+  padding-top: 30px;
   border-top: 2px solid rgba(250, 250, 250, 0.1);
 }
 
 .profile .left-image-post {
-  margin-top: 60px;
-  padding-top: 60px;
+  margin-top: 30px;
+  padding-top: 30px;
   border-top: 2px solid rgba(250, 250, 250, 0.1);
 }
 
