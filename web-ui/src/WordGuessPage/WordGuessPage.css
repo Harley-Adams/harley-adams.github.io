@@ -1,0 +1,107 @@
+.App {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.previous-guesses {
+  margin-bottom: 20px;
+}
+
+.prev-guess {
+  margin-bottom: 10px;
+}
+
+.word-container {
+  display: flex;
+}
+
+.letter-box {
+  width: 30px;
+  height: 30px;
+  border: 1px solid black;
+  margin: 0 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.correct-letter {
+  background-color: #4caf50; /* Green background for correct letters */
+  color: white;
+}
+
+.wrong-letter {
+  background-color: #ff5733; /* Red background for incorrect letters */
+  color: white;
+}
+
+.wrong-position-letter {
+  background-color: #ffd700; /* Yellow background for letters in the word but in the wrong position */
+  color: black;
+}
+
+input[type="text"] {
+  padding: 10px;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.animate-correct {
+  animation: pop 0.3s ease;
+}
+
+.animate-wrong {
+  animation: shake 0.3s ease;
+}
+
+.animate-wrong-position {
+  animation: fade-in 0.3s ease;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

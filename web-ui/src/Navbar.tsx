@@ -11,14 +11,17 @@ function Navbar() {
         <li>
           <Link to="/Leaderboard">Leaderboard</Link>
         </li>
-        <li>
+        {/* <li>
           <Link to="/Crossword">Crossword</Link>
-        </li>
+        </li> */}
         <li>
           <Link to="/FivePM">FivePM</Link>
         </li>
         <li>
           <Link to="/Posts">Posts</Link>
+        </li>
+        <li>
+          <Link to="/WordGuessGame">WordGuessGame</Link>
         </li>
       </ul>
     </nav>

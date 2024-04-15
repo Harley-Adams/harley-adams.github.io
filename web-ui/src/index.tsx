@@ -9,6 +9,7 @@ import Profile from "./ProfilePage/Profile";
 import MarkdownHost from "./Blog/MarkdownHost";
 import FivePM from "./FivePMPage/FivePM";
 import Crossword from "./Crossword/Crossword";
+import WordGuessPage from "./WordGuessPage/WordGuessPage";
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
       {
         path: "/Posts",
         element: <MarkdownHost />,
+      },
+      {
+        path: "/WordGuessGame",
+        element: <WordGuessPage />,
       },
     ],
   },
