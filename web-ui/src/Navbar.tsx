@@ -17,9 +17,9 @@ function Navbar() {
         <li>
           <Link to="/FivePM">FivePM</Link>
         </li>
-        <li>
+        {/* <li>
           <Link to="/Posts">Posts</Link>
-        </li>
+        </li> */}
         <li>
           <Link to="/WordGuessGame">WordGuessGame</Link>
         </li>

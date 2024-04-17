@@ -8,7 +8,7 @@ import uoaImg from "../images/UoA.png";
 export const ProfessionalConstants: ProfessionalDataPoint[] = [
   {
     LeftImagePost: false,
-    Header: "Senior Software Engineer/Tech Lead, Xbox/PlayFab",
+    Header: "Tech Lead / Senior Software Engineer, Xbox/PlayFab",
     TimeLine: "February 2020 – Present",
     Description: `Designing, developing and maintaing gaming cloud services for 
         the "Xbox Network" ecosystem and the "PlayFab" offering from Microsoft. I am 

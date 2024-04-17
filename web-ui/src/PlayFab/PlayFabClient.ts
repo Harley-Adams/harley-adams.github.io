@@ -151,7 +151,7 @@ export default class PlayFabClient {
     const data = {
       Statistics: [
         {
-          StatisticName: `${statName}`,
+          LeaderboardName: `${statName}`,
           Value: "1",
         },
       ],
@@ -182,7 +182,7 @@ export default class PlayFabClient {
 
     const data = {
       EntityType: "title_player_account",
-      StatisticName: statName,
+      LeaderboardName: statName,
       PageSize: 10,
     };
 
@@ -220,7 +220,7 @@ export default class PlayFabClient {
     let apiEndpoint = this.apiBase + `Leaderboard/GetLeaderboardAroundEntity`;
 
     const data = {
-      StatisticName: statName,
+      LeaderboardName: statName,
       MaxSurroundingEntries: 20,
       AuthenticationContext: {
         EntityToken: entityToken.EntityToken,
@@ -266,7 +266,7 @@ export default class PlayFabClient {
 
     const data = {
       EntityType: "title_player_account",
-      StatisticName: statName,
+      LeaderboardName: statName,
       Entity: entityToken.Entity,
       Entities: entities,
     };

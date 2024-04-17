@@ -4,6 +4,7 @@ import { ProfessionalConstants } from "./ProfessionalConstants";
 import { ProfessionalComponent } from "./ProfessionalComponent";
 import * as reactRouterDom from "react-router-dom";
 import harleyImg from "../images/harley.jpg";
+import runBoxRunImg from "../images/runboxrun.png";
 
 class Profile extends React.Component<{}, {}> {
   render() {
@@ -100,16 +101,15 @@ class Profile extends React.Component<{}, {}> {
             <div className="row">
               <div className="column">
                 <div className="left-text">
-                  <h4>Crossword game</h4>
+                  <h4>Word guess game</h4>
                   <p>
-                    A "live service" crossword game that includes stat tracking
-                    via PlayFab. Starting from a list of valid words, I generate
-                    a valid 2d crossword for players to complete. They are
-                    logged into playfab with a customId.
+                    For fun clone of the viral "Wordle" puzzle game from 2021.
+                    Includes "live service" features such as stat tracking and
+                    leaderboards via PlayFab.
                   </p>
                 </div>
                 <div className="white-button">
-                  <reactRouterDom.Link to="/Crossword">
+                  <reactRouterDom.Link to="/WordGuessGame">
                     Play crosswords
                   </reactRouterDom.Link>
                 </div>
@@ -125,7 +125,7 @@ class Profile extends React.Component<{}, {}> {
             <div className="row">
               <div className="column">
                 <div className="left-image">
-                  <img src="runboxrun.png" alt="" />
+                  <img src={runBoxRunImg} alt="" />
                 </div>
               </div>
               <div className="column">
@@ -136,7 +136,7 @@ class Profile extends React.Component<{}, {}> {
                     During my time at University, I created an android game
                     called Run Box Run. I made it without using any frameworks
                     or libraries besides from built in Java and Android
-                    functionality. Unfortunatley I didn't maintain my google
+                    functionality. Unfortunately I didn't maintain my google
                     play account, so RunBoxRun is no longer available on the app
                     store :(.
                   </p>

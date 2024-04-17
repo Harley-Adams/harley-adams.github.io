@@ -13,7 +13,7 @@ import GetTopNLeaderboard from "./GetTopNLeaderboard";
 import GetLeaderboardAround from "./GetLeaderboardAround";
 import GetLeaderboardForEntities from "./GetLeaderboardForEntities";
 
-const statName = "HarleyStat";
+const statName = "ValidateCreateUpdateAndGetLeaderboardAsc";
 
 function Leaderboard() {
   const [titleId, setTitleId] = useState<string>();
@@ -85,7 +85,7 @@ function Leaderboard() {
           statName={statName}
           useProd={useProd}
         />
-        <GetLeaderboardAround
+        {/* <GetLeaderboardAround
           entityToken={entityToken}
           titleId={titleId}
           statName={statName}
@@ -96,7 +96,7 @@ function Leaderboard() {
           titleId={titleId}
           statName={statName}
           useProd={useProd}
-        />
+        /> */}
       </div>
     );
   }
