@@ -1,7 +1,9 @@
+import { PlayFabModule } from "./PlayFabModule";
+import { PlayFabMultiplayerModels } from "./PlayFabMultiplayerModule";
 import PfLoginResult, { EntityTokenResponse } from "./models/PfLoginResult";
 import PfV2LeaderboardResult from "./models/PfV2LeaderboardResult";
 
-export default class PlayFabClient {
+export default class PlayFabWrapper {
   private apiBase: string;
   private titleId: string;
   private titleSecret: string;
@@ -258,7 +260,7 @@ export default class PlayFabClient {
 
   public GetV2LeaderboardForPlayers(
     entityToken: EntityTokenResponse,
-    statName: string,
+    leaderboardName: string,
     entities: string[],
     callback: (leaderboardResult: PfV2LeaderboardResult) => void
   ) {
@@ -266,7 +268,7 @@ export default class PlayFabClient {
 
     const data = {
       EntityType: "title_player_account",
-      LeaderboardName: statName,
+      LeaderboardName: leaderboardName,
       Entity: entityToken.Entity,
       Entities: entities,
     };
@@ -292,6 +294,141 @@ export default class PlayFabClient {
       } else {
         // tslint:disable-next-line: no-console
         console.log(`playfab v2lb fetch error: ${await response.text()}`);
+      }
+    });
+  }
+
+  public GetLobbies(
+    entityToken: EntityTokenResponse,
+    callback: (
+      getLobbiesResult: PlayFabMultiplayerModels.FindLobbiesResult
+    ) => void
+  ) {
+    let apiEndpoint = this.apiBase + `Lobby/FindLobbies`;
+
+    const request: PlayFabMultiplayerModels.FindLobbiesRequest = {
+      // Parameters here if needed
+    };
+
+    fetch(apiEndpoint, {
+      method: "POST",
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+        "X-EntityToken": `${entityToken.EntityToken}`,
+      },
+    }).then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse = await response.json();
+        callback(rawResponse.data);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab lobby error: ${await response.text()}`);
+      }
+    });
+  }
+
+  public JoinLobby(
+    entityToken: EntityTokenResponse,
+    lobbyConnectionString: string,
+    callback: (
+      joinLobbyResult: PlayFabMultiplayerModels.JoinLobbyResult
+    ) => void
+  ) {
+    let apiEndpoint = this.apiBase + `Lobby/JoinLobby`;
+
+    const request: PlayFabMultiplayerModels.JoinLobbyRequest = {
+      ConnectionString: lobbyConnectionString,
+      MemberEntity: entityToken.Entity,
+      // Additional parameters here if needed
+    };
+
+    fetch(apiEndpoint, {
+      method: "POST",
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+        "X-EntityToken": `${entityToken.EntityToken}`,
+      },
+    }).then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse = await response.json();
+        callback(rawResponse);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab lobby error: ${await response.text()}`);
+      }
+    });
+  }
+
+  public UpdateLobby(
+    entityToken: EntityTokenResponse,
+    lobbyId: string,
+    lobbyData: PlayFabMultiplayerModels.UpdateLobbyRequest,
+    callback: (
+      updateLobbyResult: PlayFabMultiplayerModels.LobbyEmptyResult
+    ) => void
+  ) {
+    let apiEndpoint = this.apiBase + `Lobby/UpdateLobby`;
+
+    const request: PlayFabMultiplayerModels.UpdateLobbyRequest = {
+      LobbyId: lobbyId,
+      ...lobbyData,
+      // Additional parameters here if needed
+    };
+
+    fetch(apiEndpoint, {
+      method: "POST",
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+        "X-EntityToken": `${entityToken.EntityToken}`,
+      },
+    }).then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse = await response.json();
+        callback(rawResponse);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab lobby error: ${await response.text()}`);
+      }
+    });
+  }
+
+  public CreateLobby(
+    entityToken: EntityTokenResponse,
+    lobbyData: { [key: string]: string | null },
+    members: PlayFabMultiplayerModels.Member[],
+    callback: (
+      createLobbyResult: PlayFabMultiplayerModels.CreateLobbyResult
+    ) => void
+  ) {
+    let apiEndpoint = this.apiBase + `Lobby/CreateLobby`;
+
+    const request: PlayFabMultiplayerModels.CreateLobbyRequest = {
+      LobbyData: lobbyData,
+      // Additional parameters here if needed
+      MaxPlayers: 10,
+      AccessPolicy: "Public",
+      Owner: entityToken.Entity,
+      UseConnections: false,
+      Members: members,
+    };
+
+    fetch(apiEndpoint, {
+      method: "POST",
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+        "X-EntityToken": `${entityToken.EntityToken}`,
+      },
+    }).then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse = await response.json();
+        callback(rawResponse);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab lobby error: ${await response.text()}`);
       }
     });
   }

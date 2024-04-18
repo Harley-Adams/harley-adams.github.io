@@ -1,5 +1,5 @@
 import { useState } from "react";
-import PlayFabClient from "../PlayFab/PlayFabClient";
+import PlayFabWrapper from "../PlayFab/PlayFabWrapper";
 import PfV2LeaderboardResult from "../PlayFab/models/PfV2LeaderboardResult";
 
 import "@coreui/coreui/dist/css/coreui.min.css";
@@ -26,7 +26,7 @@ function Leaderboard() {
 
   function getTopN(): void {
     if (entityToken !== undefined && titleId !== undefined) {
-      let pfClient = new PlayFabClient(titleId, "", useProd);
+      let pfClient = new PlayFabWrapper(titleId, "", useProd);
       pfClient.GetV2Leaderboard(entityToken, statName, setTopNData);
     }
   }
@@ -47,7 +47,7 @@ function Leaderboard() {
       let entities = useProd
         ? ["", "", ""]
         : ["F2F1ED8411309928", "2BADD20E85FCE463", "C5395E00F9D9D73F"];
-      let pfClient = new PlayFabClient(titleId, "", useProd);
+      let pfClient = new PlayFabWrapper(titleId, "", useProd);
       pfClient.GetV2LeaderboardForPlayers(
         entityToken,
         statName,

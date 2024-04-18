@@ -3,7 +3,7 @@ import { EntityTokenResponse } from "../PlayFab/models/PfLoginResult";
 import PfV2LeaderboardResult from "../PlayFab/models/PfV2LeaderboardResult";
 import { useState } from "react";
 import LeaderboardTable from "./LeaderboardTable";
-import PlayFabClient from "../PlayFab/PlayFabClient";
+import PlayFabWrapper from "../PlayFab/PlayFabWrapper";
 
 interface Props {
   entityToken: EntityTokenResponse;
@@ -20,7 +20,7 @@ function GetTopNLeaderboard(props: Props) {
     event.preventDefault();
     setShowSpinner(true);
 
-    let pfClient = new PlayFabClient(props.titleId, "", props.useProd);
+    let pfClient = new PlayFabWrapper(props.titleId, "", props.useProd);
     pfClient.GetV2Leaderboard(
       props.entityToken,
       props.statName,

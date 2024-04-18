@@ -23,6 +23,9 @@ function Navbar() {
         <li>
           <Link to="/WordGuessGame">WordGuessGame</Link>
         </li>
+        <li>
+          <Link to="/Lobby">LobbyPrototype</Link>
+        </li>
       </ul>
     </nav>
   );

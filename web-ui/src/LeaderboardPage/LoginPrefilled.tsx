@@ -8,7 +8,7 @@ import {
   CContainer,
   CSpinner,
 } from "@coreui/react";
-import PlayFabClient from "../PlayFab/PlayFabClient";
+import PlayFabWrapper from "../PlayFab/PlayFabWrapper";
 import PfLoginResult, {
   EntityTokenResponse,
 } from "../PlayFab/models/PfLoginResult";
@@ -46,7 +46,7 @@ function LoginPrefilled(props: LoginProfilledProps) {
         isProd = false;
       }
 
-      let pfClient = new PlayFabClient(titleId, "", isProd);
+      let pfClient = new PlayFabWrapper(titleId, "", isProd);
       pfClient.LoginWithCustomId(
         newCustomId.toString(),
         (loginResult: PfLoginResult) => {
