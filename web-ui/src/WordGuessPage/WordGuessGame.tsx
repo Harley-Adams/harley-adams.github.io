@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Keyboard from "./Keyboard";
+import { Dictionary } from "./Dictionary";
 
 interface WordGuessGameProps {
   word: string; // The word to guess is now passed as a prop
@@ -35,6 +36,12 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({ word }) => {
   const handleGuessSubmit = (): void => {
     if (guess.length !== word.length) {
       alert("Guess should have the same length as the word.");
+      return;
+    }
+    if (Dictionary.includes(guess.toLowerCase()) === false) {
+      alert("Guess is not a valid word.");
+      setGuess("");
+
       return;
     }
 
