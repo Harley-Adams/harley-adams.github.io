@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import Keyboard from "./Keyboard";
 import { Dictionary } from "./Dictionary";
+import { toast } from "react-toastify";
+import { ReviewGuess } from "./ReviewGuess";
+import { GuessHistory } from "./GuessHistory";
+import { Guess, LetterGuessState } from "./Guess";
+import { GuessInput } from "./GuessInput";
 
 interface WordGuessGameProps {
-  word: string; // The word to guess is now passed as a prop
-}
-
-interface Guess {
-  guess: string;
-  feedback: (string | null)[];
+  word: string;
 }
 
 // Define the layout of the QWERTY keyboard
@@ -21,85 +21,49 @@ const KEYS: string[][] = [
 const WordGuessGame: React.FC<WordGuessGameProps> = ({ word }) => {
   word = word.toUpperCase();
 
-  const [guess, setGuess] = useState<string>(""); // The current guess
-  const [feedback, setFeedback] = useState<(string | null)[]>(
-    Array(word.length).fill(null)
-  ); // Feedback for correct and incorrect guesses
+  const [currentGuess, setCurrentGuess] = useState<string>(""); // The current guess
   const [guessHistory, setGuessHistory] = useState<Guess[]>([]); // History of guesses
 
   // Function to handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setGuess(e.target.value.toUpperCase()); // Convert the guess to uppercase
+    setCurrentGuess(e.target.value.toUpperCase()); // Convert the guess to uppercase
   };
 
   // Function to handle guess submission
   const handleGuessSubmit = (): void => {
-    if (guess.length !== word.length) {
-      alert("Guess should have the same length as the word.");
-      return;
-    }
-    if (Dictionary.includes(guess.toLowerCase()) === false) {
-      alert("Guess is not a valid word.");
-      setGuess("");
+    if (currentGuess.length !== word.length) {
+      toast("Guess should have the same length as the word.", {
+        position: "top-center",
+      });
 
       return;
     }
 
-    let newFeedback = Array(word.length).fill(null);
-    let letterCount: { [key: string]: number } = {};
+    if (Dictionary.includes(currentGuess.toLowerCase()) === false) {
+      toast("Guess is not a valid word.");
+      setCurrentGuess("");
 
-    // First pass: mark correct letters and count other letters in the word
-    for (let i = 0; i < word.length; i++) {
-      if (word[i] === guess[i]) {
-        newFeedback[i] = guess[i]; // Correct letter and position
-      } else {
-        if (!letterCount[word[i]]) {
-          letterCount[word[i]] = 0;
-        }
-        letterCount[word[i]]++;
-      }
+      return;
     }
 
-    // Second pass: mark misplaced letters and wrong letters
-    for (let i = 0; i < word.length; i++) {
-      if (!newFeedback[i]) {
-        if (
-          letterCount[guess[i]] &&
-          letterCount[guess[i]] > 0 &&
-          word.includes(guess[i])
-        ) {
-          newFeedback[i] = guess[i]; // Misplaced letter
-          letterCount[guess[i]]--;
-        } else {
-          newFeedback[i] = " "; // Wrong letter, using space to indicate absence
-          setKeyState(guess[i], "wrong-letter");
-        }
-      }
-    }
+    const newFeedback = ReviewGuess(word, currentGuess);
 
-    setFeedback(newFeedback);
-    setGuessHistory([...guessHistory, { guess, feedback: newFeedback }]);
-    setGuess(""); // Clear the guess input
-
+    setGuessHistory([...guessHistory, newFeedback]);
+    setCurrentGuess(""); // Clear the guess input
+    newFeedback.lettersFeedback.forEach((letterFeedback) => {
+      setKeyStateIfImproved(letterFeedback.letter, letterFeedback.state);
+    });
     // Check if the guess is correct
-    const isCorrect = newFeedback.every((letter, idx) => letter === word[idx]);
-    if (isCorrect) {
-      alert("Congratulations! You guessed the correct word.");
+    if (word === currentGuess) {
+      toast("Congratulations! You guessed the correct word.");
     }
   };
 
   // Function to handle key press in the input
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === "Enter") {
       handleGuessSubmit();
     }
-  };
-
-  // Function to reset the game
-  const handleResetGame = (): void => {
-    setGuess("");
-    setFeedback(Array(word.length).fill(null));
-    setGuessHistory([]);
   };
 
   const initialKeyStates: { [key: string]: string } = KEYS.flat().reduce(
@@ -118,44 +82,54 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({ word }) => {
     }));
   };
 
+  const setKeyStateIfImproved = (letter: string, newState: string) => {
+    if (keyStates[letter] === LetterGuessState.Correct) {
+      return;
+    }
+
+    if (
+      keyStates[letter] === LetterGuessState.WrongPosition &&
+      newState === LetterGuessState.Correct
+    ) {
+      setKeyState(letter, newState);
+      return;
+    }
+
+    if (
+      keyStates[letter] === LetterGuessState.Wrong &&
+      (newState === LetterGuessState.Correct ||
+        newState === LetterGuessState.WrongPosition)
+    ) {
+      setKeyState(letter, newState);
+      return;
+    }
+
+    setKeyState(letter, newState);
+  };
+
+  let letterlessHistory = guessHistory.map((guess) => {
+    return {
+      lettersFeedback: guess.lettersFeedback.map((letter) => {
+        let cleanedLetter = { state: letter.state, letter: "" };
+        return cleanedLetter;
+      }),
+    };
+  });
+
   return (
     <div className="App">
       <h1>Word Guessing Game</h1>
       <p>Attempts: {guessHistory.length}</p>
       <div className="game-container">
-        <div className="previous-guesses">
-          {guessHistory.map((prevGuess, index) => (
-            <div key={index} className="prev-guess">
-              <div className="word-container">
-                {prevGuess.guess.split("").map((letter, index) => (
-                  <div
-                    key={index}
-                    className={`letter-box ${
-                      prevGuess.feedback[index] === word[index]
-                        ? "correct-letter animate-correct"
-                        : word.includes(prevGuess.feedback[index] || "")
-                        ? "wrong-position-letter animate-wrong-position"
-                        : "wrong-letter animate-wrong"
-                    }`}
-                  >
-                    {letter}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <GuessHistory guessHistory={guessHistory} />
         <Keyboard keyStates={keyStates} setKeyState={setKeyState} />
-        <div className="guess-input">
-          <input
-            type="text"
-            maxLength={word.length}
-            value={guess}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-          />
-          <button onClick={handleGuessSubmit}>Submit</button>
-        </div>
+        <GuessInput
+          currentGuess={currentGuess}
+          wordLength={word.length}
+          handleInputChange={handleInputChange}
+          handleKeyDown={handleKeyDown}
+          handleGuessSubmit={handleGuessSubmit}
+        />
       </div>
     </div>
   );
