@@ -2,6 +2,7 @@ import {
   HubConnection,
   HubConnectionBuilder,
   LogLevel,
+  HttpTransportType,
 } from "@microsoft/signalr";
 
 class PlayFabPubSub {
@@ -16,6 +17,11 @@ class PlayFabPubSub {
     this.connection = new HubConnectionBuilder()
       .withUrl(this.serverUrl, {
         accessTokenFactory: () => this.authToken,
+        transport: HttpTransportType.WebSockets,
+        skipNegotiation: true,
+        headers: {
+          "X-EntityToken": this.authToken,
+        },
       })
       .configureLogging(LogLevel.Information)
       .build();

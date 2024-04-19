@@ -32,7 +32,7 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({ word }) => {
   // Function to handle guess submission
   const handleGuessSubmit = (): void => {
     if (currentGuess.length !== word.length) {
-      toast("Guess should have the same length as the word.", {
+      toast.error("Guess should have the same length as the word.", {
         position: "top-center",
       });
 
@@ -40,7 +40,7 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({ word }) => {
     }
 
     if (Dictionary.includes(currentGuess.toLowerCase()) === false) {
-      toast("Guess is not a valid word.");
+      toast.error("Guess is not a valid word.");
       setCurrentGuess("");
 
       return;
@@ -55,7 +55,7 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({ word }) => {
     });
     // Check if the guess is correct
     if (word === currentGuess) {
-      toast("Congratulations! You guessed the correct word.");
+      toast.success("Congratulations! You guessed the correct word.");
     }
   };
 

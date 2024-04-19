@@ -411,7 +411,7 @@ export default class PlayFabWrapper {
       MaxPlayers: 10,
       AccessPolicy: "Public",
       Owner: entityToken.Entity,
-      UseConnections: false,
+      UseConnections: true,
       Members: members,
     };
 
