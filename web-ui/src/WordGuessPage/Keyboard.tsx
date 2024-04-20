@@ -31,7 +31,7 @@ interface KeyboardProps {
 
 const Keyboard: React.FC<KeyboardProps> = ({ keyStates, setKeyState }) => {
   return (
-    <div>
+    <div className="keyboard-container">
       {KEYS.map((row, index) => (
         <div key={index} className="keyboard-row">
           {row.map((letter) => (

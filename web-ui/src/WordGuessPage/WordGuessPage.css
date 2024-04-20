@@ -75,28 +75,39 @@
   cursor: pointer;
 } */
 
+.keyboard-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* Sets the width of the container to be 100% of the viewport width */
+  max-width: 100vw; /* Ensures the maximum width does not exceed the width of the viewport */
+}
+
 .keyboard-row {
-  display: flex; /* Continues to use Flexbox */
-  flex-wrap: nowrap; /* Prevents keys from wrapping */
-  justify-content: center; /* Centers keys horizontally */
-  align-items: center; /* Aligns keys vertically for a uniform appearance */
-  padding: 0 30px; /* Adds horizontal padding for a buffer, no vertical padding */
-  overflow-x: auto; /* Allows horizontal scrolling */
-  width: calc(100% - 60px); /* Adjusts width to account for padding */
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  padding: 0 10px; /* Provides padding while respecting the 100% width limit */
+  overflow-x: hidden; /* Hides any horizontal overflow */
+  width: 100%; /* Ensures the container does not exceed the viewport width */
 }
 
 .key {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 8vw; /* Each key takes up a percentage of the viewport width */
-  height: 8vw; /* Maintains aspect ratio to keep keys square */
-  max-width: 40px; /* Optional: limits the size to prevent too large keys on large screens */
-  max-height: 40px; /* Matches max-width to maintain aspect ratio */
-  margin: 0.5vw; /* Scales margin with viewport width */
+  flex: 0 0 auto; /* No growing, no shrinking, let size be determined by content and settings */
+  width: calc(
+    (100% / 10) - 1vw
+  ); /* Assuming there are 10 keys, adjusts based on container's width */
+  height: 40px; /* Fixed height for consistency */
+  margin: 3px; /* Uniform margin */
   border: 1px solid black;
   cursor: pointer;
-  font-size: 3vw; /* Optional: Scales the font size with the viewport width */
+  font-size: 3vw;
+  padding: 0px;
 }
 
 input[type="text"] {
