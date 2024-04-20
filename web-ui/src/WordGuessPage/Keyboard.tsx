@@ -33,7 +33,7 @@ const Keyboard: React.FC<KeyboardProps> = ({ keyStates, setKeyState }) => {
   return (
     <div>
       {KEYS.map((row, index) => (
-        <div key={index} style={{ display: "flex", justifyContent: "center" }}>
+        <div key={index} className="keyboard-row">
           {row.map((letter) => (
             <Key
               key={letter}
