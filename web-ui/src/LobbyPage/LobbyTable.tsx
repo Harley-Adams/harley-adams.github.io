@@ -28,12 +28,10 @@ const LobbyTable: React.FC<LobbyTableProps> = ({
       <thead>
         <tr style={{ backgroundColor: "#f2f2f2", textAlign: "left" }}>
           <th>Lobby ID</th>
-          <th>Connection String</th>
-          <th>Current Players</th>
-          <th>Max Players</th>
-          <th>Membership Lock</th>
+          <th>Players</th>
           <th>Owner ID</th>
-          <th>Search Data</th>
+          <th>Join</th>
+          <th>Leave</th>
         </tr>
       </thead>
       <tbody>
@@ -41,21 +39,14 @@ const LobbyTable: React.FC<LobbyTableProps> = ({
           <tr key={index}>
             <td>{lobby.LobbyId}</td>
             <td>
+              {lobby.CurrentPlayers} / {lobby.MaxPlayers}
+            </td>
+            <td>{lobby.Owner.Id}</td>
+            <td>
               <button onClick={() => onJoinLobby(lobby.ConnectionString)}>
                 Join Lobby
               </button>
             </td>
-            <td>{lobby.CurrentPlayers}</td>
-            <td>{lobby.MaxPlayers}</td>
-            <td>{lobby.MembershipLock || "Not Locked"}</td>
-            <td>{lobby.Owner.Id}</td>
-            {/* <td>
-              {lobby.SearchData
-                ? Object.entries(lobby.SearchData)
-                    .map(([key, value]) => `${key}: ${value || "N/A"}`)
-                    .join(", ")
-                : "No Search Data"}
-            </td> */}
             <td>
               <button onClick={handleLeaveLobby.bind(null, lobby.LobbyId)}>
                 Leave
