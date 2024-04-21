@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PlayFabWrapper, { loginWithCustomId } from "../PlayFab/PlayFabWrapper";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
 import { PlayFabMultiplayerModels } from "../PlayFab/PlayFabMultiplayerModule";
@@ -10,6 +10,7 @@ import {
   WordlePlayerContract,
 } from "../WordGuessPage/WordleContract";
 import WordGuessGame from "../WordGuessPage/WordGuessGame";
+import React from "react";
 
 const GameFinder: React.FC = () => {
   const pubsub: PlayFabPubSub<WordleGameDataContract, WordlePlayerContract> =
@@ -26,6 +27,12 @@ const GameFinder: React.FC = () => {
   const [otherPlayers, setOtherPlayers] = useState<
     Map<string, WordlePlayerContract>
   >(new Map());
+  const otherPlayersRef = React.useRef(otherPlayers);
+
+  useEffect(() => {
+    // Ensure the ref is always at the latest value
+    otherPlayersRef.current = otherPlayers;
+  }, [otherPlayers]);
 
   let pfClient = new PlayFabWrapper();
   const handleLogin = () => {
@@ -100,18 +107,91 @@ const GameFinder: React.FC = () => {
 
     console.log(`num lobby changes: ${update.lobbyChanges.length}`);
     console.log(`Game update: ${JSON.stringify(update)}`);
+    update.lobbyChanges.forEach((change) => {
+      if (change.memberToMerge.memberData) {
+        // if (
+        //   update.lobbyChanges[0].memberToMerge.memberEntity.Id ===
+        //   player?.EntityToken.Entity.Id
+        // ) {
+        //   console.log("Skipping self update!");
+        //   continue;
+        // }
+        const memberToMerge = change.memberToMerge;
 
-    if (update.lobbyChanges[0].memberToMerge.memberData) {
-      // if (
-      //   update.lobbyChanges[0].memberToMerge.memberEntity.Id ===
-      //   player?.EntityToken.Entity.Id
-      // ) {
-      //   console.log("Skipping self update!");
-      // }
-      const memberToMerge = update.lobbyChanges[0].memberToMerge;
-      otherPlayers.set(memberToMerge.memberEntity.Id, memberToMerge.memberData);
-      setOtherPlayers(otherPlayers);
-    }
+        console.log(
+          `current otherplayers size before clone: ${otherPlayers.size}`
+        );
+        console.log(
+          `current otherPlayersRef size before clone: ${otherPlayersRef.current.size}`
+        );
+
+        otherPlayers.set(
+          memberToMerge.memberEntity.Id,
+          memberToMerge.memberData
+        );
+
+        // spread out, react does a shallow compare so
+        // we need to create a new object for new state to be detected
+        const newOtherPlayers: Map<string, WordlePlayerContract> = new Map();
+
+        for (let [key, value] of otherPlayersRef.current) {
+          console.log(`adding: key: ${key}, value: ${JSON.stringify(value)}`);
+          newOtherPlayers.set(key, value);
+        }
+
+        console.log(
+          `newOtherPlayers size after clone: ${newOtherPlayers.size}`
+        );
+
+        newOtherPlayers.set(
+          memberToMerge.memberEntity.Id,
+          memberToMerge.memberData
+        );
+        console.log(`newOtherPlayers size: ${newOtherPlayers.size}`);
+
+        console.log(
+          `otherPlayersRef size after clone: ${otherPlayersRef.current.size}`
+        );
+
+        // const temp = new Map([
+        //   ...otherPlayers,
+        //   [memberToMerge.memberEntity.Id, memberToMerge.memberData],
+        // ]);
+        // temp.set(memberToMerge.memberEntity.Id, memberToMerge.memberData);
+        // console.log(`temp right after set: ${JSON.stringify(temp)}`);
+        // console.log(
+        //   `wtf: ${memberToMerge.memberEntity.Id} + ${JSON.stringify(
+        //     memberToMerge.memberData
+        //   )}`
+        // );
+
+        // newOtherPlayers.set(
+        //   memberToMerge.memberEntity.Id,
+        //   memberToMerge.memberData
+        // );
+
+        // console.log(`otherPlayers size: ${otherPlayers.size}`);
+        // console.log(`temp: ${JSON.stringify(temp)}`);
+        // console.log(`otherPlayers: ${JSON.stringify(otherPlayers)}`);
+        // console.log(`newOtherPlayers: ${JSON.stringify(newOtherPlayers)}`);
+        setOtherPlayers(newOtherPlayers);
+        console.log(
+          `otherPlayersRef size after setstate: ${otherPlayersRef.current.size}`
+        );
+      }
+    });
+
+    // if (update.lobbyChanges[0].memberToMerge.memberData) {
+    //   // if (
+    //   //   update.lobbyChanges[0].memberToMerge.memberEntity.Id ===
+    //   //   player?.EntityToken.Entity.Id
+    //   // ) {
+    //   //   console.log("Skipping self update!");
+    //   // }
+    //   const memberToMerge = update.lobbyChanges[0].memberToMerge;
+    //   otherPlayers.set(memberToMerge.memberEntity.Id, memberToMerge.memberData);
+    //   setOtherPlayers(otherPlayers);
+    // }
   };
 
   const handleStartGame = () => {

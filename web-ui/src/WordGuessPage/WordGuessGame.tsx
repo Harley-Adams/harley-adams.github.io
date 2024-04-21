@@ -57,7 +57,6 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
 
     const newFeedback = ReviewGuess(word, currentGuess);
 
-    setGuessHistory([...guessHistory, newFeedback]);
     setCurrentGuess(""); // Clear the guess input
     newFeedback.lettersFeedback.forEach((letterFeedback) => {
       if (letterFeedback.letter) {
@@ -70,13 +69,15 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
     }
     if (playerUpdateCallback) {
       // remove the letters from the feedback.
-      let letterlessHistory: Guess[] = guessHistory.map((guess) => {
-        return {
-          lettersFeedback: guess.lettersFeedback.map((letterFeedback) => {
-            return { state: letterFeedback.state, letter: "" };
-          }),
-        };
-      });
+      let letterlessHistory: Guess[] = [...guessHistory, newFeedback].map(
+        (guess) => {
+          return {
+            lettersFeedback: guess.lettersFeedback.map((letterFeedback) => {
+              return { state: letterFeedback.state, letter: "" };
+            }),
+          };
+        }
+      );
 
       const playerUpdate: WordlePlayerContract = {
         name: "PlayerName",
@@ -85,6 +86,8 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
 
       playerUpdateCallback(playerUpdate);
     }
+
+    setGuessHistory([...guessHistory, newFeedback]);
   };
 
   // Function to handle key press in the input
