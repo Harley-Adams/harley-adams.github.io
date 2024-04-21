@@ -103,9 +103,11 @@ export class PlayFabPubSub {
   public StartOrRecoverSession(
     callback: (response: PubSubStartOrReconnectResponse) => void
   ): void {
+    const traceId = generateTraceParent();
+    console.log(`StartOrRecoverSession ${traceId}`);
     this.connection
       ?.invoke("StartOrRecoverSession", {
-        traceId: "00-84678fd69ae13e41fce1333289bcf482-22d157fb94ea4827-01",
+        traceId: traceId,
       })
       .then((response: PubSubStartOrReconnectResponse) => {
         console.log(`StartOrRecoverSession ${response.newConnectionHandle}`);
@@ -117,3 +119,24 @@ export class PlayFabPubSub {
   }
 }
 export default PlayFabPubSub;
+
+function generateTraceParent(): string {
+  // Helper function to generate random hex strings of a given length
+  function randomHex(len: number): string {
+    const maxByte = 256; // 2^8
+    let result = "";
+    for (let i = 0; i < len; i++) {
+      result += Math.floor(Math.random() * maxByte)
+        .toString(16)
+        .padStart(2, "0");
+    }
+    return result;
+  }
+
+  const version = "00"; // Current version is 00
+  const traceId = randomHex(16); // 16 bytes for traceId
+  const parentId = randomHex(8); // 8 bytes for parentId
+  const flags = "01"; // Example flags (e.g., sampled)
+
+  return `${version}-${traceId}-${parentId}-${flags}`;
+}

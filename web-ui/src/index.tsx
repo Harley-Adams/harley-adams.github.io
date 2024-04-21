@@ -11,6 +11,7 @@ import FivePM from "./FivePMPage/FivePM";
 import Crossword from "./Crossword/Crossword";
 import WordGuessPage from "./WordGuessPage/WordGuessPage";
 import LobbyPage from "./LobbyPage/LobbyPage";
+import { ToastContainer } from "react-toastify";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
+    <ToastContainer />
     <RouterProvider router={router} />
   </React.StrictMode>
 );
