@@ -1,12 +1,28 @@
 import React from "react";
 import { PlayFabMultiplayerModels } from "../PlayFab/PlayFabMultiplayerModule";
+import PlayFabWrapper from "../PlayFab/PlayFabWrapper";
+import PfLoginResult from "../PlayFab/models/PfLoginResult";
 
 interface LobbyTableProps {
+  player?: PfLoginResult;
   lobbies: PlayFabMultiplayerModels.LobbySummary[];
   onJoinLobby: (connectionString: string) => void;
 }
 
-const LobbyTable: React.FC<LobbyTableProps> = ({ lobbies, onJoinLobby }) => {
+const LobbyTable: React.FC<LobbyTableProps> = ({
+  player,
+  lobbies,
+  onJoinLobby,
+}) => {
+  const handleLeaveLobby = (lobbyId: string) => {
+    const pfClient = new PlayFabWrapper();
+    if (player) {
+      console.log("Leave lobby", lobbyId);
+      pfClient.LeaveLobby(player.EntityToken, lobbyId, (leaveResult) => {
+        console.log("Lobby left:", leaveResult);
+      });
+    }
+  };
   return (
     <table style={{ width: "100%", borderCollapse: "collapse" }}>
       <thead>
@@ -33,12 +49,17 @@ const LobbyTable: React.FC<LobbyTableProps> = ({ lobbies, onJoinLobby }) => {
             <td>{lobby.MaxPlayers}</td>
             <td>{lobby.MembershipLock || "Not Locked"}</td>
             <td>{lobby.Owner.Id}</td>
-            <td>
+            {/* <td>
               {lobby.SearchData
                 ? Object.entries(lobby.SearchData)
                     .map(([key, value]) => `${key}: ${value || "N/A"}`)
                     .join(", ")
                 : "No Search Data"}
+            </td> */}
+            <td>
+              <button onClick={handleLeaveLobby.bind(null, lobby.LobbyId)}>
+                Leave
+              </button>
             </td>
           </tr>
         ))}

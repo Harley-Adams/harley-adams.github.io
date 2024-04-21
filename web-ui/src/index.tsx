@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
@@ -11,6 +11,16 @@ import FivePM from "./FivePMPage/FivePM";
 import Crossword from "./Crossword/Crossword";
 import WordGuessPage from "./WordGuessPage/WordGuessPage";
 import LobbyPage from "./LobbyPage/LobbyPage";
+import { loginWithCustomId } from "./PlayFab/PlayFabWrapper";
+import PfLoginResult from "./PlayFab/models/PfLoginResult";
+import { PlayFabCustomIdForLogin } from "./Constants";
+
+// Retrieve data from local storage to reduce throttling on login with customId.
+let pfLogin: PfLoginResult | undefined = undefined;
+
+await loginWithCustomId(PlayFabCustomIdForLogin, (loginResult) => {
+  pfLogin = loginResult;
+});
 
 const router = createBrowserRouter([
   {
@@ -43,7 +53,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/Lobby",
-        element: <LobbyPage />,
+        element: <LobbyPage player={pfLogin} />,
       },
     ],
   },

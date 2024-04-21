@@ -21,6 +21,8 @@ export const GuessInput: React.FC<GuessInputProps> = ({
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
     />
-    <button onClick={handleGuessSubmit}>Submit</button>
+    <button className="submitButton" onClick={handleGuessSubmit}>
+      Submit
+    </button>
   </div>
 );

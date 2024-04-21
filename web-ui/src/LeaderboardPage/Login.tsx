@@ -8,7 +8,7 @@ import {
   CFormCheck,
   CContainer,
 } from "@coreui/react";
-import PlayFabWrapper from "../PlayFab/PlayFabWrapper";
+import PlayFabWrapper, { loginWithCustomId } from "../PlayFab/PlayFabWrapper";
 import PfLoginResult, {
   EntityTokenResponse,
 } from "../PlayFab/models/PfLoginResult";
@@ -34,9 +34,9 @@ function Login(props: LoginProps) {
       let titleId = newTitleId.toString();
       let isProd = prodRadio === "Production";
 
-      let pfClient = new PlayFabWrapper(titleId, "", isProd);
+      let pfClient = new PlayFabWrapper();
 
-      pfClient.LoginWithCustomId(
+      loginWithCustomId(
         newCustomId.toString(),
         (loginResult: PfLoginResult) => {
           props.loggedInCallback(

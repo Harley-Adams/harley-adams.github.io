@@ -24,7 +24,7 @@ function GetLeaderboardAround(props: Props) {
     let centerEntityId = formData.get("centerEntityId")?.toString();
 
     if (centerEntityId !== undefined) {
-      let pfClient = new PlayFabWrapper(props.titleId, "", props.useProd);
+      let pfClient = new PlayFabWrapper();
       pfClient.GetV2LeaderboardAroundPlayer(
         props.entityToken,
         props.statName,

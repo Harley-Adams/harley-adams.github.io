@@ -115,7 +115,7 @@ input[type="text"] {
   margin-right: 10px;
 }
 
-button {
+.submitButton {
   padding: 10px 20px;
   background-color: #4caf50;
   color: white;

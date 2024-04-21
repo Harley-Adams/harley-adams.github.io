@@ -5,11 +5,9 @@ import { WordList } from "./WordList";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import PlayFabWrapper from "../PlayFab/PlayFabWrapper";
+import PlayFabWrapper, { loginWithCustomId } from "../PlayFab/PlayFabWrapper";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
 import { PlayFabMultiplayerModels } from "../PlayFab/PlayFabMultiplayerModule";
-import PlayFabPubSub from "../PlayFab/PlayFabPubSub";
-import { title } from "process";
 
 function WordGuessPage(): JSX.Element {
   let randomIndex = Math.floor(Math.random() * WordList.length);
@@ -21,7 +19,7 @@ function WordGuessPage(): JSX.Element {
   const [isMultiplayer, setIsMultiplayer] = useState(false);
   const [playerIsHost, setPlayerIsHost] = useState(true);
   const titleId = "A691C";
-  let pfClient = new PlayFabWrapper(titleId, "", true);
+  let pfClient = new PlayFabWrapper();
 
   useEffect(() => {
     // Retrieve data from local storage to reduce throttling on login with customId.
@@ -42,7 +40,7 @@ function WordGuessPage(): JSX.Element {
     }
 
     console.log("Logging in with custom ID");
-    pfClient.LoginWithCustomId("testCustomId", (loginResult) => {
+    loginWithCustomId("testCustomId", (loginResult) => {
       localStorage.setItem("PfLoginResult", JSON.stringify(loginResult));
       setPlayer(loginResult);
     });
@@ -75,24 +73,17 @@ function WordGuessPage(): JSX.Element {
           LobbyName: "New Lobby",
         };
 
-        pfClient.CreateLobby(
-          player?.EntityToken,
-          lobbyData,
-          memberData,
-          (createResult) => {
-            console.log(createResult);
-            setPlayerIsHost(true);
-            setIsMultiplayer(true);
-          }
-        );
+        // pfClient.CreateLobby(
+        //   player?.EntityToken,
+        //   lobbyData,
+        //   memberData,
+        //   (createResult) => {
+        //     console.log(createResult);
+        //     setPlayerIsHost(true);
+        //     setIsMultiplayer(true);
+        //   }
+        // );
       }
-
-      // Usage
-      const serverUrl = `https://${titleId}.playfabapi.com/PubSub/`; // Replace with your PlayFab SignalR service URL
-      const pubSubClient = new PlayFabPubSub(
-        serverUrl,
-        player.EntityToken.EntityToken
-      );
     });
   };
 

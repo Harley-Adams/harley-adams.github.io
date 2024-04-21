@@ -4,46 +4,80 @@ import {
   LogLevel,
   HttpTransportType,
 } from "@microsoft/signalr";
+import { PlayFabBaseAPI } from "../Constants";
+import { EntityTokenResponse } from "./models/PfLoginResult";
+import { publicDecrypt } from "crypto";
 
-class PlayFabPubSub {
-  private connection: HubConnection | undefined;
+// This is here because for some reason it isn't generate in the node sdk.
+export interface PubSubNegotiateResponse {
+  accessToken: string;
+  url: string;
+}
 
-  constructor(private serverUrl: string, private authToken: string) {
-    this.initializeConnection();
-  }
+export interface PubSubStartOrReconnectResponse {
+  newConnectionHandle: string;
+  status: string;
+  traceId: string;
+}
 
-  private initializeConnection(): void {
+export class PlayFabPubSub {
+  private connection: HubConnection | null = null;
+
+  public NegotiateToPubSub = async (
+    entityToken: EntityTokenResponse,
+    callback: (createLobbyResult: PubSubNegotiateResponse) => void
+  ) => {
+    let apiEndpoint = PlayFabBaseAPI + "PubSub/Negotiate";
+
+    fetch(apiEndpoint, {
+      method: "POST",
+      body: undefined,
+      headers: {
+        "Content-Type": "application/json",
+        "X-EntityToken": `${entityToken.EntityToken}`,
+      },
+    }).then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse: PubSubNegotiateResponse = await response.json();
+        console.log(`playfab negotiate pubsub: ${JSON.stringify(rawResponse)}`);
+        callback(rawResponse);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab negotiate pubsub error: ${await response.text()}`);
+      }
+    });
+  };
+
+  public ConnectToPubSub(
+    serverUrl: string,
+    authToken: string,
+    onConnectCallback: () => void
+  ): void {
     // Create a new connection using the HubConnectionBuilder
     this.connection = new HubConnectionBuilder()
-      .withUrl(this.serverUrl, {
-        accessTokenFactory: () => this.authToken,
+      .withUrl(serverUrl, {
+        accessTokenFactory: () => authToken,
         transport: HttpTransportType.WebSockets,
         skipNegotiation: true,
         headers: {
-          "X-EntityToken": this.authToken,
+          "X-EntityToken": authToken,
         },
       })
-      .configureLogging(LogLevel.Information)
+      .configureLogging(LogLevel.Debug)
       .build();
 
     // Start the connection
     this.connection
       .start()
-      .then(() => console.log("Connected to PlayFab PubSub!"))
+      .then(() => {
+        console.log(`Connected to PlayFab PubSub!`);
+        onConnectCallback();
+      })
       .catch((err) =>
         console.error("Error while establishing connection :", err)
       );
 
     // Set up event handlers
-    this.setupEventHandlers();
-  }
-
-  private setupEventHandlers(): void {
-    if (!this.connection) {
-      console.error("SignalR connection is not initialized.");
-      return;
-    }
-
     // Handle receiving messages
     this.connection.on("ReceiveMessage", (message: any) => {
       console.log("Received message: ", message);
@@ -62,6 +96,21 @@ class PlayFabPubSub {
       }, 5000); // Retry after 5 seconds
     });
   }
-}
 
+  public StartOrRecoverSession(
+    callback: (response: PubSubStartOrReconnectResponse) => void
+  ): void {
+    this.connection
+      ?.invoke("StartOrRecoverSession", {
+        traceId: "00-84678fd69ae13e41fce1333289bcf482-22d157fb94ea4827-01",
+      })
+      .then((response: PubSubStartOrReconnectResponse) => {
+        console.log(`StartOrRecoverSession ${response.newConnectionHandle}`);
+        callback(response);
+      })
+      .catch((err) => {
+        console.error("Error while sending message: ", err);
+      });
+  }
+}
 export default PlayFabPubSub;

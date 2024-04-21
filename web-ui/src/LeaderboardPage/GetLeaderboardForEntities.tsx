@@ -20,7 +20,7 @@ function GetLeaderboardForEntities(props: Props) {
     event.preventDefault();
     setShowSpinner(true);
 
-    let pfClient = new PlayFabWrapper(props.titleId, "", props.useProd);
+    let pfClient = new PlayFabWrapper();
     pfClient.GetV2LeaderboardForPlayers(
       props.entityToken,
       props.statName,

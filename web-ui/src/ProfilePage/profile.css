@@ -232,3 +232,10 @@
   background-repeat: no-repeat;
   transition: all 0.5s;
 }
+
+.lobbyButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
