@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { LetterGuessState } from "./Guess";
 
 // Define the layout of the QWERTY keyboard
 const KEYS: string[][] = [
@@ -9,14 +10,13 @@ const KEYS: string[][] = [
 
 interface KeyProps {
   letter: string;
-  keyState: string;
-  setKeyState: (letter: string, newState: string) => void;
+  keyState: LetterGuessState;
 }
 
-const Key: React.FC<KeyProps> = ({ letter, keyState, setKeyState }) => {
+const Key: React.FC<KeyProps> = ({ letter, keyState }) => {
   return (
     <button
-      className={`key ${keyState}`}
+      className={`key ${getKeyCssClass(keyState)}`}
       //   onClick={() => setKeyState(letter, nextKeyState(keyState))}
     >
       {letter}
@@ -24,9 +24,24 @@ const Key: React.FC<KeyProps> = ({ letter, keyState, setKeyState }) => {
   );
 };
 
+const getKeyCssClass = (keyState: LetterGuessState): string => {
+  switch (keyState) {
+    case LetterGuessState.Correct:
+      return "correct-letter";
+    case LetterGuessState.WrongPosition:
+      return "wrong-position-letter";
+    case LetterGuessState.Wrong:
+      return "wrong-letter";
+    case LetterGuessState.Unused:
+      return "unused-letter";
+    default:
+      return "unused-letter";
+  }
+};
+
 interface KeyboardProps {
-  keyStates: { [key: string]: string };
-  setKeyState: (letter: string, newState: string) => void;
+  keyStates: { [key: string]: LetterGuessState };
+  setKeyState: (letter: string, newState: LetterGuessState) => void;
 }
 
 const Keyboard: React.FC<KeyboardProps> = ({ keyStates, setKeyState }) => {
@@ -35,12 +50,7 @@ const Keyboard: React.FC<KeyboardProps> = ({ keyStates, setKeyState }) => {
       {KEYS.map((row, index) => (
         <div key={index} className="keyboard-row">
           {row.map((letter) => (
-            <Key
-              key={letter}
-              letter={letter}
-              keyState={keyStates[letter]}
-              setKeyState={setKeyState}
-            />
+            <Key key={letter} letter={letter} keyState={keyStates[letter]} />
           ))}
         </div>
       ))}

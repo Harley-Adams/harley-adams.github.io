@@ -17,10 +17,7 @@ const LobbyTable: React.FC<LobbyTableProps> = ({
   const handleLeaveLobby = (lobbyId: string) => {
     const pfClient = new PlayFabWrapper();
     if (player) {
-      console.log("Leave lobby", lobbyId);
-      pfClient.LeaveLobby(player.EntityToken, lobbyId, (leaveResult) => {
-        console.log("Lobby left:", leaveResult);
-      });
+      pfClient.LeaveLobby(player.EntityToken, lobbyId, (leaveResult) => {});
     }
   };
   return (

@@ -3,13 +3,13 @@ export interface Guess {
 }
 
 export interface LetterFeedback {
-  letter: string;
+  letter?: string;
   state: LetterGuessState;
 }
 
 export enum LetterGuessState {
-  Unused = "unused-letter",
-  Correct = "correct-letter",
-  WrongPosition = "wrong-position-letter",
-  Wrong = "wrong-letter",
+  Unused = "1",
+  Correct = "2",
+  WrongPosition = "3",
+  Wrong = "4",
 }

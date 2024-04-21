@@ -329,41 +329,6 @@ export default class PlayFabWrapper {
     });
   }
 
-  public UpdateLobby(
-    entityToken: EntityTokenResponse,
-    lobbyId: string,
-    callback: (
-      updateLobbyResult: PlayFabMultiplayerModels.LobbyEmptyResult
-    ) => void,
-    lobbyData?: any,
-    playerData?: any
-  ) {
-    let apiEndpoint = PlayFabBaseAPI + `Lobby/UpdateLobby`;
-
-    const request: PlayFabMultiplayerModels.UpdateLobbyRequest = {
-      LobbyId: lobbyId,
-      LobbyData: lobbyData,
-      MemberData: playerData,
-    };
-
-    fetch(apiEndpoint, {
-      method: "POST",
-      body: JSON.stringify(request),
-      headers: {
-        "Content-Type": "application/json",
-        "X-EntityToken": `${entityToken.EntityToken}`,
-      },
-    }).then(async (response) => {
-      if (response.status === 200) {
-        let rawResponse = await response.json();
-        callback(rawResponse.data);
-      } else {
-        // tslint:disable-next-line: no-console
-        console.log(`playfab lobby error: ${await response.text()}`);
-      }
-    });
-  }
-
   public CreateLobby(
     entityToken: EntityTokenResponse,
     connectionsEnabled: boolean,

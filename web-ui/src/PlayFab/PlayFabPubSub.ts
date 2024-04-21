@@ -19,12 +19,12 @@ interface PubSubStartOrReconnectResponse {
   traceId: string;
 }
 
-export interface PubSubMessage<LobbyDataType> {
+export interface PubSubMessage<LobbyDataType, PlayerDataType> {
   lobbyId: string;
-  lobbyChanges: LobbyChanges<LobbyDataType>[];
+  lobbyChanges: LobbyChanges<LobbyDataType, PlayerDataType>[];
 }
 
-export interface LobbyChanges<LobbyDataType> {
+export interface LobbyChanges<LobbyDataType, PlayerDataType> {
   changeNumber: number;
   pubSubConnectionHandle: string;
   memberToMerge: {
@@ -33,18 +33,21 @@ export interface LobbyChanges<LobbyDataType> {
       Id: string;
     };
     pubSubConnectionHandle: string;
+    memberData: PlayerDataType;
   };
   lobbyData: LobbyDataType;
 }
 
-export class PlayFabPubSub<LobbyDataType> {
+export class PlayFabPubSub<LobbyDataType, PlayerDataType> {
   private connection: HubConnection | null = null;
 
   public PubSubSetupLobby = async (
     entityToken: EntityTokenResponse,
     lobbyId: string,
     connectedToLobbyCallback: (response: any) => void,
-    messageReceivedCallback: (message: PubSubMessage<LobbyDataType>) => void
+    messageReceivedCallback: (
+      message: PubSubMessage<LobbyDataType, PlayerDataType>
+    ) => void
   ) => {
     this.NegotiateToPubSub(entityToken, (result) => {
       this.ConnectToPubSub(
@@ -128,7 +131,9 @@ export class PlayFabPubSub<LobbyDataType> {
     serverUrl: string,
     authToken: string,
     onConnectCallback: () => void,
-    onReceiveMessageCallback: (message: PubSubMessage<LobbyDataType>) => void
+    onReceiveMessageCallback: (
+      message: PubSubMessage<LobbyDataType, PlayerDataType>
+    ) => void
   ): void {
     // Create a new connection using the HubConnectionBuilder
     this.connection = new HubConnectionBuilder()
@@ -157,9 +162,20 @@ export class PlayFabPubSub<LobbyDataType> {
     // Set up event handlers
     // Handle receiving messages
     this.connection.on("ReceiveMessage", (message: any) => {
-      const pubSubUpdate: PubSubMessage<LobbyDataType> = JSON.parse(
+      // player data is any here because we haven't decoded it yet.
+      const pubSubUpdate: PubSubMessage<LobbyDataType, any> = JSON.parse(
         atob(message.payload)
       );
+      if (pubSubUpdate.lobbyChanges) {
+        // Decode the member data
+        pubSubUpdate.lobbyChanges.forEach((lobbyChange) => {
+          if (lobbyChange.memberToMerge.memberData) {
+            lobbyChange.memberToMerge.memberData = JSON.parse(
+              atob(lobbyChange.memberToMerge.memberData.d)
+            );
+          }
+        });
+      }
       onReceiveMessageCallback(pubSubUpdate);
     });
 
@@ -198,6 +214,52 @@ export class PlayFabPubSub<LobbyDataType> {
       .catch((err) => {
         console.error("Error while sending message: ", err);
       });
+  }
+
+  public UpdateLobby(
+    entityToken: EntityTokenResponse,
+    lobbyId: string,
+    callback: (
+      updateLobbyResult: PlayFabMultiplayerModels.LobbyEmptyResult
+    ) => void,
+    lobbyData?: LobbyDataType,
+    playerData?: PlayerDataType
+  ) {
+    let apiEndpoint = PlayFabBaseAPI + `Lobby/UpdateLobby`;
+
+    const encodedPlayerData = playerData
+      ? btoa(JSON.stringify(playerData))
+      : null;
+
+    const request: PlayFabMultiplayerModels.UpdateLobbyRequest = {
+      LobbyId: lobbyId,
+      MemberEntity: entityToken.Entity,
+    };
+
+    if (playerData) {
+      request.MemberData = { d: encodedPlayerData };
+    }
+
+    if (lobbyData) {
+      request.LobbyData = lobbyData;
+    }
+
+    fetch(apiEndpoint, {
+      method: "POST",
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+        "X-EntityToken": `${entityToken.EntityToken}`,
+      },
+    }).then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse = await response.json();
+        callback(rawResponse.data);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab lobby error: ${await response.text()}`);
+      }
+    });
   }
 }
 export default PlayFabPubSub;

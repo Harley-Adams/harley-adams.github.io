@@ -7,10 +7,13 @@ import { PlayFabPubSub, PubSubMessage } from "../PlayFab/PlayFabPubSub";
 import {
   GameState,
   WordleGameDataContract,
+  WordlePlayerContract,
 } from "../WordGuessPage/WordleContract";
+import WordGuessGame from "../WordGuessPage/WordGuessGame";
 
 const GameFinder: React.FC = () => {
-  const pubsub: PlayFabPubSub<WordleGameDataContract> = new PlayFabPubSub();
+  const pubsub: PlayFabPubSub<WordleGameDataContract, WordlePlayerContract> =
+    new PlayFabPubSub();
   const [player, setPlayer] = useState<PfLoginResult>();
   const [customIdInput, setCustomIdInput] = useState<string>("testuser");
   const [lobbies, setLobbies] =
@@ -20,6 +23,9 @@ const GameFinder: React.FC = () => {
   const [isHost, setIsHost] = useState<boolean>(false);
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
   const [lobbyId, setLobbyId] = useState<string>("");
+  const [otherPlayers, setOtherPlayers] = useState<
+    Map<string, WordlePlayerContract>
+  >(new Map());
 
   let pfClient = new PlayFabWrapper();
   const handleLogin = () => {
@@ -34,7 +40,6 @@ const GameFinder: React.FC = () => {
     }
 
     pfClient.JoinLobby(player?.EntityToken, connectionString, (joinResult) => {
-      console.log(joinResult);
       setLobbyId(joinResult.LobbyId);
       pubsub.PubSubSetupLobby(
         player.EntityToken,
@@ -43,7 +48,6 @@ const GameFinder: React.FC = () => {
           setIsInLobby(true);
         },
         (message) => {
-          console.log(`Received message: ${JSON.stringify(message)}`);
           handleGameUpdate(message);
         }
       );
@@ -83,31 +87,46 @@ const GameFinder: React.FC = () => {
     );
   };
 
-  const handleGameUpdate = (update: PubSubMessage<WordleGameDataContract>) => {
+  const handleGameUpdate = (
+    update: PubSubMessage<WordleGameDataContract, WordlePlayerContract>
+  ) => {
     // First update doesn't seem to have prefilled lobby data.
     // Not sure why, but assume that if it's missing do nothing.
-    if (!update.lobbyChanges[0].lobbyData) {
-      return;
+    if (update.lobbyChanges[0].lobbyData) {
+      if (update.lobbyChanges[0].lobbyData.gameState == GameState.inGame) {
+        setIsGameStarted(true);
+      }
     }
 
-    if (update.lobbyChanges[0].lobbyData.gameState == GameState.inGame) {
-      setIsGameStarted(true);
+    console.log(`num lobby changes: ${update.lobbyChanges.length}`);
+    console.log(`Game update: ${JSON.stringify(update)}`);
+
+    if (update.lobbyChanges[0].memberToMerge.memberData) {
+      // if (
+      //   update.lobbyChanges[0].memberToMerge.memberEntity.Id ===
+      //   player?.EntityToken.Entity.Id
+      // ) {
+      //   console.log("Skipping self update!");
+      // }
+      const memberToMerge = update.lobbyChanges[0].memberToMerge;
+      otherPlayers.set(memberToMerge.memberEntity.Id, memberToMerge.memberData);
+      setOtherPlayers(otherPlayers);
     }
   };
 
   const handleStartGame = () => {
     if (player) {
-      pfClient.UpdateLobby(player.EntityToken, lobbyId, (updateResult) => {}, {
+      pubsub.UpdateLobby(player.EntityToken, lobbyId, (updateResult) => {}, {
         gameState: GameState.inGame,
+        word: "Grace",
+        startTime: Date.now(),
       });
     }
   };
 
   const handleFindLobbies = () => {
     if (player != null) {
-      console.log("Finding lobbies");
       pfClient.GetLobbies(player.EntityToken, (lobbies) => {
-        console.log(lobbies);
         setLobbies(lobbies);
         setShowLobbyTable(true);
       });
@@ -117,6 +136,21 @@ const GameFinder: React.FC = () => {
   const handleCustomIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCustomIdInput(event.target.value); // Convert the guess to uppercase
   };
+
+  const handlePlayerUpdate = (update: WordlePlayerContract) => {
+    if (!player) {
+      return;
+    }
+
+    pubsub.UpdateLobby(
+      player?.EntityToken,
+      lobbyId,
+      (updateResult) => {},
+      undefined,
+      update
+    );
+  };
+  const handleLocalGameUpdate = (update: WordleGameDataContract) => {};
 
   if (!player) {
     return (
@@ -130,6 +164,21 @@ const GameFinder: React.FC = () => {
       </div>
     );
   }
+
+  if (isGameStarted) {
+    return (
+      <div>
+        You are player: {player?.EntityToken.Entity.Id}
+        <WordGuessGame
+          word="Grace"
+          gameUpdateCallback={handleLocalGameUpdate}
+          playerUpdateCallback={handlePlayerUpdate}
+          otherPlayers={otherPlayers}
+        />
+      </div>
+    );
+  }
+
   return (
     <div>
       <h1>Lobby Page</h1>

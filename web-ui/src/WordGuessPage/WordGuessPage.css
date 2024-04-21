@@ -168,3 +168,15 @@ input[type="text"] {
     opacity: 1;
   }
 }
+
+.player-item {
+  display: inline-block;
+  margin: 10px;
+}
+
+.players-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}

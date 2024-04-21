@@ -1,4 +1,4 @@
-import { LetterGuessState } from "./Guess";
+import { Guess } from "./Guess";
 
 export interface WordleGameDataContract {
   gameState: GameState;
@@ -6,13 +6,13 @@ export interface WordleGameDataContract {
   startTime: number;
 }
 
-export interface WorldlePlayerContract {
+export interface WordlePlayerContract {
   name: string;
-  feedback: LetterGuessState[];
+  feedbackHistory: Guess[];
 }
 
 export enum GameState {
-  preGame = "pregame",
-  inGame = "ingame",
-  postGame = "postgame",
+  preGame = "1",
+  inGame = "2",
+  postGame = "3",
 }
