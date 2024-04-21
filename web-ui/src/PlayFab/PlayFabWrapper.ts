@@ -277,8 +277,6 @@ export default class PlayFabWrapper {
       MemberEntity: entityToken.Entity,
       // Additional parameters here if needed
     };
-    console.log("try join lobby");
-    console.log(lobbyConnectionString);
     fetch(apiEndpoint, {
       method: "POST",
       body: JSON.stringify(request),
@@ -289,7 +287,6 @@ export default class PlayFabWrapper {
     }).then(async (response) => {
       if (response.status === 200) {
         let rawResponse = await response.json();
-        console.log(`playfab join lobby: ${JSON.stringify(rawResponse)}`);
         callback(rawResponse.data);
       } else {
         // tslint:disable-next-line: no-console
@@ -312,8 +309,7 @@ export default class PlayFabWrapper {
       LobbyId: lobbyId,
       // Additional parameters here if needed
     };
-    console.log("try leave lobby");
-    console.log(lobbyId);
+    console.log(`try leave lobby: ${lobbyId}`);
 
     fetch(apiEndpoint, {
       method: "POST",
@@ -325,7 +321,6 @@ export default class PlayFabWrapper {
     }).then(async (response) => {
       if (response.status === 200) {
         let rawResponse = await response.json();
-        console.log(`playfab leave lobby: ${JSON.stringify(rawResponse)}`);
         callback(rawResponse.data);
       } else {
         // tslint:disable-next-line: no-console
@@ -337,17 +332,18 @@ export default class PlayFabWrapper {
   public UpdateLobby(
     entityToken: EntityTokenResponse,
     lobbyId: string,
-    lobbyData: PlayFabMultiplayerModels.UpdateLobbyRequest,
     callback: (
       updateLobbyResult: PlayFabMultiplayerModels.LobbyEmptyResult
-    ) => void
+    ) => void,
+    lobbyData?: any,
+    playerData?: any
   ) {
     let apiEndpoint = PlayFabBaseAPI + `Lobby/UpdateLobby`;
 
     const request: PlayFabMultiplayerModels.UpdateLobbyRequest = {
       LobbyId: lobbyId,
-      ...lobbyData,
-      // Additional parameters here if needed
+      LobbyData: lobbyData,
+      MemberData: playerData,
     };
 
     fetch(apiEndpoint, {
@@ -387,6 +383,7 @@ export default class PlayFabWrapper {
       Owner: entityToken.Entity,
       UseConnections: connectionsEnabled,
       Members: members,
+      // OwnerMigrationPolicy: "Automatic",
     };
 
     fetch(apiEndpoint, {
@@ -399,9 +396,6 @@ export default class PlayFabWrapper {
     }).then(async (response) => {
       if (response.status === 200) {
         let rawResponse = await response.json();
-        console.log(
-          `playfab create lobby: ${JSON.stringify(rawResponse.data)}`
-        );
         callback(rawResponse.data);
       } else {
         // tslint:disable-next-line: no-console
@@ -419,7 +413,6 @@ export default class PlayFabWrapper {
     ) => void
   ) {
     let apiEndpoint = PlayFabBaseAPI + `Lobby/SubscribeToLobbyResource`;
-    console.log(`sub to lobby: ${pubsubHandle}`);
     const request: PlayFabMultiplayerModels.SubscribeToLobbyResourceRequest = {
       EntityKey: entityToken.Entity,
       PubSubConnectionHandle: pubsubHandle,
@@ -438,9 +431,6 @@ export default class PlayFabWrapper {
     }).then(async (response) => {
       if (response.status === 200) {
         let rawResponse = await response.json();
-        console.log(
-          `playfab subscribe to lobby: ${JSON.stringify(rawResponse.data)}`
-        );
         callback(rawResponse.data);
       } else {
         // tslint:disable-next-line: no-console

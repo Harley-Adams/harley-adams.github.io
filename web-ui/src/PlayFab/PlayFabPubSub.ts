@@ -6,7 +6,6 @@ import {
 } from "@microsoft/signalr";
 import { PlayFabBaseAPI } from "../Constants";
 import { EntityTokenResponse } from "./models/PfLoginResult";
-import { publicDecrypt } from "crypto";
 
 // This is here because for some reason it isn't generate in the node sdk.
 export interface PubSubNegotiateResponse {
@@ -39,7 +38,6 @@ export class PlayFabPubSub {
     }).then(async (response) => {
       if (response.status === 200) {
         let rawResponse: PubSubNegotiateResponse = await response.json();
-        console.log(`playfab negotiate pubsub: ${JSON.stringify(rawResponse)}`);
         callback(rawResponse);
       } else {
         // tslint:disable-next-line: no-console
@@ -51,7 +49,8 @@ export class PlayFabPubSub {
   public ConnectToPubSub(
     serverUrl: string,
     authToken: string,
-    onConnectCallback: () => void
+    onConnectCallback: () => void,
+    onReceiveMessageCallback: (message: any) => void
   ): void {
     // Create a new connection using the HubConnectionBuilder
     this.connection = new HubConnectionBuilder()
@@ -63,7 +62,7 @@ export class PlayFabPubSub {
           "X-EntityToken": authToken,
         },
       })
-      .configureLogging(LogLevel.Debug)
+      .configureLogging(LogLevel.Information)
       .build();
 
     // Start the connection
@@ -80,7 +79,11 @@ export class PlayFabPubSub {
     // Set up event handlers
     // Handle receiving messages
     this.connection.on("ReceiveMessage", (message: any) => {
-      console.log("Received message: ", message);
+      onReceiveMessageCallback(message);
+    });
+
+    this.connection.on("ReceiveSubscriptionChangeMessage", (message: any) => {
+      console.log("Receive Subscription Change Message: ", message);
     });
 
     // Handling reconnection manually if needed

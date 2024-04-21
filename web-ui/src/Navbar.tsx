@@ -21,10 +21,10 @@ function Navbar() {
           <Link to="/Posts">Posts</Link>
         </li> */}
         <li>
-          <Link to="/WordGuessGame">WordGuessGame</Link>
+          <Link to="/WordGuessGame">TotallyNotWordle</Link>
         </li>
         <li>
-          <Link to="/Lobby">LobbyPrototype</Link>
+          <Link to="/MultiplayerGames">Multiplayer Games</Link>
         </li>
       </ul>
     </nav>

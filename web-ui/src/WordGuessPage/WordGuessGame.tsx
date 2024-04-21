@@ -6,9 +6,11 @@ import { ReviewGuess } from "./ReviewGuess";
 import { GuessHistory } from "./GuessHistory";
 import { Guess, LetterGuessState } from "./Guess";
 import { GuessInput } from "./GuessInput";
+import PlayFabPubSub from "../PlayFab/PlayFabPubSub";
 
 interface WordGuessGameProps {
   word: string;
+  pubSub?: PlayFabPubSub;
 }
 
 // Define the layout of the QWERTY keyboard

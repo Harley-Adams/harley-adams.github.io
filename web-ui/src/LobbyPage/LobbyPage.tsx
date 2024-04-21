@@ -1,22 +1,27 @@
-import { useEffect, useState } from "react";
-import PlayFabWrapper from "../PlayFab/PlayFabWrapper";
+import { useState } from "react";
+import PlayFabWrapper, { loginWithCustomId } from "../PlayFab/PlayFabWrapper";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
 import { PlayFabMultiplayerModels } from "../PlayFab/PlayFabMultiplayerModule";
 import LobbyTable from "./LobbyTable";
-import exp from "constants";
 import { PlayFabPubSub } from "../PlayFab/PlayFabPubSub";
 
-interface LobbyTableProps {
-  player?: PfLoginResult;
-}
+const LobbyPage: React.FC = () => {
+  const [player, setPlayer] = useState<PfLoginResult>();
+  const [customIdInput, setCustomIdInput] = useState<string>("testuser");
 
-const LobbyPage: React.FC<LobbyTableProps> = ({ player }) => {
   const pubsub: PlayFabPubSub = new PlayFabPubSub();
   const [lobbies, setLobbies] =
     useState<PlayFabMultiplayerModels.FindLobbiesResult>();
   const [showLobbyTable, setShowLobbyTable] = useState<boolean>(false);
 
   let pfClient = new PlayFabWrapper();
+  let lobbyId: string = "";
+
+  const handleLogin = () => {
+    loginWithCustomId(customIdInput, (loginResult) => {
+      setPlayer(loginResult);
+    });
+  };
 
   const handleJoinLobby = (connectionString: string) => {
     if (player == null) {
@@ -25,6 +30,7 @@ const LobbyPage: React.FC<LobbyTableProps> = ({ player }) => {
 
     pfClient.JoinLobby(player?.EntityToken, connectionString, (joinResult) => {
       console.log(joinResult);
+      lobbyId = joinResult.LobbyId;
     });
   };
   const handleCreateLobby = () => {
@@ -33,30 +39,11 @@ const LobbyPage: React.FC<LobbyTableProps> = ({ player }) => {
       return;
     }
 
-    let myObject: { [key: string]: string | null } = {
-      key1: "value1",
-      key2: null,
-      key3: "value3",
-    };
-
-    // Example configuration for creating a lobby
-    const lobbyData: { [key: string]: string | null } = {
-      LobbyName: "New Lobby",
-    };
-
     const memberData: PlayFabMultiplayerModels.Member[] = [
       { MemberEntity: player.EntityToken.Entity },
     ];
 
-    pfClient.CreateLobby(
-      player.EntityToken,
-      false,
-      lobbyData,
-      memberData,
-      (createLobbyResult) => {
-        console.log("Lobby created:", createLobbyResult);
-      }
-    );
+    pfClient.CreateLobby(player.EntityToken, false, {}, memberData, () => {});
   };
 
   const handleCreateLobbyAndSub = () => {
@@ -65,17 +52,6 @@ const LobbyPage: React.FC<LobbyTableProps> = ({ player }) => {
       return;
     }
 
-    let myObject: { [key: string]: string | null } = {
-      key1: "value1",
-      key2: null,
-      key3: "value3",
-    };
-
-    // Example configuration for creating a lobby
-    const lobbyData: { [key: string]: string | null } = {
-      LobbyName: "New Lobby",
-    };
-
     const memberData: PlayFabMultiplayerModels.Member[] = [
       { MemberEntity: player.EntityToken.Entity },
     ];
@@ -83,26 +59,49 @@ const LobbyPage: React.FC<LobbyTableProps> = ({ player }) => {
     pfClient.CreateLobby(
       player.EntityToken,
       true,
-      lobbyData,
+      {},
       memberData,
       (createLobbyResult) => {
-        console.log("Lobby created:", createLobbyResult);
+        lobbyId = createLobbyResult.LobbyId;
         pubsub.NegotiateToPubSub(player.EntityToken, (result) => {
-          pubsub.ConnectToPubSub(result.url, result.accessToken, () => {
-            pubsub.StartOrRecoverSession((startResponse) => {
-              pfClient.SubscribeToLobby(
-                player.EntityToken,
-                startResponse.newConnectionHandle,
-                createLobbyResult.LobbyId,
-                () => {
-                  console.log(result);
-                }
+          pubsub.ConnectToPubSub(
+            result.url,
+            result.accessToken,
+            () => {
+              pubsub.StartOrRecoverSession((startResponse) => {
+                lobbyId = createLobbyResult.LobbyId;
+                pfClient.SubscribeToLobby(
+                  player.EntityToken,
+                  startResponse.newConnectionHandle,
+                  createLobbyResult.LobbyId,
+                  () => {}
+                );
+              });
+            },
+            (message) => {
+              // const payload = JSON.parse(message.payload);
+              console.log(
+                "Received message",
+                JSON.parse(atob(message.payload))
               );
-            });
-          });
+            }
+          );
         });
       }
     );
+  };
+
+  const handleUpdateLobby = () => {
+    if (player) {
+      pfClient.UpdateLobby(
+        player.EntityToken,
+        lobbyId,
+        (updateResult) => {
+          console.log("Lobby updated:", updateResult);
+        },
+        { "New Lobby Name": "lobbyName" }
+      );
+    }
   };
 
   const handleFindLobbies = () => {
@@ -116,19 +115,22 @@ const LobbyPage: React.FC<LobbyTableProps> = ({ player }) => {
     }
   };
 
-  const handleConnectToPubSub = () => {
-    if (player != null) {
-      pubsub.NegotiateToPubSub(player.EntityToken, (result) => {
-        console.log(result);
-        pubsub.ConnectToPubSub(result.url, result.accessToken, () => {
-          pubsub.StartOrRecoverSession((response) => {
-            console.log(response);
-          });
-        });
-      });
-    }
+  const handleCustomIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomIdInput(event.target.value); // Convert the guess to uppercase
   };
 
+  if (!player) {
+    return (
+      <div>
+        <input
+          type="text"
+          defaultValue={customIdInput}
+          onChange={handleCustomIdChange}
+        />
+        <button onClick={handleLogin}>Login</button>
+      </div>
+    );
+  }
   return (
     <div>
       <h1>Lobby Page</h1>
@@ -139,14 +141,15 @@ const LobbyPage: React.FC<LobbyTableProps> = ({ player }) => {
         <button onClick={handleCreateLobbyAndSub}>
           Create New Lobby and Subscribe via PubSub
         </button>
-        <button onClick={handleConnectToPubSub}>Connect to PubSub</button>
+        <button onClick={handleUpdateLobby}>Update Lobby</button>
       </div>
-
-      <LobbyTable
-        player={player}
-        lobbies={lobbies?.Lobbies || []}
-        onJoinLobby={handleJoinLobby}
-      />
+      {showLobbyTable ? (
+        <LobbyTable
+          player={player}
+          lobbies={lobbies?.Lobbies || []}
+          onJoinLobby={handleJoinLobby}
+        />
+      ) : null}
     </div>
   );
 };
