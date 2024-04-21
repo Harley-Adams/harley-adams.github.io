@@ -3,21 +3,23 @@ import PlayFabWrapper, { loginWithCustomId } from "../PlayFab/PlayFabWrapper";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
 import { PlayFabMultiplayerModels } from "../PlayFab/PlayFabMultiplayerModule";
 import LobbyTable from "./LobbyTable";
-import { PlayFabPubSub } from "../PlayFab/PlayFabPubSub";
+import { PlayFabPubSub, PubSubMessage } from "../PlayFab/PlayFabPubSub";
+import {
+  GameState,
+  WordleGameDataContract,
+} from "../WordGuessPage/WordleContract";
 
-interface GameFinderProps {
-  pubsub: PlayFabPubSub;
-}
-
-const GameFinder: React.FC<GameFinderProps> = ({ pubsub }) => {
+const GameFinder: React.FC = () => {
+  const pubsub: PlayFabPubSub<WordleGameDataContract> = new PlayFabPubSub();
   const [player, setPlayer] = useState<PfLoginResult>();
   const [customIdInput, setCustomIdInput] = useState<string>("testuser");
   const [lobbies, setLobbies] =
     useState<PlayFabMultiplayerModels.FindLobbiesResult>();
   const [showLobbyTable, setShowLobbyTable] = useState<boolean>(false);
+  const [isInLobby, setIsInLobby] = useState<boolean>(false);
   const [isHost, setIsHost] = useState<boolean>(false);
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
-  const [lobbyId, setLobbyId] = useState<string>(""); // [1
+  const [lobbyId, setLobbyId] = useState<string>("");
 
   let pfClient = new PlayFabWrapper();
   const handleLogin = () => {
@@ -34,6 +36,17 @@ const GameFinder: React.FC<GameFinderProps> = ({ pubsub }) => {
     pfClient.JoinLobby(player?.EntityToken, connectionString, (joinResult) => {
       console.log(joinResult);
       setLobbyId(joinResult.LobbyId);
+      pubsub.PubSubSetupLobby(
+        player.EntityToken,
+        joinResult.LobbyId,
+        (response) => {
+          setIsInLobby(true);
+        },
+        (message) => {
+          console.log(`Received message: ${JSON.stringify(message)}`);
+          handleGameUpdate(message);
+        }
+      );
     });
   };
 
@@ -50,48 +63,42 @@ const GameFinder: React.FC<GameFinderProps> = ({ pubsub }) => {
     pfClient.CreateLobby(
       player.EntityToken,
       true,
-      { GameState: "pregame" },
+      { gameState: GameState.preGame },
       memberData,
       (createLobbyResult) => {
         setLobbyId(createLobbyResult.LobbyId);
         setIsHost(true);
-        pubsub.NegotiateToPubSub(player.EntityToken, (result) => {
-          pubsub.ConnectToPubSub(
-            result.url,
-            result.accessToken,
-            () => {
-              pubsub.StartOrRecoverSession((startResponse) => {
-                pfClient.SubscribeToLobby(
-                  player.EntityToken,
-                  startResponse.newConnectionHandle,
-                  createLobbyResult.LobbyId,
-                  () => {}
-                );
-              });
-            },
-            (message) => {
-              const payload = atob(message.payload);
-              const lobbyUpdate = JSON.parse(atob(message.payload));
-              console.log(`Received message: ${payload}`);
-              console.log(
-                `attempted deserialize: ${lobbyUpdate.lobbyChanges[0].lobbyData.GameState}`
-              );
-              if (
-                lobbyUpdate.lobbyChanges[0].lobbyData.GameState == "started"
-              ) {
-                setIsGameStarted(true);
-              }
-            }
-          );
-        });
+        pubsub.PubSubSetupLobby(
+          player.EntityToken,
+          createLobbyResult.LobbyId,
+          (response) => {
+            setIsInLobby(true);
+          },
+          (message) => {
+            console.log(`Received message: ${JSON.stringify(message)}`);
+            handleGameUpdate(message);
+          }
+        );
       }
     );
+  };
+
+  const handleGameUpdate = (update: PubSubMessage<WordleGameDataContract>) => {
+    // First update doesn't seem to have prefilled lobby data.
+    // Not sure why, but assume that if it's missing do nothing.
+    if (!update.lobbyChanges[0].lobbyData) {
+      return;
+    }
+
+    if (update.lobbyChanges[0].lobbyData.gameState == GameState.inGame) {
+      setIsGameStarted(true);
+    }
   };
 
   const handleStartGame = () => {
     if (player) {
       pfClient.UpdateLobby(player.EntityToken, lobbyId, (updateResult) => {}, {
-        GameState: "ingame",
+        gameState: GameState.inGame,
       });
     }
   };

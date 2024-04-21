@@ -7,10 +7,11 @@ import { GuessHistory } from "./GuessHistory";
 import { Guess, LetterGuessState } from "./Guess";
 import { GuessInput } from "./GuessInput";
 import PlayFabPubSub from "../PlayFab/PlayFabPubSub";
+import { WordleGameDataContract } from "./WordleContract";
 
 interface WordGuessGameProps {
   word: string;
-  pubSub?: PlayFabPubSub;
+  pubSub?: PlayFabPubSub<WordleGameDataContract>;
 }
 
 // Define the layout of the QWERTY keyboard

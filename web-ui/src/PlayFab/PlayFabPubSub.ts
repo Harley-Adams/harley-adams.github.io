@@ -2,25 +2,68 @@ import {
   HubConnection,
   HubConnectionBuilder,
   LogLevel,
-  HttpTransportType,
 } from "@microsoft/signalr";
 import { PlayFabBaseAPI } from "../Constants";
 import { EntityTokenResponse } from "./models/PfLoginResult";
+import { PlayFabMultiplayerModels } from "./PlayFabMultiplayerModule";
 
 // This is here because for some reason it isn't generate in the node sdk.
-export interface PubSubNegotiateResponse {
+interface PubSubNegotiateResponse {
   accessToken: string;
   url: string;
 }
 
-export interface PubSubStartOrReconnectResponse {
+interface PubSubStartOrReconnectResponse {
   newConnectionHandle: string;
   status: string;
   traceId: string;
 }
 
-export class PlayFabPubSub {
+export interface PubSubMessage<LobbyDataType> {
+  lobbyId: string;
+  lobbyChanges: LobbyChanges<LobbyDataType>[];
+}
+
+export interface LobbyChanges<LobbyDataType> {
+  changeNumber: number;
+  pubSubConnectionHandle: string;
+  memberToMerge: {
+    memberEntity: {
+      Type: string;
+      Id: string;
+    };
+    pubSubConnectionHandle: string;
+  };
+  lobbyData: LobbyDataType;
+}
+
+export class PlayFabPubSub<LobbyDataType> {
   private connection: HubConnection | null = null;
+
+  public PubSubSetupLobby = async (
+    entityToken: EntityTokenResponse,
+    lobbyId: string,
+    connectedToLobbyCallback: (response: any) => void,
+    messageReceivedCallback: (message: PubSubMessage<LobbyDataType>) => void
+  ) => {
+    this.NegotiateToPubSub(entityToken, (result) => {
+      this.ConnectToPubSub(
+        result.url,
+        result.accessToken,
+        () => {
+          this.StartOrRecoverSession((startResponse) => {
+            this.SubscribeToLobby(
+              entityToken,
+              startResponse.newConnectionHandle,
+              lobbyId,
+              connectedToLobbyCallback
+            );
+          });
+        },
+        messageReceivedCallback
+      );
+    });
+  };
 
   public NegotiateToPubSub = async (
     entityToken: EntityTokenResponse,
@@ -46,11 +89,46 @@ export class PlayFabPubSub {
     });
   };
 
+  public SubscribeToLobby = (
+    entityToken: EntityTokenResponse,
+    pubsubHandle: string,
+    resourceId: string,
+    callback: (
+      subscribeToLobbyResult: PlayFabMultiplayerModels.SubscribeToLobbyResourceResult
+    ) => void
+  ) => {
+    let apiEndpoint = PlayFabBaseAPI + `Lobby/SubscribeToLobbyResource`;
+    const request: PlayFabMultiplayerModels.SubscribeToLobbyResourceRequest = {
+      EntityKey: entityToken.Entity,
+      PubSubConnectionHandle: pubsubHandle,
+      ResourceId: resourceId,
+      SubscriptionVersion: 1,
+      Type: "LobbyChange",
+    };
+
+    fetch(apiEndpoint, {
+      method: "POST",
+      body: JSON.stringify(request),
+      headers: {
+        "Content-Type": "application/json",
+        "X-EntityToken": `${entityToken.EntityToken}`,
+      },
+    }).then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse = await response.json();
+        callback(rawResponse.data);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab sub to lobby error: ${await response.text()}`);
+      }
+    });
+  };
+
   public ConnectToPubSub(
     serverUrl: string,
     authToken: string,
     onConnectCallback: () => void,
-    onReceiveMessageCallback: (message: any) => void
+    onReceiveMessageCallback: (message: PubSubMessage<LobbyDataType>) => void
   ): void {
     // Create a new connection using the HubConnectionBuilder
     this.connection = new HubConnectionBuilder()
@@ -79,7 +157,10 @@ export class PlayFabPubSub {
     // Set up event handlers
     // Handle receiving messages
     this.connection.on("ReceiveMessage", (message: any) => {
-      onReceiveMessageCallback(message);
+      const pubSubUpdate: PubSubMessage<LobbyDataType> = JSON.parse(
+        atob(message.payload)
+      );
+      onReceiveMessageCallback(pubSubUpdate);
     });
 
     this.connection.on("ReceiveSubscriptionChangeMessage", (message: any) => {

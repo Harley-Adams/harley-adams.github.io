@@ -41,7 +41,7 @@ const LobbyTable: React.FC<LobbyTableProps> = ({
             <td>
               {lobby.CurrentPlayers} / {lobby.MaxPlayers}
             </td>
-            <td>{lobby.Owner.Id}</td>
+            <td>{lobby.Owner?.Id}</td>
             <td>
               <button onClick={() => onJoinLobby(lobby.ConnectionString)}>
                 Join Lobby

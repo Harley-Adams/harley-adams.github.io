@@ -403,39 +403,4 @@ export default class PlayFabWrapper {
       }
     });
   }
-
-  public SubscribeToLobby(
-    entityToken: EntityTokenResponse,
-    pubsubHandle: string,
-    resourceId: string,
-    callback: (
-      subscribeToLobbyResult: PlayFabMultiplayerModels.SubscribeToLobbyResourceResult
-    ) => void
-  ) {
-    let apiEndpoint = PlayFabBaseAPI + `Lobby/SubscribeToLobbyResource`;
-    const request: PlayFabMultiplayerModels.SubscribeToLobbyResourceRequest = {
-      EntityKey: entityToken.Entity,
-      PubSubConnectionHandle: pubsubHandle,
-      ResourceId: resourceId,
-      SubscriptionVersion: 1,
-      Type: "LobbyChange",
-    };
-
-    fetch(apiEndpoint, {
-      method: "POST",
-      body: JSON.stringify(request),
-      headers: {
-        "Content-Type": "application/json",
-        "X-EntityToken": `${entityToken.EntityToken}`,
-      },
-    }).then(async (response) => {
-      if (response.status === 200) {
-        let rawResponse = await response.json();
-        callback(rawResponse.data);
-      } else {
-        // tslint:disable-next-line: no-console
-        console.log(`playfab sub to lobby error: ${await response.text()}`);
-      }
-    });
-  }
 }
