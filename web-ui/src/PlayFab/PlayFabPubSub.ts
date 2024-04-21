@@ -56,13 +56,13 @@ export class PlayFabPubSub {
     this.connection = new HubConnectionBuilder()
       .withUrl(serverUrl, {
         accessTokenFactory: () => authToken,
-        transport: HttpTransportType.WebSockets,
-        skipNegotiation: true,
         headers: {
           "X-EntityToken": authToken,
         },
       })
-      .configureLogging(LogLevel.Information)
+      .withAutomaticReconnect()
+      .withKeepAliveInterval(5000)
+      .configureLogging(LogLevel.Debug)
       .build();
 
     // Start the connection
@@ -87,7 +87,8 @@ export class PlayFabPubSub {
     });
 
     // Handling reconnection manually if needed
-    this.connection.onclose(() => {
+    this.connection.onclose((error) => {
+      console.log(`error: ${error}`);
       console.log("Disconnected. Trying to reconnect...");
       setTimeout(() => {
         this.connection
