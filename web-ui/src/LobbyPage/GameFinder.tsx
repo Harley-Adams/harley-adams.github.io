@@ -11,12 +11,12 @@ import {
 } from "../WordGuessPage/WordleContract";
 import WordGuessGame from "../WordGuessPage/WordGuessGame";
 import React from "react";
+import LoginUI from "../WordGuessPage/LoginUI";
 
 const GameFinder: React.FC = () => {
   const pubsub: PlayFabPubSub<WordleGameDataContract, WordlePlayerContract> =
     new PlayFabPubSub();
   const [player, setPlayer] = useState<PfLoginResult>();
-  const [customIdInput, setCustomIdInput] = useState<string>("testuser");
   const [lobbies, setLobbies] =
     useState<PlayFabMultiplayerModels.FindLobbiesResult>();
   const [showLobbyTable, setShowLobbyTable] = useState<boolean>(false);
@@ -35,11 +35,6 @@ const GameFinder: React.FC = () => {
   }, [otherPlayers]);
 
   let pfClient = new PlayFabWrapper();
-  const handleLogin = () => {
-    loginWithCustomId(customIdInput, (loginResult) => {
-      setPlayer(loginResult);
-    });
-  };
 
   const handleJoinLobby = (connectionString: string) => {
     if (!player) {
@@ -177,10 +172,6 @@ const GameFinder: React.FC = () => {
     }
   };
 
-  const handleCustomIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomIdInput(event.target.value); // Convert the guess to uppercase
-  };
-
   const handlePlayerUpdate = (update: WordlePlayerContract) => {
     if (!player) {
       return;
@@ -194,17 +185,16 @@ const GameFinder: React.FC = () => {
       update
     );
   };
+
   const handleLocalGameUpdate = (update: WordleGameDataContract) => {};
+  const handleGameComplete = () => {
+    setIsGameStarted(false);
+  };
 
   if (!player) {
     return (
       <div>
-        <input
-          type="text"
-          defaultValue={customIdInput}
-          onChange={handleCustomIdChange}
-        />
-        <button onClick={handleLogin}>Login</button>
+        <LoginUI setPlayer={setPlayer} />
       </div>
     );
   }
@@ -215,6 +205,9 @@ const GameFinder: React.FC = () => {
         You are player: {player?.EntityToken.Entity.Id}
         <WordGuessGame
           word="Grace"
+          gameCompleteCallback={() => {
+            handleGameComplete();
+          }}
           gameUpdateCallback={handleLocalGameUpdate}
           playerUpdateCallback={handlePlayerUpdate}
           otherPlayers={otherPlayers}

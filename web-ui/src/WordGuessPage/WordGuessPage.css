@@ -3,6 +3,38 @@
   margin-top: 50px;
 }
 
+.login-container {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Center children horizontally */
+  gap: 20px; /* Space between children */
+
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  min-height: 100vh; /* Minimum height of 100% of the viewport height */
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+
+  padding-bottom: 50vh; /* Approximately 75% from the top of the screen */
+}
+
+.pregame-container {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Center children horizontally */
+  gap: 20px; /* Space between children */
+
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  min-height: 100vh; /* Minimum height of 100% of the viewport height */
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+
+  padding-bottom: 50vh; /* Approximately 75% from the top of the screen */
+}
+
 .game-container {
   display: flex;
   flex-direction: column;

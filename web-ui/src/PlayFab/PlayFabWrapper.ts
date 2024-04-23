@@ -1,4 +1,10 @@
 import { PlayFabBaseAPI, PlayFabTitleId } from "../Constants";
+import {
+  GetEntityLeaderboardResponse,
+  GetLeaderboardAroundEntityRequest,
+  GetLeaderboardRequest,
+  UpdateStatisticsPayload,
+} from "./PlayFabLeaderboards";
 import { PlayFabMultiplayerModels } from "./PlayFabMultiplayerModule";
 import PfLoginResult, { EntityTokenResponse } from "./models/PfLoginResult";
 import PfV2LeaderboardResult from "./models/PfV2LeaderboardResult";
@@ -48,64 +54,145 @@ export async function loginWithCustomId(
 
       callback(loginResult);
       localStorage.setItem(loginResultCacheKey, JSON.stringify(loginResult));
+
+      UpdateDisplayName(customId, loginResult.EntityToken.EntityToken).then(
+        () => {
+          console.log("display name updated");
+        }
+      );
     } else {
       console.log(`playfab login error: ${await response.text()}`);
     }
   });
 }
 
+export async function UpdateDisplayName(displayName: string, token: string) {
+  let apiEndpoint = PlayFabBaseAPI + `Client/UpdateUserTitleDisplayName`;
+
+  const data = {
+    DisplayName: displayName,
+  };
+
+  return fetch(apiEndpoint, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+      "X-Authorization": token,
+    },
+  }).then(async (response) => {
+    if (response.status === 200) {
+      console.log(`namechange ${await response.text()}`);
+    } else {
+      // tslint:disable-next-line: no-console
+      console.log(`playfab update name error: ${await response.text()}`);
+    }
+  });
+}
+
+export async function UpdateWordleStatistics(entityToken: EntityTokenResponse) {
+  let apiEndpoint = PlayFabBaseAPI + `Statistic/UpdateStatistics`;
+
+  const payload: UpdateStatisticsPayload = {
+    Statistics: [
+      {
+        Name: "gamesPlayed",
+        Scores: ["1"],
+      },
+    ],
+    Entity: entityToken.Entity,
+  };
+
+  const response = await fetch(apiEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-EntityToken": entityToken.EntityToken,
+    },
+
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const message = `An error has occurred updating stats: ${response.status}`;
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export function GetLeaderboard(
+  entityToken: EntityTokenResponse,
+  leaderboardName: string,
+  callback: (leaderboardResult: GetEntityLeaderboardResponse) => void
+) {
+  let apiEndpoint = PlayFabBaseAPI + `Leaderboard/GetLeaderboard`;
+
+  const payload: GetLeaderboardRequest = {
+    LeaderboardName: leaderboardName,
+    StartingPosition: 0,
+    PageSize: 20,
+  };
+
+  const response = fetch(apiEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-EntityToken": entityToken.EntityToken,
+    },
+
+    body: JSON.stringify(payload),
+  })
+    .then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse = await response.json();
+        callback(rawResponse.data);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab lobby error: ${await response.text()}`);
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
+export function GetLeaderboardAroundEntity(
+  entityToken: EntityTokenResponse,
+  leaderboardName: string,
+  callback: (leaderboardResult: GetEntityLeaderboardResponse) => void
+) {
+  let apiEndpoint = PlayFabBaseAPI + `Leaderboard/GetLeaderboardAroundEntity`;
+
+  const payload: GetLeaderboardAroundEntityRequest = {
+    LeaderboardName: leaderboardName,
+    MaxSurroundingEntries: 20,
+  };
+
+  const response = fetch(apiEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-EntityToken": entityToken.EntityToken,
+    },
+
+    body: JSON.stringify(payload),
+  })
+    .then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse = await response.json();
+        callback(rawResponse.data);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab get lb around error: ${await response.text()}`);
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
 export default class PlayFabWrapper {
-  private UpdateDisplayName(displayName: string, token: string) {
-    let apiEndpoint = PlayFabBaseAPI + `Client/UpdateUserTitleDisplayName`;
-
-    const data = {
-      DisplayName: displayName,
-    };
-
-    return fetch(apiEndpoint, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-        "X-Authorization": token,
-      },
-    }).then(async (response) => {
-      if (response.status === 200) {
-        console.log(`namechange ${await response.text()}`);
-      } else {
-        // tslint:disable-next-line: no-console
-        console.log(`playfab update name error: ${await response.text()}`);
-      }
-    });
-  }
-
-  public IncrementStat(entityKey: string, statName: string) {
-    const apiEndpoint = PlayFabBaseAPI + `Client/UpdatePlayerStatistics`;
-    const data = {
-      Statistics: [
-        {
-          LeaderboardName: `${statName}`,
-          Value: "1",
-        },
-      ],
-    };
-
-    fetch(apiEndpoint, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-        "X-Authorization": `${entityKey}`,
-      },
-    }).then(async (response) => {
-      if (response.status === 200) {
-      } else {
-        // tslint:disable-next-line: no-console
-        console.log(`playfab stat error: ${await response.text()}`);
-      }
-    });
-  }
-
   public GetV2Leaderboard(
     entityToken: EntityTokenResponse,
     statName: string,
@@ -116,7 +203,7 @@ export default class PlayFabWrapper {
     const data = {
       EntityType: "title_player_account",
       LeaderboardName: statName,
-      PageSize: 10,
+      PageSize: 20,
     };
 
     fetch(apiEndpoint, {

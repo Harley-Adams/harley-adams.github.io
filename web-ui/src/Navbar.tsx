@@ -8,9 +8,9 @@ function Navbar() {
         <li>
           <Link to="/">Profile</Link>
         </li>
-        <li>
+        {/* <li>
           <Link to="/Leaderboard">Leaderboard</Link>
-        </li>
+        </li> */}
         {/* <li>
           <Link to="/Crossword">Crossword</Link>
         </li> */}
@@ -24,7 +24,7 @@ function Navbar() {
           <Link to="/WordGuessGame">TotallyNotWordle</Link>
         </li>
         <li>
-          <Link to="/MultiplayerGames">Multiplayer Games</Link>
+          <Link to="/MultiplayerGames">TotallyNotWordle Royale</Link>
         </li>
       </ul>
     </nav>

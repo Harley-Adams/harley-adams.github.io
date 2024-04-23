@@ -10,6 +10,7 @@ import { WordleGameDataContract, WordlePlayerContract } from "./WordleContract";
 
 interface WordGuessGameProps {
   word: string;
+  gameCompleteCallback: () => void;
   gameUpdateCallback?: (update: WordleGameDataContract) => void;
   playerUpdateCallback?: (update: WordlePlayerContract) => void;
   otherPlayers?: Map<string, WordlePlayerContract>;
@@ -24,6 +25,7 @@ const KEYS: string[][] = [
 
 const WordGuessGame: React.FC<WordGuessGameProps> = ({
   word,
+  gameCompleteCallback,
   gameUpdateCallback,
   playerUpdateCallback,
   otherPlayers,
@@ -32,6 +34,7 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
 
   const [currentGuess, setCurrentGuess] = useState<string>(""); // The current guess
   const [guessHistory, setGuessHistory] = useState<Guess[]>([]); // History of guesses
+  const [isGameComplete, setIsGameComplete] = useState<boolean>(false); // Whether the game is complete
 
   // Function to handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -66,6 +69,7 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
     // Check if the guess is correct
     if (word === currentGuess) {
       toast.success("Congratulations! You guessed the correct word.");
+      setIsGameComplete(true);
     }
     if (playerUpdateCallback) {
       // remove the letters from the feedback.
@@ -148,14 +152,20 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
       <p>Attempts: {guessHistory.length}</p>
       <div className="game-container">
         <GuessHistory guessHistory={guessHistory} />
-        <Keyboard keyStates={keyStates} setKeyState={setKeyState} />
-        <GuessInput
-          currentGuess={currentGuess}
-          wordLength={word.length}
-          handleInputChange={handleInputChange}
-          handleKeyDown={handleKeyDown}
-          handleGuessSubmit={handleGuessSubmit}
-        />
+        {!isGameComplete ? (
+          <Keyboard keyStates={keyStates} setKeyState={setKeyState} />
+        ) : null}
+        {!isGameComplete ? (
+          <GuessInput
+            currentGuess={currentGuess}
+            wordLength={word.length}
+            handleInputChange={handleInputChange}
+            handleKeyDown={handleKeyDown}
+            handleGuessSubmit={handleGuessSubmit}
+          />
+        ) : (
+          <FinishedUI word={word} gameCompleteCallback={gameCompleteCallback} />
+        )}
       </div>
 
       <OtherPlayers otherPlayers={otherPlayers} />
@@ -181,6 +191,23 @@ const OtherPlayers: React.FC<{
     <div>
       <h2>Other Players</h2>
       <div className="players-container">{mapItems}</div>
+    </div>
+  );
+};
+
+interface FinishedGameUIProps {
+  word: string;
+  gameCompleteCallback: () => void;
+}
+const FinishedUI: React.FC<FinishedGameUIProps> = ({
+  word,
+  gameCompleteCallback,
+}) => {
+  return (
+    <div>
+      <h2>Game Over</h2>
+      <p>The word was: {word}</p>
+      <button onClick={gameCompleteCallback}>Back to home screen</button>
     </div>
   );
 };
