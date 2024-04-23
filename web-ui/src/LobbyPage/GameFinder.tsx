@@ -23,7 +23,7 @@ const GameFinder: React.FC = () => {
   const [isInLobby, setIsInLobby] = useState<boolean>(false);
   const [isHost, setIsHost] = useState<boolean>(false);
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
-  const [lobbyId, setLobbyId] = useState<string>("");
+  const [currentLobbyId, setCurrentLobbyId] = useState<string>("");
   const [otherPlayers, setOtherPlayers] = useState<
     Map<string, WordlePlayerContract>
   >(new Map());
@@ -42,12 +42,12 @@ const GameFinder: React.FC = () => {
   };
 
   const handleJoinLobby = (connectionString: string) => {
-    if (player == null) {
+    if (!player) {
       return;
     }
 
     pfClient.JoinLobby(player?.EntityToken, connectionString, (joinResult) => {
-      setLobbyId(joinResult.LobbyId);
+      setCurrentLobbyId(joinResult.LobbyId);
       pubsub.PubSubSetupLobby(
         player.EntityToken,
         joinResult.LobbyId,
@@ -77,7 +77,7 @@ const GameFinder: React.FC = () => {
       { gameState: GameState.preGame },
       memberData,
       (createLobbyResult) => {
-        setLobbyId(createLobbyResult.LobbyId);
+        setCurrentLobbyId(createLobbyResult.LobbyId);
         setIsHost(true);
         pubsub.PubSubSetupLobby(
           player.EntityToken,
@@ -118,13 +118,6 @@ const GameFinder: React.FC = () => {
         // }
         const memberToMerge = change.memberToMerge;
 
-        console.log(
-          `current otherplayers size before clone: ${otherPlayers.size}`
-        );
-        console.log(
-          `current otherPlayersRef size before clone: ${otherPlayersRef.current.size}`
-        );
-
         otherPlayers.set(
           memberToMerge.memberEntity.Id,
           memberToMerge.memberData
@@ -135,49 +128,15 @@ const GameFinder: React.FC = () => {
         const newOtherPlayers: Map<string, WordlePlayerContract> = new Map();
 
         for (let [key, value] of otherPlayersRef.current) {
-          console.log(`adding: key: ${key}, value: ${JSON.stringify(value)}`);
           newOtherPlayers.set(key, value);
         }
-
-        console.log(
-          `newOtherPlayers size after clone: ${newOtherPlayers.size}`
-        );
 
         newOtherPlayers.set(
           memberToMerge.memberEntity.Id,
           memberToMerge.memberData
         );
-        console.log(`newOtherPlayers size: ${newOtherPlayers.size}`);
 
-        console.log(
-          `otherPlayersRef size after clone: ${otherPlayersRef.current.size}`
-        );
-
-        // const temp = new Map([
-        //   ...otherPlayers,
-        //   [memberToMerge.memberEntity.Id, memberToMerge.memberData],
-        // ]);
-        // temp.set(memberToMerge.memberEntity.Id, memberToMerge.memberData);
-        // console.log(`temp right after set: ${JSON.stringify(temp)}`);
-        // console.log(
-        //   `wtf: ${memberToMerge.memberEntity.Id} + ${JSON.stringify(
-        //     memberToMerge.memberData
-        //   )}`
-        // );
-
-        // newOtherPlayers.set(
-        //   memberToMerge.memberEntity.Id,
-        //   memberToMerge.memberData
-        // );
-
-        // console.log(`otherPlayers size: ${otherPlayers.size}`);
-        // console.log(`temp: ${JSON.stringify(temp)}`);
-        // console.log(`otherPlayers: ${JSON.stringify(otherPlayers)}`);
-        // console.log(`newOtherPlayers: ${JSON.stringify(newOtherPlayers)}`);
         setOtherPlayers(newOtherPlayers);
-        console.log(
-          `otherPlayersRef size after setstate: ${otherPlayersRef.current.size}`
-        );
       }
     });
 
@@ -196,11 +155,16 @@ const GameFinder: React.FC = () => {
 
   const handleStartGame = () => {
     if (player) {
-      pubsub.UpdateLobby(player.EntityToken, lobbyId, (updateResult) => {}, {
-        gameState: GameState.inGame,
-        word: "Grace",
-        startTime: Date.now(),
-      });
+      pubsub.UpdateLobby(
+        player.EntityToken,
+        currentLobbyId,
+        (updateResult) => {},
+        {
+          gameState: GameState.inGame,
+          word: "Grace",
+          startTime: Date.now(),
+        }
+      );
     }
   };
 
@@ -224,7 +188,7 @@ const GameFinder: React.FC = () => {
 
     pubsub.UpdateLobby(
       player?.EntityToken,
-      lobbyId,
+      currentLobbyId,
       (updateResult) => {},
       undefined,
       update
@@ -276,8 +240,13 @@ const GameFinder: React.FC = () => {
       ) : null}
       {isHost ? <button onClick={handleStartGame}>StartGame</button> : null}
       {isGameStarted ? <h1>Game Started</h1> : null}
+      {/* {isInLobby ? <CurrentLobbyView /> : null} */}
     </div>
   );
 };
 
 export default GameFinder;
+
+const CurrentLobbyView: React.FC = () => {
+  return <div></div>;
+};

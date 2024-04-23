@@ -4,7 +4,7 @@ import { Dictionary } from "./Dictionary";
 import { toast } from "react-toastify";
 import { ReviewGuess } from "./ReviewGuess";
 import { GuessHistory } from "./GuessHistory";
-import { Guess, LetterFeedback, LetterGuessState } from "./Guess";
+import { Guess, LetterGuessState } from "./Guess";
 import { GuessInput } from "./GuessInput";
 import { WordleGameDataContract, WordlePlayerContract } from "./WordleContract";
 
