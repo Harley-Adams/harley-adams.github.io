@@ -7,10 +7,16 @@ import "react-toastify/dist/ReactToastify.css";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
 import React from "react";
 import LoginUI from "./LoginUI";
+import LeaderboardView from "./LeaderboardView";
+import StatisticsView from "./StatisticsView";
 
 function WordGuessPage(): JSX.Element {
   const [player, setPlayer] = useState<PfLoginResult>();
   const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
+  const [leaderboardNameToShow, setLeaderboardNameToShow] =
+    useState<string>("");
+  const [showStatistics, setShowStatistics] = useState<boolean>(false);
 
   const handleGameStart = () => {
     setGameStarted(true);
@@ -18,6 +24,15 @@ function WordGuessPage(): JSX.Element {
 
   const handlePostGameDone = () => {
     setGameStarted(false);
+  };
+
+  const handleShowPlayerStatistics = () => {
+    setShowStatistics(true);
+  };
+
+  const handleShowLeaderboard = (leaderboardName: string) => {
+    setLeaderboardNameToShow(leaderboardName);
+    setShowLeaderboard(true);
   };
 
   let randomIndex = Math.floor(Math.random() * WordList.length);
@@ -31,14 +46,36 @@ function WordGuessPage(): JSX.Element {
     return (
       <div className="pregame-container">
         <button onClick={handleGameStart}>Start Game</button>
-        <button>View Stats</button>
-        <button>View Leaderboards</button>
+        {/* <button onClick={handleShowPlayerStatistics}>View Stats</button> */}
+        <button onClick={() => handleShowLeaderboard("WordleBestGame")}>
+          View WordleBestGame Leaderboard
+        </button>
+        <button onClick={() => handleShowLeaderboard("WordleBestGameDaily")}>
+          View WordleBestGameDaily Leaderboard
+        </button>
+        <button onClick={() => handleShowLeaderboard("WordleTopPlayers")}>
+          View WordleTopPlayers Leaderboard
+        </button>
+        <button onClick={() => handleShowLeaderboard("WordleTopPlayersDaily")}>
+          View WordleTopPlayersDaily Leaderboard
+        </button>
+        {showLeaderboard ? (
+          <LeaderboardView
+            player={player}
+            leaderboardName={leaderboardNameToShow}
+          />
+        ) : null}
+        {showStatistics ? <StatisticsView player={player} /> : null}
       </div>
     );
   }
 
   return (
-    <WordGuessGame word={word} gameCompleteCallback={handlePostGameDone} />
+    <WordGuessGame
+      player={player}
+      word={word}
+      gameCompleteCallback={handlePostGameDone}
+    />
   );
 }
 

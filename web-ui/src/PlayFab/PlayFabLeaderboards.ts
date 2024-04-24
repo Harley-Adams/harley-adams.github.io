@@ -12,10 +12,17 @@ export interface UpdateStatisticsPayload {
 }
 
 export interface GetStatisticsPayload {
-  Entity: {
-    Id: string;
-    Type: string;
-  };
+  Entity?: EntityKey;
+}
+
+export interface Statistic {
+  name: string;
+  version: number;
+  Scores: string[];
+}
+export interface GetStatisticsResponse {
+  Entity: EntityKey;
+  Statistics: Statistic[];
 }
 
 export interface GetLeaderboardRequest {

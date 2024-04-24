@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Keyboard from "./Keyboard";
 import { Dictionary } from "./Dictionary";
 import { toast } from "react-toastify";
@@ -7,8 +7,14 @@ import { GuessHistory } from "./GuessHistory";
 import { Guess, LetterGuessState } from "./Guess";
 import { GuessInput } from "./GuessInput";
 import { WordleGameDataContract, WordlePlayerContract } from "./WordleContract";
+import PfLoginResult, {
+  EntityTokenResponse,
+} from "../PlayFab/models/PfLoginResult";
+import { UpdateWordleStatistics } from "../PlayFab/PlayFabWrapper";
+import { start } from "repl";
 
 interface WordGuessGameProps {
+  player: PfLoginResult;
   word: string;
   gameCompleteCallback: () => void;
   gameUpdateCallback?: (update: WordleGameDataContract) => void;
@@ -24,6 +30,7 @@ const KEYS: string[][] = [
 ];
 
 const WordGuessGame: React.FC<WordGuessGameProps> = ({
+  player,
   word,
   gameCompleteCallback,
   gameUpdateCallback,
@@ -31,6 +38,11 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
   otherPlayers,
 }) => {
   word = word.toUpperCase();
+
+  const [startTime, setStartTime] = useState<number>(0);
+  useEffect(() => {
+    setStartTime(Date.now());
+  }, []);
 
   const [currentGuess, setCurrentGuess] = useState<string>(""); // The current guess
   const [guessHistory, setGuessHistory] = useState<Guess[]>([]); // History of guesses
@@ -66,9 +78,35 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
         setKeyStateIfImproved(letterFeedback.letter, letterFeedback.state);
       }
     });
+
     // Check if the guess is correct
     if (word === currentGuess) {
       toast.success("Congratulations! You guessed the correct word.");
+      let numWrongLetters = 0;
+      let numMisplacedLetters = 0;
+
+      guessHistory.forEach((guess) => {
+        guess.lettersFeedback.forEach((letterFeedback) => {
+          if (letterFeedback.state === LetterGuessState.Wrong) {
+            numWrongLetters++;
+          }
+          if (letterFeedback.state === LetterGuessState.WrongPosition) {
+            numMisplacedLetters++;
+          }
+        });
+      });
+      const timeTaken = Date.now() - startTime;
+      console.log(`Time taken: ${timeTaken}ms ${Date.now()}  ${startTime}`);
+
+      UpdateWordleStatistics(
+        player.EntityToken,
+        word,
+        guessHistory.length + 1,
+        timeTaken,
+        numWrongLetters,
+        numMisplacedLetters
+      );
+
       setIsGameComplete(true);
     }
     if (playerUpdateCallback) {

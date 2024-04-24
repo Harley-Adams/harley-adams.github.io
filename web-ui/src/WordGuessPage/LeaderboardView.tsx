@@ -13,7 +13,8 @@ const LeaderboardView: React.FC<LeaderboardViewProps> = ({
   leaderboardName,
 }) => {
   const [leaderboardResult, setLeaderboardResult] =
-    useState<GetEntityLeaderboardResponse>();
+    useState<GetEntityLeaderboardResponse | null>(null);
+
   useEffect(() => {
     GetLeaderboard(player.EntityToken, leaderboardName, setLeaderboardResult);
   }, []);
@@ -21,14 +22,13 @@ const LeaderboardView: React.FC<LeaderboardViewProps> = ({
   if (!leaderboardResult) {
     return <div>Loading...</div>;
   }
+
   return (
     <div>
       <table>
         <thead>
           <tr>
             <th>Rank</th>
-            <th>Display Name</th>
-            <th>Entity Type</th>
             <th>Entity ID</th>
             <th>Scores</th>
           </tr>
@@ -37,7 +37,7 @@ const LeaderboardView: React.FC<LeaderboardViewProps> = ({
           {leaderboardResult?.Rankings.map((entry, index) => (
             <tr key={index}>
               <td>{entry.Rank}</td>
-              <td>{entry.DisplayName}</td>
+              <td>{entry.Entity.Id}</td>
               <td>{entry.Scores.join(", ")}</td>
             </tr>
           ))}

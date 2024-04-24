@@ -3,6 +3,8 @@ import {
   GetEntityLeaderboardResponse,
   GetLeaderboardAroundEntityRequest,
   GetLeaderboardRequest,
+  GetStatisticsPayload,
+  GetStatisticsResponse,
   UpdateStatisticsPayload,
 } from "./PlayFabLeaderboards";
 import { PlayFabMultiplayerModels } from "./PlayFabMultiplayerModule";
@@ -90,14 +92,57 @@ export async function UpdateDisplayName(displayName: string, token: string) {
   });
 }
 
-export async function UpdateWordleStatistics(entityToken: EntityTokenResponse) {
+export async function UpdateWordleStatistics(
+  entityToken: EntityTokenResponse,
+  word: string,
+  guessesMade: number,
+  timeTaken: number,
+  numberOfWrongLetters: number,
+  numberOfMisplacedLetters: number
+) {
   let apiEndpoint = PlayFabBaseAPI + `Statistic/UpdateStatistics`;
 
   const payload: UpdateStatisticsPayload = {
     Statistics: [
       {
-        Name: "gamesPlayed",
-        Scores: ["1"],
+        Name: "WordleBestGame",
+        Metadata: word,
+        Scores: [
+          guessesMade.toString(),
+          timeTaken.toString(),
+          numberOfWrongLetters.toString(),
+          numberOfMisplacedLetters.toString(),
+        ],
+      },
+      {
+        Name: "WordleBestGameDaily",
+        Metadata: word,
+        Scores: [
+          guessesMade.toString(),
+          timeTaken.toString(),
+          numberOfWrongLetters.toString(),
+          numberOfMisplacedLetters.toString(),
+        ],
+      },
+      {
+        Name: "WordleTopPlayers",
+        Scores: [
+          "1",
+          guessesMade.toString(),
+          timeTaken.toString(),
+          numberOfWrongLetters.toString(),
+          numberOfMisplacedLetters.toString(),
+        ],
+      },
+      {
+        Name: "WordleTopPlayersDaily",
+        Scores: [
+          "1",
+          guessesMade.toString(),
+          timeTaken.toString(),
+          numberOfWrongLetters.toString(),
+          numberOfMisplacedLetters.toString(),
+        ],
       },
     ],
     Entity: entityToken.Entity,
@@ -121,6 +166,39 @@ export async function UpdateWordleStatistics(entityToken: EntityTokenResponse) {
   return response.json();
 }
 
+export function GetStatistics(
+  entityToken: EntityTokenResponse,
+  callback: (statsResult: GetStatisticsResponse) => void
+) {
+  let apiEndpoint = PlayFabBaseAPI + `Statistic/GetStatistics`;
+
+  const payload: GetStatisticsPayload = {
+    Entity: entityToken.Entity,
+  };
+
+  const response = fetch(apiEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-EntityToken": entityToken.EntityToken,
+    },
+
+    body: JSON.stringify(payload),
+  })
+    .then(async (response) => {
+      if (response.status === 200) {
+        let rawResponse = await response.json();
+        callback(rawResponse.data);
+      } else {
+        // tslint:disable-next-line: no-console
+        console.log(`playfab lobby error: ${await response.text()}`);
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
 export function GetLeaderboard(
   entityToken: EntityTokenResponse,
   leaderboardName: string,
@@ -130,7 +208,7 @@ export function GetLeaderboard(
 
   const payload: GetLeaderboardRequest = {
     LeaderboardName: leaderboardName,
-    StartingPosition: 0,
+    StartingPosition: 1,
     PageSize: 20,
   };
 

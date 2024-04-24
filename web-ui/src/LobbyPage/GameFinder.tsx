@@ -204,6 +204,7 @@ const GameFinder: React.FC = () => {
       <div>
         You are player: {player?.EntityToken.Entity.Id}
         <WordGuessGame
+          player={player}
           word="Grace"
           gameCompleteCallback={() => {
             handleGameComplete();
