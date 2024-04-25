@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/static/css/main.87a0b4e1.css",
+    "main.css": "/static/css/main.cbcd6c80.css",
     "main.js": "/static/js/main.7b2520e6.js",
     "static/js/787.4c617d16.chunk.js": "/static/js/787.4c617d16.chunk.js",
     "static/media/page-bg.jpg": "/static/media/page-bg.fd87df84fbb90bc87ec2.jpg",
@@ -12,12 +12,12 @@
     "static/media/xboxlogo.png": "/static/media/xboxlogo.198a136fb179f7d9a4fe.png",
     "index.html": "/index.html",
     "static/media/markdownsample.md": "/static/media/markdownsample.75b595ad12a3864fe8ff.md",
-    "main.87a0b4e1.css.map": "/static/css/main.87a0b4e1.css.map",
+    "main.cbcd6c80.css.map": "/static/css/main.cbcd6c80.css.map",
     "main.7b2520e6.js.map": "/static/js/main.7b2520e6.js.map",
     "787.4c617d16.chunk.js.map": "/static/js/787.4c617d16.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.87a0b4e1.css",
+    "static/css/main.cbcd6c80.css",
     "static/js/main.7b2520e6.js"
   ]
 }
