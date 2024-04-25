@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { GetLeaderboard, GetStatistics } from "../PlayFab/PlayFabWrapper";
+import { GetStatistics } from "../PlayFab/PlayFabWrapper";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
-import {
-  GetEntityLeaderboardResponse,
-  GetStatisticsResponse,
-} from "../PlayFab/PlayFabLeaderboards";
+import { GetStatisticsResponse } from "../PlayFab/PlayFabLeaderboards";
+import { CTable } from "@coreui/react";
+import { version } from "os";
 
 interface StatisticsViewProps {
   player: PfLoginResult;
@@ -22,26 +21,59 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ player }) => {
     return <div>Loading...</div>;
   }
 
+  const columns = [
+    {
+      key: "statName",
+      label: "statName",
+      _props: { scope: "col" },
+    },
+    {
+      key: "version",
+      _props: { scope: "col" },
+    },
+    {
+      key: "col_1",
+      label: "Score1",
+      _props: { scope: "col" },
+    },
+    {
+      key: "col_2",
+      label: "Score2",
+      _props: { scope: "col" },
+    },
+    {
+      key: "col_3",
+      label: "Score3",
+      _props: { scope: "col" },
+    },
+    {
+      key: "col_4",
+      label: "Score4",
+      _props: { scope: "col" },
+    },
+    {
+      key: "col_5",
+      label: "Score5",
+      _props: { scope: "col" },
+    },
+  ];
+
+  let projectedDataItems = Object.entries(statisticsResult.Statistics).map(
+    ([statName, stat]) => ({
+      statName: statName,
+      version: stat.version ? stat.version : "0",
+      col_1: stat.Scores[0] ? stat.Scores[0] : "",
+      col_2: stat.Scores[1] ? stat.Scores[1] : "",
+      col_3: stat.Scores[2] ? stat.Scores[2] : "",
+      col_4: stat.Scores[3] ? stat.Scores[3] : "",
+      col_5: stat.Scores[4] ? stat.Scores[4] : "",
+      _cellProps: { id: { scope: "row" } },
+    })
+  );
+
   return (
     <div>
-      <table>
-        <thead>
-          <tr>
-            <th>Statistic Name</th>
-            <th>Version</th>
-            <th>Scores</th>
-          </tr>
-        </thead>
-        <tbody>
-          {statisticsResult?.Statistics.map((entry, index) => (
-            <tr key={index}>
-              <td>{entry.name}</td>
-              <td>{entry.version}</td>
-              <td>{entry.Scores.join(", ")}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <CTable columns={columns} items={projectedDataItems} striped={true} />
     </div>
   );
 };

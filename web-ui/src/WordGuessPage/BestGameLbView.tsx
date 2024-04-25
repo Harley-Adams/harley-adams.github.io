@@ -1,20 +1,16 @@
 import { useEffect, useState } from "react";
 import { GetLeaderboard } from "../PlayFab/PlayFabWrapper";
-import PfLoginResult from "../PlayFab/models/PfLoginResult";
 import {
   EntityLeaderboardEntry,
   GetEntityLeaderboardResponse,
 } from "../PlayFab/PlayFabLeaderboards";
 import { CTable } from "@coreui/react";
-import { verify } from "crypto";
+import {
+  LeaderboardViewProps,
+  TransformMsStringToSeconds,
+} from "./LeaderboardView";
 
-export interface LeaderboardViewProps {
-  player: PfLoginResult;
-  leaderboardName: string;
-  version?: number;
-}
-
-const LeaderboardView: React.FC<LeaderboardViewProps> = ({
+const BestGameLbView: React.FC<LeaderboardViewProps> = ({
   player,
   leaderboardName,
   version,
@@ -47,32 +43,27 @@ const LeaderboardView: React.FC<LeaderboardViewProps> = ({
     },
     {
       key: "col_1",
-      label: "Score1",
+      label: "Guesses Made",
       _props: { scope: "col" },
     },
     {
       key: "col_2",
-      label: "Score2",
+      label: "Time Taken (seconds)",
       _props: { scope: "col" },
     },
     {
       key: "col_3",
-      label: "Score3",
+      label: "Wrong Letters Guessed",
       _props: { scope: "col" },
     },
     {
       key: "col_4",
-      label: "Score4",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_5",
-      label: "Score5",
+      label: "Misplaced Letters Guessed",
       _props: { scope: "col" },
     },
     {
       key: "metadata",
-      label: "Metadata",
+      label: "Answer",
       _props: { scope: "col" },
     },
   ];
@@ -82,10 +73,9 @@ const LeaderboardView: React.FC<LeaderboardViewProps> = ({
       rank: item.Rank,
       entityId: item.DisplayName ? item.DisplayName : item.Entity.Id,
       col_1: item.Scores[0] ? item.Scores[0] : "",
-      col_2: item.Scores[1] ? item.Scores[1] : "",
+      col_2: item.Scores[1] ? TransformMsStringToSeconds(item.Scores[1]) : "",
       col_3: item.Scores[2] ? item.Scores[2] : "",
       col_4: item.Scores[3] ? item.Scores[3] : "",
-      col_5: item.Scores[4] ? item.Scores[4] : "",
       metadata: item.Metadata ? item.Metadata : "",
       _cellProps: { id: { scope: "row" } },
     })
@@ -100,9 +90,4 @@ const LeaderboardView: React.FC<LeaderboardViewProps> = ({
   );
 };
 
-export default LeaderboardView;
-
-export function TransformMsStringToSeconds(msString: string): string {
-  const ms: number = parseInt(msString);
-  return (ms / 1000).toFixed(2);
-}
+export default BestGameLbView;

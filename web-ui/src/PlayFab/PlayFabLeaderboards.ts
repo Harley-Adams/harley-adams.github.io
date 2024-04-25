@@ -37,6 +37,7 @@ export interface EntityLeaderboardEntry {
   Entity: EntityKey;
   Rank: number;
   Scores: string[];
+  Metadata?: string;
 }
 
 // Interface for the response object that contains the leaderboard information

@@ -202,7 +202,8 @@ export function GetStatistics(
 export function GetLeaderboard(
   entityToken: EntityTokenResponse,
   leaderboardName: string,
-  callback: (leaderboardResult: GetEntityLeaderboardResponse) => void
+  callback: (leaderboardResult: GetEntityLeaderboardResponse) => void,
+  version?: number
 ) {
   let apiEndpoint = PlayFabBaseAPI + `Leaderboard/GetLeaderboard`;
 
