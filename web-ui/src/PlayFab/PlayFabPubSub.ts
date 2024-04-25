@@ -145,7 +145,7 @@ export class PlayFabPubSub<LobbyDataType, PlayerDataType> {
       })
       .withAutomaticReconnect()
       .withKeepAliveInterval(5000)
-      .configureLogging(LogLevel.Debug)
+      .configureLogging(LogLevel.Information)
       .build();
 
     // Start the connection
@@ -162,6 +162,8 @@ export class PlayFabPubSub<LobbyDataType, PlayerDataType> {
     // Set up event handlers
     // Handle receiving messages
     this.connection.on("ReceiveMessage", (message: any) => {
+      console.log(`Receive Message: ${message}`);
+
       // player data is any here because we haven't decoded it yet.
       const pubSubUpdate: PubSubMessage<LobbyDataType, any> = JSON.parse(
         atob(message.payload)

@@ -129,6 +129,7 @@
   padding: 0 10px; /* Provides padding while respecting the 100% width limit */
   overflow-x: hidden; /* Hides any horizontal overflow */
   width: 100%; /* Ensures the container does not exceed the viewport width */
+  overflow: hidden; /* Hides any overflow */
 }
 
 @media (max-width: 600px) {

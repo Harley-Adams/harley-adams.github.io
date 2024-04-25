@@ -134,18 +134,6 @@ const GameFinder: React.FC = () => {
         setOtherPlayers(newOtherPlayers);
       }
     });
-
-    // if (update.lobbyChanges[0].memberToMerge.memberData) {
-    //   // if (
-    //   //   update.lobbyChanges[0].memberToMerge.memberEntity.Id ===
-    //   //   player?.EntityToken.Entity.Id
-    //   // ) {
-    //   //   console.log("Skipping self update!");
-    //   // }
-    //   const memberToMerge = update.lobbyChanges[0].memberToMerge;
-    //   otherPlayers.set(memberToMerge.memberEntity.Id, memberToMerge.memberData);
-    //   setOtherPlayers(otherPlayers);
-    // }
   };
 
   const handleStartGame = () => {
@@ -219,7 +207,6 @@ const GameFinder: React.FC = () => {
 
   return (
     <div>
-      <h1>Lobby Page</h1>
       <br />
       <div className="lobbyButtons">
         <button onClick={handleFindLobbies}>Find lobbies</button>
@@ -232,6 +219,7 @@ const GameFinder: React.FC = () => {
           onJoinLobby={handleJoinLobby}
         />
       ) : null}
+
       {isHost ? <button onClick={handleStartGame}>StartGame</button> : null}
       {isGameStarted ? <h1>Game Started</h1> : null}
       {/* {isInLobby ? <CurrentLobbyView /> : null} */}
@@ -241,6 +229,7 @@ const GameFinder: React.FC = () => {
 
 export default GameFinder;
 
-const CurrentLobbyView: React.FC = () => {
+interface CurrentLobbyViewProps {}
+const CurrentLobbyView: React.FC<CurrentLobbyViewProps> = () => {
   return <div></div>;
 };
