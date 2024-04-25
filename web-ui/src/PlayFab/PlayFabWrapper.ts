@@ -211,6 +211,7 @@ export function GetLeaderboard(
     LeaderboardName: leaderboardName,
     StartingPosition: 1,
     PageSize: 20,
+    Version: version,
   };
 
   const response = fetch(apiEndpoint, {

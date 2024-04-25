@@ -29,7 +29,7 @@ const LeaderboardView: React.FC<LeaderboardViewProps> = ({
       setLeaderboardResult,
       version
     );
-  }, [leaderboardName]);
+  }, [leaderboardName, version]);
 
   if (!leaderboardResult) {
     return <div>Loading...</div>;

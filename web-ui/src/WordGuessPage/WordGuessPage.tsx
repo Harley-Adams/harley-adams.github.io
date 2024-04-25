@@ -34,7 +34,9 @@ function WordGuessPage(): JSX.Element {
   if (!gameStarted) {
     return (
       <div className="pregame-container">
-        <button onClick={handleGameStart}>Start Game</button>
+        <button onClick={handleGameStart} className="start-game-button">
+          Start Game
+        </button>
         <StatisticsAndLeaderboardUX player={player} />
       </div>
     );
@@ -67,25 +69,37 @@ const StatisticsAndLeaderboardUX: React.FC<StatisticsAndLeaderboardUXProps> = ({
   const [leaderboardNameToShow, setLeaderboardNameToShow] =
     useState<string>("");
   const [showStatistics, setShowStatistics] = useState<boolean>(false);
+  const [version, setVersion] = useState<number>(0);
 
   const handleShowPlayerStatistics = () => {
     setShowStatistics(true);
     setShowLeaderboard(false);
+    setShowBestLeaderboard(false);
+    setShowTopLeaderboard(false);
   };
 
-  const handleShowLeaderboard = (leaderboardName: string) => {
+  const handleShowLeaderboard = (leaderboardName: string, version?: number) => {
+    setVersion(version || 0);
     setLeaderboardNameToShow(leaderboardName);
     setShowLeaderboard(true);
     setShowStatistics(false);
   };
-  const handleShowBestLeaderboard = (leaderboardName: string) => {
+  const handleShowBestLeaderboard = (
+    leaderboardName: string,
+    version?: number
+  ) => {
+    setVersion(version || 0);
     setLeaderboardNameToShow(leaderboardName);
     setShowLeaderboard(false);
     setShowStatistics(false);
     setShowBestLeaderboard(true);
     setShowTopLeaderboard(false);
   };
-  const handleShowTopLeaderboard = (leaderboardName: string) => {
+  const handleShowTopLeaderboard = (
+    leaderboardName: string,
+    version?: number
+  ) => {
+    setVersion(version || 0);
     setLeaderboardNameToShow(leaderboardName);
     setShowLeaderboard(false);
     setShowStatistics(false);
@@ -95,41 +109,54 @@ const StatisticsAndLeaderboardUX: React.FC<StatisticsAndLeaderboardUXProps> = ({
 
   return (
     <div>
-      <div>
+      <div className="lb-buttons">
         <button onClick={handleShowPlayerStatistics}>View Stats</button>
-        <button onClick={() => handleShowBestLeaderboard("WordleBestGame")}>
+        <button onClick={() => handleShowBestLeaderboard("WordleBestGame", 0)}>
           View WordleBestGame Leaderboard
         </button>
         <button
-          onClick={() => handleShowBestLeaderboard("WordleBestGameDaily")}
+          onClick={() => handleShowBestLeaderboard("WordleBestGameDaily", 1)}
         >
           View WordleBestGameDaily Leaderboard
         </button>
-        <button onClick={() => handleShowTopLeaderboard("WordleTopPlayers")}>
+        <button
+          onClick={() => handleShowBestLeaderboard("WordleBestGameDaily", 0)}
+        >
+          View yesterday's WordleBestGameDaily Leaderboard
+        </button>
+        <button onClick={() => handleShowTopLeaderboard("WordleTopPlayers", 0)}>
           View WordleTopPlayers Leaderboard
         </button>
         <button
-          onClick={() => handleShowTopLeaderboard("WordleTopPlayersDaily")}
+          onClick={() => handleShowTopLeaderboard("WordleTopPlayersDaily", 1)}
         >
           View WordleTopPlayersDaily Leaderboard
+        </button>
+        <button
+          onClick={() => handleShowTopLeaderboard("WordleTopPlayersDaily", 0)}
+        >
+          View yesterday's WordleTopPlayersDaily Leaderboard
         </button>
       </div>
       {showLeaderboard ? (
         <LeaderboardView
           player={player}
           leaderboardName={leaderboardNameToShow}
+          version={version}
         />
       ) : null}
       {showBestLeaderboard ? (
         <BestGameLbView
           player={player}
           leaderboardName={leaderboardNameToShow}
+          version={version}
         />
       ) : null}
       {showTopLeaderboard ? (
         <TopPlayerLbView
           player={player}
           leaderboardName={leaderboardNameToShow}
+          version={version}
         />
       ) : null}
       {showStatistics ? <StatisticsView player={player} /> : null}

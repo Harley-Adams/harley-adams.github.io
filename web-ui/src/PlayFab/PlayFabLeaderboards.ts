@@ -17,9 +17,11 @@ export interface GetStatisticsPayload {
 
 export interface Statistic {
   name: string;
-  version: number;
+  Version: number;
   Scores: string[];
+  Metadata?: string;
 }
+
 export interface GetStatisticsResponse {
   Entity: EntityKey;
   Statistics: Statistic[];

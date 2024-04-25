@@ -56,17 +56,24 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ player }) => {
       label: "Score5",
       _props: { scope: "col" },
     },
+    {
+      key: "metadata",
+      label: "Metadata",
+      _props: { scope: "col" },
+    },
   ];
 
+  console.log(`${JSON.stringify(statisticsResult.Statistics)}`);
   let projectedDataItems = Object.entries(statisticsResult.Statistics).map(
     ([statName, stat]) => ({
       statName: statName,
-      version: stat.version ? stat.version : "0",
+      version: stat.Version ? stat.Version : "0",
       col_1: stat.Scores[0] ? stat.Scores[0] : "",
       col_2: stat.Scores[1] ? stat.Scores[1] : "",
       col_3: stat.Scores[2] ? stat.Scores[2] : "",
       col_4: stat.Scores[3] ? stat.Scores[3] : "",
       col_5: stat.Scores[4] ? stat.Scores[4] : "",
+      metadata: stat.Metadata ? stat.Metadata : "",
       _cellProps: { id: { scope: "row" } },
     })
   );
