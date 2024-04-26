@@ -1,23 +1,25 @@
 {
   "files": {
-    "main.css": "/static/css/main.cbcd6c80.css",
-    "main.js": "/static/js/main.b9749d2a.js",
+    "main.css": "/static/css/main.e30fe48a.css",
+    "main.js": "/static/js/main.2004cb8d.js",
     "static/js/787.4c617d16.chunk.js": "/static/js/787.4c617d16.chunk.js",
     "static/media/page-bg.jpg": "/static/media/page-bg.fd87df84fbb90bc87ec2.jpg",
     "static/media/harley.jpg": "/static/media/harley.f9899b064a3b05d144bd.jpg",
+    "static/media/wordleroyale.png": "/static/media/wordleroyale.b32091fec2d6f0363330.png",
+    "static/media/wordle.png": "/static/media/wordle.dea4000b5fefc35cdcdb.png",
     "static/media/runboxrun.png": "/static/media/runboxrun.d338aab591ffd9018950.png",
     "static/media/ninjakiwi.png": "/static/media/ninjakiwi.d5ed1b7961ed6eb87b7c.png",
+    "static/media/xboxlogo.png": "/static/media/xboxlogo.057177848a50ea7272a9.png",
     "static/media/sway.png": "/static/media/sway.6b8eeff1cc6b5c27e515.png",
     "static/media/fiserv.png": "/static/media/fiserv.3804a80d0819a9772976.png",
-    "static/media/xboxlogo.png": "/static/media/xboxlogo.198a136fb179f7d9a4fe.png",
     "index.html": "/index.html",
     "static/media/markdownsample.md": "/static/media/markdownsample.75b595ad12a3864fe8ff.md",
-    "main.cbcd6c80.css.map": "/static/css/main.cbcd6c80.css.map",
-    "main.b9749d2a.js.map": "/static/js/main.b9749d2a.js.map",
+    "main.e30fe48a.css.map": "/static/css/main.e30fe48a.css.map",
+    "main.2004cb8d.js.map": "/static/js/main.2004cb8d.js.map",
     "787.4c617d16.chunk.js.map": "/static/js/787.4c617d16.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.cbcd6c80.css",
-    "static/js/main.b9749d2a.js"
+    "static/css/main.e30fe48a.css",
+    "static/js/main.2004cb8d.js"
   ]
 }
