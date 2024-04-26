@@ -17,6 +17,7 @@ const GameFinder: React.FC = () => {
   const pubsub: PlayFabPubSub<WordleGameDataContract, WordlePlayerContract> =
     new PlayFabPubSub();
   const [player, setPlayer] = useState<PfLoginResult>();
+  const [customId, setCustomId] = useState<string>("");
   const [lobbies, setLobbies] =
     useState<PlayFabMultiplayerModels.FindLobbiesResult>();
   const [showLobbyTable, setShowLobbyTable] = useState<boolean>(false);
@@ -182,7 +183,7 @@ const GameFinder: React.FC = () => {
   if (!player) {
     return (
       <div>
-        <LoginUI setPlayer={setPlayer} />
+        <LoginUI setPlayer={setPlayer} setCustomId={setCustomId} />
       </div>
     );
   }

@@ -4,9 +4,10 @@ import { loginWithCustomId } from "../PlayFab/PlayFabWrapper";
 
 interface LoginUIProps {
   setPlayer: (player: PfLoginResult) => void;
+  setCustomId: (customId: string) => void;
 }
 
-const LoginUI: React.FC<LoginUIProps> = ({ setPlayer }) => {
+const LoginUI: React.FC<LoginUIProps> = ({ setPlayer, setCustomId }) => {
   const [customIdInput, setCustomIdInput] = useState<string>("testuser");
 
   const handleCustomIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,6 +17,7 @@ const LoginUI: React.FC<LoginUIProps> = ({ setPlayer }) => {
   const handleLogin = () => {
     loginWithCustomId(customIdInput, (loginResult) => {
       setPlayer(loginResult);
+      setCustomId(customIdInput);
     });
   };
 

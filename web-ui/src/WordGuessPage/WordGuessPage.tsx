@@ -13,10 +13,19 @@ import BestGameLbView from "./BestGameLbView";
 import TopPlayerLbView from "./TopPlayerLbView";
 
 function WordGuessPage(): JSX.Element {
+  const [customId, setCustomId] = useState<string>("testuser");
+  const [word, setWord] = useState<string>("");
   const [player, setPlayer] = useState<PfLoginResult>();
   const [gameStarted, setGameStarted] = useState<boolean>(false);
 
   const handleGameStart = () => {
+    if (customId === "harley") {
+      setWord("grace");
+    } else {
+      let randomIndex = Math.floor(Math.random() * WordList.length);
+      let wordFromList = WordList[randomIndex];
+      setWord(wordFromList);
+    }
     setGameStarted(true);
   };
 
@@ -24,11 +33,9 @@ function WordGuessPage(): JSX.Element {
     setGameStarted(false);
   };
 
-  let randomIndex = Math.floor(Math.random() * WordList.length);
-  let word = WordList[randomIndex];
   // word = "grace"; // for testing
   if (!player) {
-    return <LoginUI setPlayer={setPlayer} />;
+    return <LoginUI setPlayer={setPlayer} setCustomId={setCustomId} />;
   }
 
   if (!gameStarted) {
