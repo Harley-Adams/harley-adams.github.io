@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import PlayFabWrapper, { loginWithCustomId } from "../PlayFab/PlayFabWrapper";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
-import { PlayFabMultiplayerModels } from "../PlayFab/PlayFabMultiplayerModule";
+import { PlayFabMultiplayerModels } from "../PlayFab/modules/PlayFabMultiplayerModule";
 import LobbyTable from "./LobbyTable";
-import { PlayFabPubSub, PubSubMessage } from "../PlayFab/PlayFabPubSub";
+import { PlayFabPubSub, PubSubMessage } from "../PlayFab/PlayFabPubSubWrapper";
 import {
   GameState,
   WordleGameDataContract,
@@ -12,6 +11,7 @@ import {
 import WordGuessGame from "../WordGuessPage/WordGuessGame";
 import React from "react";
 import LoginUI from "../WordGuessPage/LoginUI";
+import { CreateLobby, GetLobbies, JoinLobby } from "../PlayFab/PlayFabWrapper";
 
 const GameFinder: React.FC = () => {
   const pubsub: PlayFabPubSub<WordleGameDataContract, WordlePlayerContract> =
@@ -35,29 +35,32 @@ const GameFinder: React.FC = () => {
     otherPlayersRef.current = otherPlayers;
   }, [otherPlayers]);
 
-  let pfClient = new PlayFabWrapper();
-
-  const handleJoinLobby = (connectionString: string) => {
+  const handleJoinLobby = async (connectionString: string) => {
     if (!player) {
       return;
     }
 
-    pfClient.JoinLobby(player?.EntityToken, connectionString, (joinResult) => {
+    const joinResult = await JoinLobby(player?.EntityToken, connectionString);
+
+    if (joinResult) {
       setCurrentLobbyId(joinResult.LobbyId);
       pubsub.PubSubSetupLobby(
         player.EntityToken,
         joinResult.LobbyId,
         (response) => {
-          setIsInLobby(true);
+          if (response) {
+            setIsInLobby(true);
+            // todo: provide other lobby details for UX.
+          }
         },
         (message) => {
           handleGameUpdate(message);
         }
       );
-    });
+    }
   };
 
-  const handleCreateLobbyAndSub = () => {
+  const handleCreateLobbyAndSub = async () => {
     if (player == null) {
       console.error("Player must be logged in to create a lobby");
       return;
@@ -67,27 +70,29 @@ const GameFinder: React.FC = () => {
       { MemberEntity: player.EntityToken.Entity },
     ];
 
-    pfClient.CreateLobby(
+    const createLobbyResult = await CreateLobby(
       player.EntityToken,
       true,
       { gameState: GameState.preGame },
-      memberData,
-      (createLobbyResult) => {
-        setCurrentLobbyId(createLobbyResult.LobbyId);
-        setIsHost(true);
-        pubsub.PubSubSetupLobby(
-          player.EntityToken,
-          createLobbyResult.LobbyId,
-          (response) => {
-            setIsInLobby(true);
-          },
-          (message) => {
-            console.log(`Received message: ${JSON.stringify(message)}`);
-            handleGameUpdate(message);
-          }
-        );
-      }
+      memberData
     );
+
+    if (createLobbyResult) {
+      setCurrentLobbyId(createLobbyResult.LobbyId);
+      setIsHost(true);
+
+      pubsub.PubSubSetupLobby(
+        player.EntityToken,
+        createLobbyResult.LobbyId,
+        (response) => {
+          setIsInLobby(true);
+        },
+        (message) => {
+          console.log(`Received message: ${JSON.stringify(message)}`);
+          handleGameUpdate(message);
+        }
+      );
+    }
   };
 
   const handleGameUpdate = (
@@ -152,12 +157,13 @@ const GameFinder: React.FC = () => {
     }
   };
 
-  const handleFindLobbies = () => {
+  const handleFindLobbies = async () => {
     if (player != null) {
-      pfClient.GetLobbies(player.EntityToken, (lobbies) => {
+      const lobbies = await GetLobbies(player.EntityToken);
+      if (lobbies) {
         setLobbies(lobbies);
         setShowLobbyTable(true);
-      });
+      }
     }
   };
 

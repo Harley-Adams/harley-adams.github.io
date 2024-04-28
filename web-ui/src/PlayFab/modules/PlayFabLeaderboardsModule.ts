@@ -1,4 +1,4 @@
-import { EntityKey } from "./models/PfLoginResult";
+import { EntityKey } from "../models/PfLoginResult";
 
 export interface StatisticUpdate {
   Name: string;

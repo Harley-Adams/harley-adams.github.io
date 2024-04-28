@@ -1,7 +1,7 @@
 import React from "react";
-import { PlayFabMultiplayerModels } from "../PlayFab/PlayFabMultiplayerModule";
-import PlayFabWrapper from "../PlayFab/PlayFabWrapper";
+import { PlayFabMultiplayerModels } from "../PlayFab/modules/PlayFabMultiplayerModule";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
+import { LeaveLobby } from "../PlayFab/PlayFabWrapper";
 
 interface LobbyTableProps {
   player?: PfLoginResult;
@@ -14,12 +14,12 @@ const LobbyTable: React.FC<LobbyTableProps> = ({
   lobbies,
   onJoinLobby,
 }) => {
-  const handleLeaveLobby = (lobbyId: string) => {
-    const pfClient = new PlayFabWrapper();
+  const handleLeaveLobby = async (lobbyId: string) => {
     if (player) {
-      pfClient.LeaveLobby(player.EntityToken, lobbyId, (leaveResult) => {});
+      await LeaveLobby(player.EntityToken, lobbyId);
     }
   };
+
   return (
     <table style={{ width: "100%", borderCollapse: "collapse" }}>
       <thead>

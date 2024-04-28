@@ -1,16 +1,16 @@
 import { useState } from "react";
 import WordGuessGame from "./WordGuessGame";
 import "./WordGuessPage.css"; // You can define your styles here
-import { WordList } from "./WordList";
+import { WordList } from "./Data/WordList";
 
 import "react-toastify/dist/ReactToastify.css";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
 import React from "react";
 import LoginUI from "./LoginUI";
-import LeaderboardView from "./LeaderboardView";
-import StatisticsView from "./StatisticsView";
-import BestGameLbView from "./BestGameLbView";
-import TopPlayerLbView from "./TopPlayerLbView";
+import LeaderboardView from "./LeaderboardViews/LeaderboardView";
+import StatisticsView from "./LeaderboardViews/StatisticsView";
+import BestGameLbView from "./LeaderboardViews/BestGameLbView";
+import TopPlayerLbView from "./LeaderboardViews/TopPlayerLbView";
 
 function WordGuessPage(): JSX.Element {
   const [customId, setCustomId] = useState<string>("testuser");
@@ -118,6 +118,9 @@ const StatisticsAndLeaderboardUX: React.FC<StatisticsAndLeaderboardUXProps> = ({
     <div>
       <div className="lb-buttons">
         <button onClick={handleShowPlayerStatistics}>View Stats</button>
+        {/* <button onClick={() => handleShowLeaderboard("WordleBestGame", 0)}>
+          View Leaderboard
+        </button> */}
         <button onClick={() => handleShowBestLeaderboard("WordleBestGame", 0)}>
           View WordleBestGame Leaderboard
         </button>

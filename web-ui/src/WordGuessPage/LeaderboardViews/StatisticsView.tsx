@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { GetStatistics } from "../PlayFab/PlayFabWrapper";
-import PfLoginResult from "../PlayFab/models/PfLoginResult";
-import { GetStatisticsResponse } from "../PlayFab/PlayFabLeaderboards";
+import { GetStatistics } from "../../PlayFab/PlayFabWrapper";
+import PfLoginResult from "../../PlayFab/models/PfLoginResult";
+import { GetStatisticsResponse } from "../../PlayFab/modules/PlayFabLeaderboardsModule";
 import { CTable } from "@coreui/react";
-import { version } from "os";
 
 interface StatisticsViewProps {
   player: PfLoginResult;
@@ -14,7 +13,13 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ player }) => {
     useState<GetStatisticsResponse | null>(null);
 
   useEffect(() => {
-    GetStatistics(player.EntityToken, setStatisticsResult);
+    GetStatistics(player.EntityToken).then((statsResponse) => {
+      if (statsResponse) {
+        setStatisticsResult(statsResponse);
+      } else {
+        return <div>Loading...</div>;
+      }
+    });
   }, []);
 
   if (!statisticsResult) {

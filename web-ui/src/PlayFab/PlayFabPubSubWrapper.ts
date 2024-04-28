@@ -5,7 +5,7 @@ import {
 } from "@microsoft/signalr";
 import { PlayFabBaseAPI } from "../Constants";
 import { EntityTokenResponse } from "./models/PfLoginResult";
-import { PlayFabMultiplayerModels } from "./PlayFabMultiplayerModule";
+import { PlayFabMultiplayerModels } from "./modules/PlayFabMultiplayerModule";
 
 // This is here because for some reason it isn't generate in the node sdk.
 interface PubSubNegotiateResponse {

@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Leaderboard from "./LeaderboardPage/Leaderboard";
 import Layout from "./Layout";
 import Profile from "./ProfilePage/Profile";
 import MarkdownHost from "./Blog/MarkdownHost";
@@ -21,10 +20,6 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Profile />,
-      },
-      {
-        path: "/Leaderboard",
-        element: <Leaderboard />,
       },
       {
         path: "/Crossword",

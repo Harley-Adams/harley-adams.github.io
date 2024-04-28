@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
-import { GetLeaderboard } from "../PlayFab/PlayFabWrapper";
-import PfLoginResult from "../PlayFab/models/PfLoginResult";
+import { GetLeaderboard } from "../../PlayFab/PlayFabWrapper";
 import {
   EntityLeaderboardEntry,
   GetEntityLeaderboardResponse,
-} from "../PlayFab/PlayFabLeaderboards";
+} from "../../PlayFab/modules/PlayFabLeaderboardsModule";
 import { CTable } from "@coreui/react";
 import {
   LeaderboardViewProps,
   TransformMsStringToSeconds,
 } from "./LeaderboardView";
 
-const TopPlayerLbView: React.FC<LeaderboardViewProps> = ({
+const BestGameLbView: React.FC<LeaderboardViewProps> = ({
   player,
   leaderboardName,
   version,
@@ -20,11 +19,10 @@ const TopPlayerLbView: React.FC<LeaderboardViewProps> = ({
     useState<GetEntityLeaderboardResponse | null>(null);
 
   useEffect(() => {
-    GetLeaderboard(
-      player.EntityToken,
-      leaderboardName,
-      setLeaderboardResult,
-      version
+    GetLeaderboard(player.EntityToken, leaderboardName, version).then(
+      (result) => {
+        setLeaderboardResult(result);
+      }
     );
   }, [leaderboardName, version]);
 
@@ -44,27 +42,27 @@ const TopPlayerLbView: React.FC<LeaderboardViewProps> = ({
     },
     {
       key: "col_1",
-      label: "Puzzles Solved",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_2",
       label: "Guesses Made",
       _props: { scope: "col" },
     },
     {
-      key: "col_3",
+      key: "col_2",
       label: "Time Taken (seconds)",
       _props: { scope: "col" },
     },
     {
-      key: "col_4",
+      key: "col_3",
       label: "Wrong Letters Guessed",
       _props: { scope: "col" },
     },
     {
-      key: "col_5",
+      key: "col_4",
       label: "Misplaced Letters Guessed",
+      _props: { scope: "col" },
+    },
+    {
+      key: "metadata",
+      label: "Answer",
       _props: { scope: "col" },
     },
   ];
@@ -74,10 +72,10 @@ const TopPlayerLbView: React.FC<LeaderboardViewProps> = ({
       rank: item.Rank,
       entityId: item.DisplayName ? item.DisplayName : item.Entity.Id,
       col_1: item.Scores[0] ? item.Scores[0] : "",
-      col_2: item.Scores[1] ? item.Scores[1] : "",
-      col_3: item.Scores[2] ? TransformMsStringToSeconds(item.Scores[2]) : "",
+      col_2: item.Scores[1] ? TransformMsStringToSeconds(item.Scores[1]) : "",
+      col_3: item.Scores[2] ? item.Scores[2] : "",
       col_4: item.Scores[3] ? item.Scores[3] : "",
-      col_5: item.Scores[4] ? item.Scores[4] : "",
+      metadata: item.Metadata ? item.Metadata : "",
       _cellProps: { id: { scope: "row" } },
     })
   );
@@ -91,4 +89,4 @@ const TopPlayerLbView: React.FC<LeaderboardViewProps> = ({
   );
 };
 
-export default TopPlayerLbView;
+export default BestGameLbView;

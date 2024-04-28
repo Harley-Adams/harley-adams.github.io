@@ -14,11 +14,12 @@ const LoginUI: React.FC<LoginUIProps> = ({ setPlayer, setCustomId }) => {
     setCustomIdInput(event.target.value);
   };
 
-  const handleLogin = () => {
-    loginWithCustomId(customIdInput, (loginResult) => {
-      setPlayer(loginResult);
+  const handleLogin = async () => {
+    const loginResponse = await loginWithCustomId(customIdInput);
+    if (loginResponse) {
+      setPlayer(loginResponse);
       setCustomId(customIdInput);
-    });
+    }
   };
 
   return (

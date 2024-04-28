@@ -12,7 +12,6 @@
   display: flex;
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
-  min-height: 100vh; /* Minimum height of 100% of the viewport height */
   margin: 0; /* Remove default margin */
   padding: 0; /* Remove default padding */
 
@@ -92,26 +91,6 @@
   background-color: white; /* White background for unused letters */
   color: black; /* Black color for the font */
 }
-
-/* Ensure the other classes are defined similarly to this */
-/* .key {
-  width: 40px;
-  height: 40px;
-  margin: 5px;
-  border: 1px solid black;
-  cursor: pointer;
-} */
-
-/* .key {
-  display: flex;
-  justify-content: center;
-  align-items: center; 
-  width: 40px;
-  height: 40px;
-  margin: 5px;
-  border: 1px solid black;
-  cursor: pointer;
-} */
 
 .keyboard-container {
   display: flex;
