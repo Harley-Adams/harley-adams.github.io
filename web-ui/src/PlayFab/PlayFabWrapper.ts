@@ -53,7 +53,7 @@ export async function loginWithCustomId(
     };
     localStorage.setItem(loginResultCacheKey, JSON.stringify(loginResult));
 
-    await UpdateDisplayName(customId, loginResult.EntityToken.EntityToken);
+    await UpdateDisplayName(loginResult.EntityToken, customId);
 
     return loginResult;
   } else {
@@ -63,28 +63,21 @@ export async function loginWithCustomId(
   return null;
 }
 
-export async function UpdateDisplayName(displayName: string, token: string) {
+export async function UpdateDisplayName(
+  entityToken: EntityTokenResponse,
+  displayName: string
+) {
   let apiEndpoint = PlayFabBaseAPI + `Client/UpdateUserTitleDisplayName`;
 
-  const data = {
+  const request = {
     DisplayName: displayName,
   };
 
-  const response = await fetch(apiEndpoint, {
-    method: "POST",
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json",
-      "X-Authorization": token,
-    },
-  });
-
-  if (response.ok) {
-    console.log(`namechange ${await response.text()}`);
-  } else {
-    // tslint:disable-next-line: no-console
-    console.log(`playfab update name error: ${await response.text()}`);
-  }
+  return await makePlayFabApiRequest<GetStatisticsResponse>(
+    apiEndpoint,
+    entityToken.EntityToken,
+    request
+  );
 }
 
 export async function UpdateWordleStatistics(
@@ -97,7 +90,7 @@ export async function UpdateWordleStatistics(
 ) {
   let apiEndpoint = PlayFabBaseAPI + `Statistic/UpdateStatistics`;
 
-  const payload: UpdateStatisticsPayload = {
+  const request: UpdateStatisticsPayload = {
     Statistics: [
       {
         Name: "WordleBestGame",
@@ -143,22 +136,11 @@ export async function UpdateWordleStatistics(
     Entity: entityToken.Entity,
   };
 
-  const response = await fetch(apiEndpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-EntityToken": entityToken.EntityToken,
-    },
-
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const message = `An error has occurred updating stats: ${response.status}`;
-    throw new Error(message);
-  }
-
-  return response.json();
+  return await makePlayFabApiRequest<GetStatisticsResponse>(
+    apiEndpoint,
+    entityToken.EntityToken,
+    request
+  );
 }
 
 export async function GetStatistics(
@@ -166,29 +148,15 @@ export async function GetStatistics(
 ): Promise<GetStatisticsResponse | null> {
   let apiEndpoint = PlayFabBaseAPI + `Statistic/GetStatistics`;
 
-  const payload: GetStatisticsPayload = {
+  const request: GetStatisticsPayload = {
     Entity: entityToken.Entity,
   };
 
-  const response = await fetch(apiEndpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-EntityToken": entityToken.EntityToken,
-    },
-
-    body: JSON.stringify(payload),
-  });
-
-  if (response.ok) {
-    let rawResponse = await response.json();
-    return rawResponse.data;
-  } else {
-    // tslint:disable-next-line: no-console
-    console.log(`playfab lobby error: ${await response.text()}`);
-  }
-
-  return null;
+  return await makePlayFabApiRequest<GetStatisticsResponse>(
+    apiEndpoint,
+    entityToken.EntityToken,
+    request
+  );
 }
 
 export async function GetLeaderboard(
@@ -198,38 +166,18 @@ export async function GetLeaderboard(
 ): Promise<GetEntityLeaderboardResponse | null> {
   let apiEndpoint = PlayFabBaseAPI + `Leaderboard/GetLeaderboard`;
 
-  const payload: GetLeaderboardRequest = {
+  const request: GetLeaderboardRequest = {
     LeaderboardName: leaderboardName,
     StartingPosition: 1,
     PageSize: 20,
     Version: version,
   };
 
-  try {
-    const response = await fetch(apiEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-EntityToken": entityToken.EntityToken,
-      },
-
-      body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-      console.log(
-        `playfab getting leaderboard error: ${await response.text()}`
-      );
-
-      return null;
-    }
-
-    let rawResponse = await response.json();
-    return rawResponse.data;
-  } catch (error) {
-    console.error(error);
-
-    return null;
-  }
+  return await makePlayFabApiRequest<GetEntityLeaderboardResponse>(
+    apiEndpoint,
+    entityToken.EntityToken,
+    request
+  );
 }
 
 export async function GetLeaderboardAroundEntity(
@@ -238,30 +186,16 @@ export async function GetLeaderboardAroundEntity(
 ): Promise<GetEntityLeaderboardResponse | null> {
   let apiEndpoint = PlayFabBaseAPI + `Leaderboard/GetLeaderboardAroundEntity`;
 
-  const payload: GetLeaderboardAroundEntityRequest = {
+  const request: GetLeaderboardAroundEntityRequest = {
     LeaderboardName: leaderboardName,
     MaxSurroundingEntries: 20,
   };
 
-  const response = await fetch(apiEndpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-EntityToken": entityToken.EntityToken,
-    },
-
-    body: JSON.stringify(payload),
-  });
-
-  if (response.ok) {
-    let rawResponse = await response.json();
-    return rawResponse.data;
-  } else {
-    // tslint:disable-next-line: no-console
-    console.log(`playfab get lb around error: ${await response.text()}`);
-  }
-
-  return null;
+  return await makePlayFabApiRequest<GetEntityLeaderboardResponse>(
+    apiEndpoint,
+    entityToken.EntityToken,
+    request
+  );
 }
 
 export async function GetLobbies(
@@ -269,24 +203,10 @@ export async function GetLobbies(
 ): Promise<PlayFabMultiplayerModels.FindLobbiesResult | null> {
   let apiEndpoint = PlayFabBaseAPI + `Lobby/FindLobbies`;
 
-  const response = await fetch(apiEndpoint, {
-    method: "POST",
-    body: null,
-    headers: {
-      "Content-Type": "application/json",
-      "X-EntityToken": `${entityToken.EntityToken}`,
-    },
-  });
-
-  if (response.ok) {
-    let rawResponse = await response.json();
-    return rawResponse.data;
-  } else {
-    // tslint:disable-next-line: no-console
-    console.log(`playfab lobby error: ${await response.text()}`);
-  }
-
-  return null;
+  return await makePlayFabApiRequest<PlayFabMultiplayerModels.FindLobbiesResult>(
+    apiEndpoint,
+    entityToken.EntityToken
+  );
 }
 
 export async function JoinLobby(
@@ -300,24 +220,11 @@ export async function JoinLobby(
     MemberEntity: entityToken.Entity,
   };
 
-  const response = await fetch(apiEndpoint, {
-    method: "POST",
-    body: JSON.stringify(request),
-    headers: {
-      "Content-Type": "application/json",
-      "X-EntityToken": `${entityToken.EntityToken}`,
-    },
-  });
-
-  if (response.status === 200) {
-    let rawResponse = await response.json();
-    return rawResponse.data;
-  } else {
-    // tslint:disable-next-line: no-console
-    console.log(`playfab lobby error: ${await response.text()}`);
-  }
-
-  return null;
+  return await makePlayFabApiRequest<PlayFabMultiplayerModels.JoinLobbyResult>(
+    apiEndpoint,
+    entityToken.EntityToken,
+    request
+  );
 }
 
 export async function LeaveLobby(
@@ -329,29 +236,13 @@ export async function LeaveLobby(
   const request: PlayFabMultiplayerModels.LeaveLobbyRequest = {
     MemberEntity: entityToken.Entity,
     LobbyId: lobbyId,
-    // Additional parameters here if needed
   };
-  console.log(`try leave lobby: ${lobbyId}`);
 
-  const response = await fetch(apiEndpoint, {
-    method: "POST",
-    body: JSON.stringify(request),
-    headers: {
-      "Content-Type": "application/json",
-      "X-EntityToken": `${entityToken.EntityToken}`,
-    },
-  });
-
-  if (response.ok) {
-    let rawResponse = await response.json();
-
-    return rawResponse.data;
-  } else {
-    // tslint:disable-next-line: no-console
-    console.log(`playfab leave error: ${await response.text()}`);
-  }
-
-  return null;
+  return await makePlayFabApiRequest<PlayFabMultiplayerModels.LobbyEmptyResult>(
+    apiEndpoint,
+    entityToken.EntityToken,
+    request
+  );
 }
 
 export async function CreateLobby(
@@ -373,14 +264,14 @@ export async function CreateLobby(
     // OwnerMigrationPolicy: "Automatic",
   };
 
-  return await makeApiRequest<PlayFabMultiplayerModels.CreateLobbyResult>(
+  return await makePlayFabApiRequest<PlayFabMultiplayerModels.CreateLobbyResult>(
     apiEndpoint,
     entityToken.EntityToken,
     request
   );
 }
 
-async function makeApiRequest<T>(
+async function makePlayFabApiRequest<T>(
   endpoint: string,
   token: string,
   data?: object
