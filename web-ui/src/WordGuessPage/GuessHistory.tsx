@@ -1,4 +1,4 @@
-import { Guess, LetterGuessState } from "./Guess";
+import { Guess, LetterGuessState } from "./GameLogic/Guess";
 
 interface GuessHistoryProps {
   guessHistory: Guess[];

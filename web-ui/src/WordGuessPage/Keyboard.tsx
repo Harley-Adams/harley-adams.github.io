@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LetterGuessState } from "./Guess";
+import { LetterGuessState } from "./GameLogic/Guess";
 
 // Define the layout of the QWERTY keyboard
 const KEYS: string[][] = [

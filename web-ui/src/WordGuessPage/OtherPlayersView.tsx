@@ -1,4 +1,4 @@
-import { Guess } from "./Guess";
+import { Guess } from "./GameLogic/Guess";
 import { GuessHistory } from "./GuessHistory";
 
 interface OtherPlayersViewProps {

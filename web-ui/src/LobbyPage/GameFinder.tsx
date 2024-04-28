@@ -229,7 +229,7 @@ const GameFinder: React.FC = () => {
 
       {isHost ? <button onClick={handleStartGame}>StartGame</button> : null}
       {isGameStarted ? <h1>Game Started</h1> : null}
-      {/* {isInLobby ? <CurrentLobbyView /> : null} */}
+      {isInLobby ? <CurrentLobbyView /> : null}
     </div>
   );
 };
@@ -238,5 +238,5 @@ export default GameFinder;
 
 interface CurrentLobbyViewProps {}
 const CurrentLobbyView: React.FC<CurrentLobbyViewProps> = () => {
-  return <div></div>;
+  return <div> You are in a lobby.</div>;
 };

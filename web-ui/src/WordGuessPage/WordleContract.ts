@@ -1,4 +1,4 @@
-import { Guess } from "./Guess";
+import { Guess } from "./GameLogic/Guess";
 
 export interface WordleGameDataContract {
   gameState: GameState;

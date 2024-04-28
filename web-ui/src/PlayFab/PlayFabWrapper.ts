@@ -67,7 +67,7 @@ export async function UpdateDisplayName(
   entityToken: EntityTokenResponse,
   displayName: string
 ) {
-  let apiEndpoint = PlayFabBaseAPI + `Client/UpdateUserTitleDisplayName`;
+  let apiEndpoint = `Client/UpdateUserTitleDisplayName`;
 
   const request = {
     DisplayName: displayName,
@@ -88,7 +88,7 @@ export async function UpdateWordleStatistics(
   numberOfWrongLetters: number,
   numberOfMisplacedLetters: number
 ) {
-  let apiEndpoint = PlayFabBaseAPI + `Statistic/UpdateStatistics`;
+  let apiEndpoint = `Statistic/UpdateStatistics`;
 
   const request: UpdateStatisticsPayload = {
     Statistics: [
@@ -146,7 +146,7 @@ export async function UpdateWordleStatistics(
 export async function GetStatistics(
   entityToken: EntityTokenResponse
 ): Promise<GetStatisticsResponse | null> {
-  let apiEndpoint = PlayFabBaseAPI + `Statistic/GetStatistics`;
+  let apiEndpoint = `Statistic/GetStatistics`;
 
   const request: GetStatisticsPayload = {
     Entity: entityToken.Entity,
@@ -164,7 +164,7 @@ export async function GetLeaderboard(
   leaderboardName: string,
   version?: number
 ): Promise<GetEntityLeaderboardResponse | null> {
-  let apiEndpoint = PlayFabBaseAPI + `Leaderboard/GetLeaderboard`;
+  let apiEndpoint = `Leaderboard/GetLeaderboard`;
 
   const request: GetLeaderboardRequest = {
     LeaderboardName: leaderboardName,
@@ -184,7 +184,7 @@ export async function GetLeaderboardAroundEntity(
   entityToken: EntityTokenResponse,
   leaderboardName: string
 ): Promise<GetEntityLeaderboardResponse | null> {
-  let apiEndpoint = PlayFabBaseAPI + `Leaderboard/GetLeaderboardAroundEntity`;
+  let apiEndpoint = `Leaderboard/GetLeaderboardAroundEntity`;
 
   const request: GetLeaderboardAroundEntityRequest = {
     LeaderboardName: leaderboardName,
@@ -201,7 +201,7 @@ export async function GetLeaderboardAroundEntity(
 export async function GetLobbies(
   entityToken: EntityTokenResponse
 ): Promise<PlayFabMultiplayerModels.FindLobbiesResult | null> {
-  let apiEndpoint = PlayFabBaseAPI + `Lobby/FindLobbies`;
+  let apiEndpoint = `Lobby/FindLobbies`;
 
   return await makePlayFabApiRequest<PlayFabMultiplayerModels.FindLobbiesResult>(
     apiEndpoint,
@@ -213,7 +213,7 @@ export async function JoinLobby(
   entityToken: EntityTokenResponse,
   lobbyConnectionString: string
 ): Promise<PlayFabMultiplayerModels.JoinLobbyResult | null> {
-  let apiEndpoint = PlayFabBaseAPI + `Lobby/JoinLobby`;
+  let apiEndpoint = `Lobby/JoinLobby`;
 
   const request: PlayFabMultiplayerModels.JoinLobbyRequest = {
     ConnectionString: lobbyConnectionString,
@@ -231,7 +231,7 @@ export async function LeaveLobby(
   entityToken: EntityTokenResponse,
   lobbyId: string
 ): Promise<PlayFabMultiplayerModels.LobbyEmptyResult | null> {
-  let apiEndpoint = PlayFabBaseAPI + `Lobby/LeaveLobby`;
+  let apiEndpoint = `Lobby/LeaveLobby`;
 
   const request: PlayFabMultiplayerModels.LeaveLobbyRequest = {
     MemberEntity: entityToken.Entity,
