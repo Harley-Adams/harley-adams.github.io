@@ -6,36 +6,32 @@ import { WordList } from "./Data/WordList";
 import "react-toastify/dist/ReactToastify.css";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
 import React from "react";
-import LoginUI from "./LoginUI";
+import LoginUI from "./GameViews/LoginUI";
 import LeaderboardView from "./LeaderboardViews/LeaderboardView";
 import StatisticsView from "./LeaderboardViews/StatisticsView";
 import BestGameLbView from "./LeaderboardViews/BestGameLbView";
 import TopPlayerLbView from "./LeaderboardViews/TopPlayerLbView";
+import { answerWordState, loggedInPlayerState } from "./WordleState";
+import { useRecoilState } from "recoil";
+import { PickRandomWord } from "./GameLogic/PickRandomWord";
 
 function WordGuessPage(): JSX.Element {
   const [customId, setCustomId] = useState<string>("testuser");
-  const [word, setWord] = useState<string>("");
-  const [player, setPlayer] = useState<PfLoginResult>();
+  const [player, setPlayer] = useRecoilState(loggedInPlayerState);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [word, setWord] = useRecoilState(answerWordState);
 
   const handleGameStart = () => {
-    if (customId === "harley") {
-      setWord("grace");
-    } else {
-      let randomIndex = Math.floor(Math.random() * WordList.length);
-      let wordFromList = WordList[randomIndex];
-      setWord(wordFromList);
-    }
     setGameStarted(true);
+    setWord(PickRandomWord(5));
   };
 
   const handlePostGameDone = () => {
     setGameStarted(false);
   };
 
-  // word = "grace"; // for testing
   if (!player) {
-    return <LoginUI setPlayer={setPlayer} setCustomId={setCustomId} />;
+    return <LoginUI />;
   }
 
   if (!gameStarted) {
@@ -53,7 +49,6 @@ function WordGuessPage(): JSX.Element {
     <div>
       <WordGuessGame
         player={player}
-        word={word}
         gameCompleteCallback={handlePostGameDone}
       />
     </div>

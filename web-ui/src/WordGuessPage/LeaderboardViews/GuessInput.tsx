@@ -4,6 +4,7 @@ interface GuessInputProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   handleGuessSubmit: () => void;
+  handleBackspace: () => void;
 }
 
 export const GuessInput: React.FC<GuessInputProps> = ({
@@ -12,6 +13,7 @@ export const GuessInput: React.FC<GuessInputProps> = ({
   handleInputChange,
   handleKeyDown,
   handleGuessSubmit,
+  handleBackspace,
 }) => (
   <div className="guess-input">
     <input
@@ -23,6 +25,9 @@ export const GuessInput: React.FC<GuessInputProps> = ({
     />
     <button className="submitButton" onClick={handleGuessSubmit}>
       Submit
+    </button>
+    <button className="backspaceButton" onClick={handleBackspace}>
+      Backspace
     </button>
   </div>
 );

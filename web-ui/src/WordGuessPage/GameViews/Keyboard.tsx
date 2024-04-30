@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { LetterGuessState } from "./GameLogic/Guess";
+import { LetterGuessState } from "../GameLogic/Guess";
+import { useRecoilState } from "recoil";
+import { playerLetterGuessState } from "../WordleState";
 
 // Define the layout of the QWERTY keyboard
 const KEYS: string[][] = [
@@ -11,13 +13,14 @@ const KEYS: string[][] = [
 interface KeyProps {
   letter: string;
   keyState: LetterGuessState;
+  onKeyHit: (letter: string) => void;
 }
 
-const Key: React.FC<KeyProps> = ({ letter, keyState }) => {
+const Key: React.FC<KeyProps> = ({ letter, keyState, onKeyHit }) => {
   return (
     <button
       className={`key ${getKeyCssClass(keyState)}`}
-      //   onClick={() => setKeyState(letter, nextKeyState(keyState))}
+      onClick={() => onKeyHit(letter)}
     >
       {letter}
     </button>
@@ -40,17 +43,23 @@ const getKeyCssClass = (keyState: LetterGuessState): string => {
 };
 
 interface KeyboardProps {
-  keyStates: { [key: string]: LetterGuessState };
-  setKeyState: (letter: string, newState: LetterGuessState) => void;
+  onKeyHit: (letter: string) => void;
 }
 
-const Keyboard: React.FC<KeyboardProps> = ({ keyStates, setKeyState }) => {
+const Keyboard: React.FC<KeyboardProps> = ({ onKeyHit }) => {
+  const [playerKeyboard] = useRecoilState(playerLetterGuessState);
+
   return (
     <div className="keyboard-container">
       {KEYS.map((row, index) => (
         <div key={index} className="keyboard-row">
           {row.map((letter) => (
-            <Key key={letter} letter={letter} keyState={keyStates[letter]} />
+            <Key
+              key={letter}
+              letter={letter}
+              keyState={playerKeyboard[letter]}
+              onKeyHit={onKeyHit}
+            />
           ))}
         </div>
       ))}

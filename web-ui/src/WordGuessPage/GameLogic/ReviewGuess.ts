@@ -1,6 +1,6 @@
-import { Guess, LetterFeedback, LetterGuessState } from "./Guess";
+import { GuessFeedback, LetterFeedback, LetterGuessState } from "./Guess";
 
-export const ReviewGuess = (word: string, guess: string): Guess => {
+export const ReviewGuess = (word: string, guess: string): GuessFeedback => {
   let feedbackPerLetter: LetterFeedback[] = guess
     .split("")
     .map((character) => ({

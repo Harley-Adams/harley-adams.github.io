@@ -159,6 +159,14 @@ input[type="text"] {
   cursor: pointer;
 }
 
+.backspaceButton {
+  padding: 10px 20px;
+  background-color: #ff5733;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
 .animate-correct {
   animation: pop 0.3s ease;
 }

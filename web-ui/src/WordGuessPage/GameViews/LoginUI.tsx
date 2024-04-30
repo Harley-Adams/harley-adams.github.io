@@ -1,14 +1,13 @@
 import { useState } from "react";
-import PfLoginResult from "../PlayFab/models/PfLoginResult";
-import { loginWithCustomId } from "../PlayFab/PlayFabWrapper";
+import PfLoginResult from "../../PlayFab/models/PfLoginResult";
+import { loginWithCustomId } from "../../PlayFab/PlayFabWrapper";
+import { useRecoilState } from "recoil";
+import { customIdState, loggedInPlayerState } from "../WordleState";
 
-interface LoginUIProps {
-  setPlayer: (player: PfLoginResult) => void;
-  setCustomId: (customId: string) => void;
-}
-
-const LoginUI: React.FC<LoginUIProps> = ({ setPlayer, setCustomId }) => {
-  const [customIdInput, setCustomIdInput] = useState<string>("testuser");
+const LoginUI: React.FC = () => {
+  const [loggedInPlayer, setLoggedInPlayer] =
+    useRecoilState(loggedInPlayerState);
+  const [customIdInput, setCustomIdInput] = useRecoilState(customIdState);
 
   const handleCustomIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCustomIdInput(event.target.value);
@@ -17,8 +16,7 @@ const LoginUI: React.FC<LoginUIProps> = ({ setPlayer, setCustomId }) => {
   const handleLogin = async () => {
     const loginResponse = await loginWithCustomId(customIdInput);
     if (loginResponse) {
-      setPlayer(loginResponse);
-      setCustomId(customIdInput);
+      setLoggedInPlayer(loginResponse);
     }
   };
 

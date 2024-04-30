@@ -1,7 +1,7 @@
-import { Guess, LetterGuessState } from "./GameLogic/Guess";
+import { GuessFeedback, LetterGuessState } from "../GameLogic/Guess";
 
 interface GuessHistoryProps {
-  guessHistory: Guess[];
+  guessHistory: GuessFeedback[];
 }
 
 export const GuessHistory: React.FC<GuessHistoryProps> = (props) => {

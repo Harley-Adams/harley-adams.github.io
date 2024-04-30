@@ -11,6 +11,7 @@ import Crossword from "./Crossword/Crossword";
 import WordGuessPage from "./WordGuessPage/WordGuessPage";
 import LobbyPage from "./LobbyPage/LobbyPage";
 import { ToastContainer } from "react-toastify";
+import { RecoilRoot } from "recoil";
 
 const router = createBrowserRouter([
   {
@@ -50,8 +51,10 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <ToastContainer />
-    <RouterProvider router={router} />
+    <RecoilRoot>
+      <ToastContainer />
+      <RouterProvider router={router} />
+    </RecoilRoot>
   </React.StrictMode>
 );
 

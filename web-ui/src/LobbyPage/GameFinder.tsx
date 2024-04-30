@@ -10,13 +10,21 @@ import {
 } from "../WordGuessPage/WordleContract";
 import WordGuessGame from "../WordGuessPage/WordGuessGame";
 import React from "react";
-import LoginUI from "../WordGuessPage/LoginUI";
+import LoginUI from "../WordGuessPage/GameViews/LoginUI";
 import { CreateLobby, GetLobbies, JoinLobby } from "../PlayFab/PlayFabWrapper";
+import {
+  answerWordState,
+  currentLobbyIdState,
+  loggedInPlayerState,
+  otherPlayerLetterGuessState,
+} from "../WordGuessPage/WordleState";
+import { useRecoilState } from "recoil";
+import { PickRandomWord } from "../WordGuessPage/GameLogic/PickRandomWord";
 
 const GameFinder: React.FC = () => {
   const pubsub: PlayFabPubSub<WordleGameDataContract, WordlePlayerContract> =
     new PlayFabPubSub();
-  const [player, setPlayer] = useState<PfLoginResult>();
+  const [player, setPlayer] = useRecoilState(loggedInPlayerState);
   const [customId, setCustomId] = useState<string>("");
   const [lobbies, setLobbies] =
     useState<PlayFabMultiplayerModels.FindLobbiesResult>();
@@ -24,16 +32,14 @@ const GameFinder: React.FC = () => {
   const [isInLobby, setIsInLobby] = useState<boolean>(false);
   const [isHost, setIsHost] = useState<boolean>(false);
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
-  const [currentLobbyId, setCurrentLobbyId] = useState<string>("");
-  const [otherPlayers, setOtherPlayers] = useState<
-    Map<string, WordlePlayerContract>
-  >(new Map());
-  const otherPlayersRef = React.useRef(otherPlayers);
+  const [currentLobbyId, setCurrentLobbyId] =
+    useRecoilState(currentLobbyIdState);
 
-  useEffect(() => {
-    // Ensure the ref is always at the latest value
-    otherPlayersRef.current = otherPlayers;
-  }, [otherPlayers]);
+  const [word, setWord] = useRecoilState(answerWordState);
+
+  const [otherPlayersState, setOtherPlayersState] = useRecoilState(
+    otherPlayerLetterGuessState
+  );
 
   const handleJoinLobby = async (connectionString: string) => {
     if (!player) {
@@ -102,6 +108,7 @@ const GameFinder: React.FC = () => {
     // Not sure why, but assume that if it's missing do nothing.
     if (update.lobbyChanges[0].lobbyData) {
       if (update.lobbyChanges[0].lobbyData.gameState == GameState.inGame) {
+        setWord(update.lobbyChanges[0].lobbyData.word);
         setIsGameStarted(true);
       }
     }
@@ -110,34 +117,12 @@ const GameFinder: React.FC = () => {
     console.log(`Game update: ${JSON.stringify(update)}`);
     update.lobbyChanges.forEach((change) => {
       if (change.memberToMerge.memberData) {
-        // if (
-        //   update.lobbyChanges[0].memberToMerge.memberEntity.Id ===
-        //   player?.EntityToken.Entity.Id
-        // ) {
-        //   console.log("Skipping self update!");
-        //   continue;
-        // }
         const memberToMerge = change.memberToMerge;
 
-        otherPlayers.set(
-          memberToMerge.memberEntity.Id,
-          memberToMerge.memberData
-        );
-
-        // spread out, react does a shallow compare so
-        // we need to create a new object for new state to be detected
-        const newOtherPlayers: Map<string, WordlePlayerContract> = new Map();
-
-        for (let [key, value] of otherPlayersRef.current) {
-          newOtherPlayers.set(key, value);
-        }
-
-        newOtherPlayers.set(
-          memberToMerge.memberEntity.Id,
-          memberToMerge.memberData
-        );
-
-        setOtherPlayers(newOtherPlayers);
+        setOtherPlayersState((prevStates) => ({
+          ...prevStates,
+          [memberToMerge.memberEntity.Id]: memberToMerge.memberData,
+        }));
       }
     });
   };
@@ -150,7 +135,7 @@ const GameFinder: React.FC = () => {
         (updateResult) => {},
         {
           gameState: GameState.inGame,
-          word: "Grace",
+          word: PickRandomWord(5),
           startTime: Date.now(),
         }
       );
@@ -189,7 +174,7 @@ const GameFinder: React.FC = () => {
   if (!player) {
     return (
       <div>
-        <LoginUI setPlayer={setPlayer} setCustomId={setCustomId} />
+        <LoginUI />
       </div>
     );
   }
@@ -200,13 +185,11 @@ const GameFinder: React.FC = () => {
         You are player: {player?.EntityToken.Entity.Id}
         <WordGuessGame
           player={player}
-          word="Grace"
           gameCompleteCallback={() => {
             handleGameComplete();
           }}
           gameUpdateCallback={handleLocalGameUpdate}
           playerUpdateCallback={handlePlayerUpdate}
-          otherPlayers={otherPlayers}
         />
       </div>
     );

@@ -1,4 +1,4 @@
-import { Guess } from "./GameLogic/Guess";
+import { GuessFeedback } from "./GameLogic/Guess";
 
 export interface WordleGameDataContract {
   gameState: GameState;
@@ -8,7 +8,8 @@ export interface WordleGameDataContract {
 
 export interface WordlePlayerContract {
   name: string;
-  feedbackHistory: Guess[];
+  feedbackHistory: GuessFeedback[];
+  // encodedGuesses: number;
 }
 
 export enum GameState {

@@ -5,6 +5,7 @@ import {
   GetLeaderboardRequest,
   GetStatisticsPayload,
   GetStatisticsResponse,
+  StatisticUpdate,
   UpdateStatisticsPayload,
 } from "./modules/PlayFabLeaderboardsModule";
 import { PlayFabMultiplayerModels } from "./modules/PlayFabMultiplayerModule";
@@ -80,59 +81,14 @@ export async function UpdateDisplayName(
   );
 }
 
-export async function UpdateWordleStatistics(
+export async function UpdateStatistics(
   entityToken: EntityTokenResponse,
-  word: string,
-  guessesMade: number,
-  timeTaken: number,
-  numberOfWrongLetters: number,
-  numberOfMisplacedLetters: number
+  statUpdates: StatisticUpdate[]
 ) {
   let apiEndpoint = `Statistic/UpdateStatistics`;
 
   const request: UpdateStatisticsPayload = {
-    Statistics: [
-      {
-        Name: "WordleBestGame",
-        Metadata: word,
-        Scores: [
-          guessesMade.toString(),
-          timeTaken.toString(),
-          numberOfWrongLetters.toString(),
-          numberOfMisplacedLetters.toString(),
-        ],
-      },
-      {
-        Name: "WordleBestGameDaily",
-        Metadata: word,
-        Scores: [
-          guessesMade.toString(),
-          timeTaken.toString(),
-          numberOfWrongLetters.toString(),
-          numberOfMisplacedLetters.toString(),
-        ],
-      },
-      {
-        Name: "WordleTopPlayers",
-        Scores: [
-          "1",
-          guessesMade.toString(),
-          timeTaken.toString(),
-          numberOfWrongLetters.toString(),
-          numberOfMisplacedLetters.toString(),
-        ],
-      },
-      {
-        Name: "WordleTopPlayersDaily",
-        Scores: [
-          "1",
-          guessesMade.toString(),
-          timeTaken.toString(),
-          numberOfWrongLetters.toString(),
-          numberOfMisplacedLetters.toString(),
-        ],
-      },
-    ],
+    Statistics: statUpdates,
     Entity: entityToken.Entity,
   };
 
