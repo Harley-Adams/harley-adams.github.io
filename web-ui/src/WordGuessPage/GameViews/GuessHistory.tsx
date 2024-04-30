@@ -1,4 +1,4 @@
-import { GuessFeedback, LetterGuessState } from "../GameLogic/Guess";
+import { GuessFeedback, LetterGuessState } from "../WordleContract";
 
 interface GuessHistoryProps {
   guessHistory: GuessFeedback[];

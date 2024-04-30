@@ -12,7 +12,8 @@ const OtherPlayersView: React.FC = () => {
   const mapOtherPlayers = Object.entries(otherPlayers).map(
     ([entityId, player]) => (
       <div key={entityId} className="player-item">
-        {player.name}: <GuessHistory guessHistory={player.feedbackHistory} />
+        {player.name}:
+        <GuessHistory guessHistory={player.feedbackHistory ?? []} />
       </div>
     )
   );

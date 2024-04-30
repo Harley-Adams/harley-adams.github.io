@@ -1,7 +1,6 @@
 import { useState } from "react";
 import WordGuessGame from "./WordGuessGame";
 import "./WordGuessPage.css"; // You can define your styles here
-import { WordList } from "./Data/WordList";
 
 import "react-toastify/dist/ReactToastify.css";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";

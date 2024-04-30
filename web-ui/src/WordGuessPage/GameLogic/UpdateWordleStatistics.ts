@@ -1,7 +1,7 @@
 import { UpdateStatistics } from "../../PlayFab/PlayFabWrapper";
 import PfLoginResult from "../../PlayFab/models/PfLoginResult";
 import { StatisticUpdate } from "../../PlayFab/modules/PlayFabLeaderboardsModule";
-import { GuessFeedback, LetterGuessState } from "./Guess";
+import { GuessFeedback, LetterGuessState } from "../WordleContract";
 
 export const UpdateWordleStatistics = (
   player: PfLoginResult,

@@ -1,6 +1,9 @@
 import { atom } from "recoil";
-import { GuessFeedback, LetterGuessState } from "./GameLogic/Guess";
-import { WordlePlayerContract } from "./WordleContract";
+import {
+  GuessFeedback,
+  LetterGuessState,
+  WordlePlayerContract,
+} from "./WordleContract";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
 
 export type LetterDictionary = {

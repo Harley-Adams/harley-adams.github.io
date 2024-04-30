@@ -1,4 +1,8 @@
-import { GuessFeedback, LetterFeedback, LetterGuessState } from "./Guess";
+import {
+  GuessFeedback,
+  LetterFeedback,
+  LetterGuessState,
+} from "../WordleContract";
 
 export const ReviewGuess = (word: string, guess: string): GuessFeedback => {
   let feedbackPerLetter: LetterFeedback[] = guess

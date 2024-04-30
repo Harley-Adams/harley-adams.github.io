@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import PfLoginResult from "../PlayFab/models/PfLoginResult";
+import { useState } from "react";
 import { PlayFabMultiplayerModels } from "../PlayFab/modules/PlayFabMultiplayerModule";
 import LobbyTable from "./LobbyTable";
 import { PlayFabPubSub, PubSubMessage } from "../PlayFab/PlayFabPubSubWrapper";
@@ -18,14 +17,17 @@ import {
   loggedInPlayerState,
   otherPlayerLetterGuessState,
 } from "../WordGuessPage/WordleState";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { PickRandomWord } from "../WordGuessPage/GameLogic/PickRandomWord";
+import {
+  ParseWordlePlayerUpdate,
+  UpdateWordleLobby,
+} from "../WordGuessPage/GameLogic/MultiplayerLogic";
 
 const GameFinder: React.FC = () => {
   const pubsub: PlayFabPubSub<WordleGameDataContract, WordlePlayerContract> =
     new PlayFabPubSub();
-  const [player, setPlayer] = useRecoilState(loggedInPlayerState);
-  const [customId, setCustomId] = useState<string>("");
+  const [player] = useRecoilState(loggedInPlayerState);
   const [lobbies, setLobbies] =
     useState<PlayFabMultiplayerModels.FindLobbiesResult>();
   const [showLobbyTable, setShowLobbyTable] = useState<boolean>(false);
@@ -35,11 +37,9 @@ const GameFinder: React.FC = () => {
   const [currentLobbyId, setCurrentLobbyId] =
     useRecoilState(currentLobbyIdState);
 
-  const [word, setWord] = useRecoilState(answerWordState);
+  const setWord = useSetRecoilState(answerWordState);
 
-  const [otherPlayersState, setOtherPlayersState] = useRecoilState(
-    otherPlayerLetterGuessState
-  );
+  const setOtherPlayersState = useSetRecoilState(otherPlayerLetterGuessState);
 
   const handleJoinLobby = async (connectionString: string) => {
     if (!player) {
@@ -107,7 +107,7 @@ const GameFinder: React.FC = () => {
     // First update doesn't seem to have prefilled lobby data.
     // Not sure why, but assume that if it's missing do nothing.
     if (update.lobbyChanges[0].lobbyData) {
-      if (update.lobbyChanges[0].lobbyData.gameState == GameState.inGame) {
+      if (update.lobbyChanges[0].lobbyData.gameState === GameState.inGame) {
         setWord(update.lobbyChanges[0].lobbyData.word);
         setIsGameStarted(true);
       }
@@ -115,13 +115,16 @@ const GameFinder: React.FC = () => {
 
     console.log(`num lobby changes: ${update.lobbyChanges.length}`);
     console.log(`Game update: ${JSON.stringify(update)}`);
+
     update.lobbyChanges.forEach((change) => {
       if (change.memberToMerge.memberData) {
         const memberToMerge = change.memberToMerge;
-
+        const decodedMemberData = ParseWordlePlayerUpdate(
+          memberToMerge.memberData
+        );
         setOtherPlayersState((prevStates) => ({
           ...prevStates,
-          [memberToMerge.memberEntity.Id]: memberToMerge.memberData,
+          [memberToMerge.memberEntity.Id]: decodedMemberData,
         }));
       }
     });
@@ -129,16 +132,11 @@ const GameFinder: React.FC = () => {
 
   const handleStartGame = () => {
     if (player) {
-      pubsub.UpdateLobby(
-        player.EntityToken,
-        currentLobbyId,
-        (updateResult) => {},
-        {
-          gameState: GameState.inGame,
-          word: PickRandomWord(5),
-          startTime: Date.now(),
-        }
-      );
+      pubsub.UpdateLobby(player.EntityToken, currentLobbyId, {
+        gameState: GameState.inGame,
+        word: PickRandomWord(5),
+        startTime: Date.now(),
+      });
     }
   };
 
@@ -157,13 +155,7 @@ const GameFinder: React.FC = () => {
       return;
     }
 
-    pubsub.UpdateLobby(
-      player?.EntityToken,
-      currentLobbyId,
-      (updateResult) => {},
-      undefined,
-      update
-    );
+    UpdateWordleLobby(pubsub, player, currentLobbyId, update);
   };
 
   const handleLocalGameUpdate = (update: WordleGameDataContract) => {};

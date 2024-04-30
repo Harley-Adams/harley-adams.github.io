@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
 import Keyboard from "./GameViews/Keyboard";
-import { Dictionary } from "./Data/Dictionary";
 import { toast } from "react-toastify";
 import { ReviewGuess } from "./GameLogic/ReviewGuess";
 import { GuessHistory } from "./GameViews/GuessHistory";
-import { GuessFeedback, LetterGuessState } from "./GameLogic/Guess";
 import { GuessInput } from "./LeaderboardViews/GuessInput";
-import { WordleGameDataContract, WordlePlayerContract } from "./WordleContract";
+import {
+  GuessFeedback,
+  LetterGuessState,
+  WordleGameDataContract,
+  WordlePlayerContract,
+} from "./WordleContract";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import {
   answerWordState,
+  customIdState,
   playerGuessHistory,
   playerLetterGuessState,
 } from "./WordleState";
@@ -33,7 +37,7 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
   gameUpdateCallback,
   playerUpdateCallback,
 }) => {
-  const [word, setWord] = useRecoilState(answerWordState);
+  const [word] = useRecoilState(answerWordState);
   const [startTime, setStartTime] = useState<number>(0);
   useEffect(() => {
     setStartTime(Date.now());
@@ -45,7 +49,7 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
     useRecoilState<GuessFeedback[]>(playerGuessHistory); // History of guesses
   // setGuessHistory([]);
   const [isGameComplete, setIsGameComplete] = useState<boolean>(false); // Whether the game is complete
-
+  const customId = useRecoilValue(customIdState);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setCurrentGuess(e.target.value.toUpperCase()); // Convert the guess to uppercase
   };
@@ -116,7 +120,7 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
       });
 
       const playerUpdate: WordlePlayerContract = {
-        name: "PlayerName",
+        name: customId,
         feedbackHistory: letterlessHistory,
       };
 
@@ -132,13 +136,6 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
       handleGuessSubmit();
     }
   };
-
-  // const setKeyState = (letter: string, newState: LetterGuessState) => {
-  //   setKeyStates((prevStates) => ({
-  //     ...prevStates,
-  //     [letter]: newState,
-  //   }));
-  // };
 
   return (
     <div className="App">

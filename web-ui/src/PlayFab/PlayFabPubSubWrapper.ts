@@ -221,9 +221,6 @@ export class PlayFabPubSub<LobbyDataType, PlayerDataType> {
   public UpdateLobby(
     entityToken: EntityTokenResponse,
     lobbyId: string,
-    callback: (
-      updateLobbyResult: PlayFabMultiplayerModels.LobbyEmptyResult
-    ) => void,
     lobbyData?: LobbyDataType,
     playerData?: PlayerDataType
   ) {
@@ -254,10 +251,7 @@ export class PlayFabPubSub<LobbyDataType, PlayerDataType> {
         "X-EntityToken": `${entityToken.EntityToken}`,
       },
     }).then(async (response) => {
-      if (response.status === 200) {
-        let rawResponse = await response.json();
-        callback(rawResponse.data);
-      } else {
+      if (!response.ok) {
         // tslint:disable-next-line: no-console
         console.log(`playfab lobby error: ${await response.text()}`);
       }

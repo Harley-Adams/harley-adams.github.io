@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { LetterGuessState } from "../GameLogic/Guess";
+import React from "react";
 import { useRecoilState } from "recoil";
 import { playerLetterGuessState } from "../WordleState";
+import { LetterGuessState } from "../WordleContract";
 
 // Define the layout of the QWERTY keyboard
 const KEYS: string[][] = [

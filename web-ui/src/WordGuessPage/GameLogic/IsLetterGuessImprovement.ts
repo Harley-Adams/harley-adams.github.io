@@ -1,5 +1,5 @@
+import { LetterGuessState } from "../WordleContract";
 import { LetterDictionary } from "../WordleState";
-import { LetterGuessState } from "./Guess";
 
 const IsLetterGuessImprovement = (
   keyStates: LetterDictionary,
