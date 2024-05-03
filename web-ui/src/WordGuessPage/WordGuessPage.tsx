@@ -10,18 +10,26 @@ import LeaderboardView from "./LeaderboardViews/LeaderboardView";
 import StatisticsView from "./LeaderboardViews/StatisticsView";
 import BestGameLbView from "./LeaderboardViews/BestGameLbView";
 import TopPlayerLbView from "./LeaderboardViews/TopPlayerLbView";
-import { answerWordState, loggedInPlayerState } from "./WordleState";
+import {
+  answerWordState,
+  loggedInPlayerState,
+  playerGuessHistory,
+} from "./WordleState";
 import { useRecoilState } from "recoil";
 import { PickRandomWord } from "./GameLogic/PickRandomWord";
+import { GuessFeedback } from "./WordleContract";
 
 function WordGuessPage(): JSX.Element {
   const [customId, setCustomId] = useState<string>("testuser");
   const [player, setPlayer] = useRecoilState(loggedInPlayerState);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [word, setWord] = useRecoilState(answerWordState);
+  const [guessHistory, setGuessHistory] =
+    useRecoilState<GuessFeedback[]>(playerGuessHistory); // History of guesses
 
   const handleGameStart = () => {
     setGameStarted(true);
+    setGuessHistory([]);
     setWord(PickRandomWord(5));
   };
 
