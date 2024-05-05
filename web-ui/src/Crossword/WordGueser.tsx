@@ -1,4 +1,3 @@
-import { CButton, CForm, CFormInput, CSpinner } from "@coreui/react";
 import { useState } from "react";
 
 interface Props {
@@ -26,24 +25,24 @@ function WordGuesser(props: Props) {
       <div className="WordGuesser">
         <h2>Word: {props.partialWord}</h2>
         <h3>Clue: {props.clue}</h3>
-        <CForm onSubmit={onSubmit}>
-          <CFormInput
+        <form onSubmit={onSubmit}>
+          <input
             id="wordGuessInput"
             placeholder=""
             aria-label="WordGuess"
             name="wordGuessInput"
             defaultValue={props.partialWord}
-            floatingLabel="Guess"
+            // floatingLabel="Guess"
           />
-          <CButton
+          <button
             type="submit"
             color="primary"
-            variant="outline"
+            // variant="outline"
             id="button-addon2"
           >
             Submit
-          </CButton>
-        </CForm>
+          </button>
+        </form>
       </div>
     );
   } else {

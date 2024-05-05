@@ -5,7 +5,6 @@ import {
   EntityLeaderboardEntry,
   GetEntityLeaderboardResponse,
 } from "../../PlayFab/modules/PlayFabLeaderboardsModule";
-import { CTable } from "@coreui/react";
 import {
   LeaderboardViewProps,
   TransformMsStringToSeconds,
@@ -84,7 +83,7 @@ const TopPlayerLbView: React.FC<LeaderboardViewProps> = ({
   return (
     <div>
       <div>
-        <CTable columns={columns} items={projectedDataItems} striped={true} />
+        {/* <CTable columns={columns} items={projectedDataItems} striped={true} /> */}
       </div>
     </div>
   );

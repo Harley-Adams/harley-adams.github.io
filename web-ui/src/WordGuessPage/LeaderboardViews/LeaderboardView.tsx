@@ -5,7 +5,6 @@ import {
   EntityLeaderboardEntry,
   GetEntityLeaderboardResponse,
 } from "../../PlayFab/modules/PlayFabLeaderboardsModule";
-import { CTable } from "@coreui/react";
 
 export interface LeaderboardViewProps {
   player: PfLoginResult;
@@ -75,7 +74,7 @@ const LeaderboardView: React.FC<LeaderboardViewProps> = ({
   return (
     <div>
       <div>
-        <CTable columns={columns} items={projectedDataItems} striped={true} />
+        {/* <CTable columns={columns} items={projectedDataItems} striped={true} /> */}
       </div>
     </div>
   );

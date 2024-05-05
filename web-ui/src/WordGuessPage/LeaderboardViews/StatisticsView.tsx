@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { GetStatistics } from "../../PlayFab/PlayFabWrapper";
 import PfLoginResult from "../../PlayFab/models/PfLoginResult";
 import { GetStatisticsResponse } from "../../PlayFab/modules/PlayFabLeaderboardsModule";
-import { CTable } from "@coreui/react";
 
 interface StatisticsViewProps {
   player: PfLoginResult;
@@ -85,7 +84,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ player }) => {
 
   return (
     <div>
-      <CTable columns={columns} items={projectedDataItems} striped={true} />
+      {/* <CTable columns={columns} items={projectedDataItems} striped={true} /> */}
     </div>
   );
 };

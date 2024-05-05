@@ -1,4 +1,4 @@
-.mynavbar ul {
+/* .mynavbar ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -20,4 +20,71 @@
 
 .mynavbar li a:hover {
   background-color: #111111;
+} */
+
+/* src/components/Navbar.css */
+/* .navbar {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background-color: #333;
 }
+
+.navbar-toggle {
+  display: none;
+  font-size: 30px;
+  color: white;
+  cursor: pointer;
+}
+
+.logo {
+  color: white;
+  text-decoration: none;
+  font-size: 20px;
+}
+
+.main-nav {
+  list-style: none;
+  display: flex;
+  margin-right: 10px;
+}
+
+.main-nav li {
+  margin: 0 10px;
+}
+
+.main-nav li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .navbar-toggle {
+    display: block;
+  }
+
+  .main-nav {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 150px;
+    height: 100vh;
+    background-color: #333;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    display: none;
+    z-index: 1;
+  }
+
+  .main-nav.active {
+    display: flex;
+  }
+
+  .main-nav li {
+    margin: 15px 0;
+  }
+} */

@@ -14,8 +14,9 @@ import {
   answerWordState,
   loggedInPlayerState,
   playerGuessHistory,
+  playerLetterGuessState,
 } from "./WordleState";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import { PickRandomWord } from "./GameLogic/PickRandomWord";
 import { GuessFeedback } from "./WordleContract";
 
@@ -24,12 +25,13 @@ function WordGuessPage(): JSX.Element {
   const [player, setPlayer] = useRecoilState(loggedInPlayerState);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [word, setWord] = useRecoilState(answerWordState);
-  const [guessHistory, setGuessHistory] =
-    useRecoilState<GuessFeedback[]>(playerGuessHistory); // History of guesses
+  const resetGuessHistory = useResetRecoilState(playerGuessHistory); // History of guesses
+  const resetPlayerKeyboard = useResetRecoilState(playerLetterGuessState);
 
   const handleGameStart = () => {
     setGameStarted(true);
-    setGuessHistory([]);
+    resetGuessHistory();
+    resetPlayerKeyboard();
     setWord(PickRandomWord(5));
   };
 

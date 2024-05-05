@@ -4,11 +4,21 @@ import {
   EntityLeaderboardEntry,
   GetEntityLeaderboardResponse,
 } from "../../PlayFab/modules/PlayFabLeaderboardsModule";
-import { CTable } from "@coreui/react";
 import {
   LeaderboardViewProps,
   TransformMsStringToSeconds,
 } from "./LeaderboardView";
+import {
+  TableContainer,
+  Paper,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 
 const BestGameLbView: React.FC<LeaderboardViewProps> = ({
   player,
@@ -26,66 +36,56 @@ const BestGameLbView: React.FC<LeaderboardViewProps> = ({
     );
   }, [leaderboardName, version]);
 
+  const theme = useTheme();
+  const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
+
   if (!leaderboardResult) {
     return <div>Loading...</div>;
   }
 
-  const columns = [
-    {
-      key: "rank",
-      label: "Rank",
-      _props: { scope: "col" },
-    },
-    {
-      key: "entityId",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_1",
-      label: "Guesses Made",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_2",
-      label: "Time Taken (seconds)",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_3",
-      label: "Wrong Letters Guessed",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_4",
-      label: "Misplaced Letters Guessed",
-      _props: { scope: "col" },
-    },
-    {
-      key: "metadata",
-      label: "Answer",
-      _props: { scope: "col" },
-    },
-  ];
+  const columns = (
+    <TableRow>
+      <TableCell>Rank</TableCell>
+      <TableCell>EntityId</TableCell>
+      <TableCell>Guesses Made</TableCell>
+      <TableCell>Time Taken (seconds)</TableCell>
+      {!isXSmall ? <TableCell>Wrong Letters</TableCell> : null}
+      {!isXSmall ? <TableCell>Misplace Letters</TableCell> : null}
+      <TableCell>Answer</TableCell>
+    </TableRow>
+  );
 
   let projectedDataItems = leaderboardResult.Rankings.map(
-    (item: EntityLeaderboardEntry) => ({
-      rank: item.Rank,
-      entityId: item.DisplayName ? item.DisplayName : item.Entity.Id,
-      col_1: item.Scores[0] ? item.Scores[0] : "",
-      col_2: item.Scores[1] ? TransformMsStringToSeconds(item.Scores[1]) : "",
-      col_3: item.Scores[2] ? item.Scores[2] : "",
-      col_4: item.Scores[3] ? item.Scores[3] : "",
-      metadata: item.Metadata ? item.Metadata : "",
-      _cellProps: { id: { scope: "row" } },
-    })
+    (item: EntityLeaderboardEntry) => {
+      return (
+        <TableRow key={item.Rank}>
+          <TableCell component="th" scope="row">
+            {item.Rank}
+          </TableCell>
+          <TableCell align="right">
+            {item.DisplayName ? item.DisplayName : item.Entity.Id}
+          </TableCell>
+          <TableCell align="right">{item.Scores[0]}</TableCell>
+          <TableCell align="right">{item.Scores[1]}</TableCell>
+          {!isXSmall ? <TableCell>{item.Scores[2]}</TableCell> : null}
+          {!isXSmall ? <TableCell>{item.Scores[3]}</TableCell> : null}
+          <TableCell align="right">{item.Metadata}</TableCell>
+        </TableRow>
+      );
+    }
   );
 
   return (
-    <div>
-      <div>
-        <CTable columns={columns} items={projectedDataItems} striped={true} />
-      </div>
-    </div>
+    <TableContainer component={Paper}>
+      <Table
+        stickyHeader
+        sx={{ minWidth: 650, width: "100%" }}
+        aria-label="simple table"
+      >
+        <TableHead>{columns}</TableHead>
+        <TableBody>{projectedDataItems}</TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

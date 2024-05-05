@@ -18,8 +18,9 @@ import {
   loggedInPlayerState,
   otherPlayerLetterGuessState,
   playerGuessHistory,
+  playerLetterGuessState,
 } from "../WordGuessPage/WordleState";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState, useSetRecoilState } from "recoil";
 import { PickRandomWord } from "../WordGuessPage/GameLogic/PickRandomWord";
 import {
   ParseWordlePlayerUpdate,
@@ -38,8 +39,8 @@ const GameFinder: React.FC = () => {
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
   const [currentLobbyId, setCurrentLobbyId] =
     useRecoilState(currentLobbyIdState);
-  const [guessHistory, setGuessHistory] =
-    useRecoilState<GuessFeedback[]>(playerGuessHistory); // History of guesses
+  const resetGuessHistory = useResetRecoilState(playerGuessHistory);
+  const resetPlayerKeyboard = useResetRecoilState(playerLetterGuessState);
 
   const setWord = useSetRecoilState(answerWordState);
 
@@ -113,7 +114,8 @@ const GameFinder: React.FC = () => {
     if (update.lobbyChanges[0].lobbyData) {
       if (update.lobbyChanges[0].lobbyData.gameState === GameState.inGame) {
         setWord(update.lobbyChanges[0].lobbyData.word);
-        setGuessHistory([]);
+        resetGuessHistory();
+        resetPlayerKeyboard();
         setIsGameStarted(true);
       }
     }

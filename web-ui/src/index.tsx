@@ -10,8 +10,13 @@ import FivePM from "./FivePMPage/FivePM";
 import Crossword from "./Crossword/Crossword";
 import WordGuessPage from "./WordGuessPage/WordGuessPage";
 import LobbyPage from "./LobbyPage/LobbyPage";
-import { ToastContainer } from "react-toastify";
 import { RecoilRoot } from "recoil";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+import { CssBaseline } from "@mui/material";
+import { HomePage } from "./Home/HomePage";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +25,10 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
+        element: <HomePage />,
+      },
+      {
+        path: "/Profile",
         element: <Profile />,
       },
       {
@@ -51,8 +60,8 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
+    <CssBaseline enableColorScheme />
     <RecoilRoot>
-      <ToastContainer />
       <RouterProvider router={router} />
     </RecoilRoot>
   </React.StrictMode>
