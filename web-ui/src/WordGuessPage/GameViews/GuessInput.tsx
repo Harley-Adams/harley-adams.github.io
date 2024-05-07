@@ -1,3 +1,5 @@
+import { TextField } from "@mui/material";
+
 interface GuessInputProps {
   currentGuess: string;
   wordLength: number;
@@ -22,6 +24,7 @@ export const GuessInput: React.FC<GuessInputProps> = ({
       value={currentGuess}
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
+      autoComplete="off"
     />
     <button className="submitButton" onClick={handleGuessSubmit}>
       Submit

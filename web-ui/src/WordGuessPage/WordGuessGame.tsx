@@ -3,7 +3,7 @@ import Keyboard from "./GameViews/Keyboard";
 import { toast } from "react-toastify";
 import { ReviewGuess } from "./GameLogic/ReviewGuess";
 import { GuessHistory } from "./GameViews/GuessHistory";
-import { GuessInput } from "./LeaderboardViews/GuessInput";
+import { GuessInput } from "./GameViews/GuessInput";
 import {
   GuessFeedback,
   LetterGuessState,
@@ -11,7 +11,7 @@ import {
   WordlePlayerContract,
 } from "./WordleContract";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useResetRecoilState } from "recoil";
 import {
   answerWordState,
   customIdState,
@@ -25,29 +25,38 @@ import { IsValidGuess } from "./GameLogic/IsValidGuess";
 import { UpdateWordleStatistics } from "./GameLogic/UpdateWordleStatistics";
 
 interface WordGuessGameProps {
-  player: PfLoginResult;
+  wordProp: string;
+  player?: PfLoginResult;
   gameCompleteCallback: () => void;
   gameUpdateCallback?: (update: WordleGameDataContract) => void;
   playerUpdateCallback?: (update: WordlePlayerContract) => void;
 }
 
 const WordGuessGame: React.FC<WordGuessGameProps> = ({
+  wordProp,
   player,
   gameCompleteCallback,
   gameUpdateCallback,
   playerUpdateCallback,
 }) => {
-  const [word] = useRecoilState(answerWordState);
   const [startTime, setStartTime] = useState<number>(0);
+  const resetPlayerGuessHistory = useResetRecoilState(playerGuessHistory);
+  const resetLetterGuessState = useResetRecoilState(playerLetterGuessState);
+
   useEffect(() => {
+    resetPlayerGuessHistory();
+    resetLetterGuessState();
     setStartTime(Date.now());
   }, []);
+
+  const [word, setWord] = useRecoilState(answerWordState);
+  setWord(wordProp);
   const [keyStates, setKeyStates] = useRecoilState(playerLetterGuessState);
 
   const [currentGuess, setCurrentGuess] = useState<string>(""); // The current guess
   const [guessHistory, setGuessHistory] =
     useRecoilState<GuessFeedback[]>(playerGuessHistory); // History of guesses
-  // setGuessHistory([]);
+
   const [isGameComplete, setIsGameComplete] = useState<boolean>(false); // Whether the game is complete
   const customId = useRecoilValue(customIdState);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -102,7 +111,9 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
     if (word === currentGuess) {
       toast.success("Congratulations! You guessed the correct word.");
       const timeTaken = Date.now() - startTime;
-      UpdateWordleStatistics(player, timeTaken, word, guessHistory);
+      if (player) {
+        UpdateWordleStatistics(player, timeTaken, word, guessHistory);
+      }
       setIsGameComplete(true);
     }
 

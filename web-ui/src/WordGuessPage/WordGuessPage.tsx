@@ -24,14 +24,10 @@ function WordGuessPage(): JSX.Element {
   const [customId, setCustomId] = useState<string>("testuser");
   const [player, setPlayer] = useRecoilState(loggedInPlayerState);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
-  const [word, setWord] = useRecoilState(answerWordState);
-  const resetGuessHistory = useResetRecoilState(playerGuessHistory); // History of guesses
-  const resetPlayerKeyboard = useResetRecoilState(playerLetterGuessState);
+  const [word, setWord] = useState<string>("grace");
 
   const handleGameStart = () => {
     setGameStarted(true);
-    resetGuessHistory();
-    resetPlayerKeyboard();
     setWord(PickRandomWord(5));
   };
 
@@ -57,6 +53,7 @@ function WordGuessPage(): JSX.Element {
   return (
     <div>
       <WordGuessGame
+        wordProp={word}
         player={player}
         gameCompleteCallback={handlePostGameDone}
       />

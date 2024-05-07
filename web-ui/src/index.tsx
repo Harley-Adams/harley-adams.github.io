@@ -17,6 +17,7 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import { CssBaseline } from "@mui/material";
 import { HomePage } from "./Home/HomePage";
+import { PuzzleTimePage } from "./PuzzleTime/PuzzleTimePage";
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: "/MultiplayerGames",
         element: <LobbyPage />,
+      },
+      {
+        path: "/PuzzleTime",
+        element: <PuzzleTimePage />,
       },
     ],
   },
