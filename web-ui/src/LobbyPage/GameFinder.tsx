@@ -4,7 +4,6 @@ import LobbyTable from "./LobbyTable";
 import { PlayFabPubSub, PubSubMessage } from "../PlayFab/PlayFabPubSubWrapper";
 import {
   GameState,
-  GuessFeedback,
   WordleGameDataContract,
   WordlePlayerContract,
 } from "../WordGuessPage/WordleContract";
@@ -13,12 +12,9 @@ import React from "react";
 import LoginUI from "../WordGuessPage/GameViews/LoginUI";
 import { CreateLobby, GetLobbies, JoinLobby } from "../PlayFab/PlayFabWrapper";
 import {
-  answerWordState,
   currentLobbyIdState,
   loggedInPlayerState,
   otherPlayerLetterGuessState,
-  playerGuessHistory,
-  playerLetterGuessState,
 } from "../WordGuessPage/WordleState";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { PickRandomWord } from "../WordGuessPage/GameLogic/PickRandomWord";
@@ -180,7 +176,6 @@ const GameFinder: React.FC = () => {
         You are player: {player?.EntityToken.Entity.Id}
         <WordGuessGame
           wordProp={word}
-          player={player}
           gameCompleteCallback={() => {
             handleGameComplete();
           }}

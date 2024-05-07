@@ -40,7 +40,6 @@ function WordGuessPage(): JSX.Element {
     <div>
       <WordGuessGame
         wordProp={word}
-        player={player}
         gameCompleteCallback={handlePostGameDone}
       />
     </div>

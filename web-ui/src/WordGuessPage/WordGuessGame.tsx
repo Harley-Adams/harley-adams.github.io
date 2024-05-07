@@ -20,6 +20,7 @@ import {
 import {
   answerWordState,
   customIdState,
+  loggedInPlayerState,
   playerGuessHistory,
   playerLetterGuessState,
 } from "./WordleState";
@@ -35,7 +36,6 @@ import {
 
 interface WordGuessGameProps {
   wordProp: string;
-  player?: PfLoginResult;
   gameCompleteCallback: () => void;
   gameUpdateCallback?: (update: WordleGameDataContract) => void;
   playerUpdateCallback?: (update: WordlePlayerContract) => void;
@@ -43,7 +43,6 @@ interface WordGuessGameProps {
 
 const WordGuessGame: React.FC<WordGuessGameProps> = ({
   wordProp,
-  player,
   gameCompleteCallback,
   gameUpdateCallback,
   playerUpdateCallback,
@@ -52,6 +51,7 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
   const resetPlayerGuessHistory = useResetRecoilState(playerGuessHistory);
   const resetLetterGuessState = useResetRecoilState(playerLetterGuessState);
   const setGameMode = useSetRecoilState(currentGameMode);
+  const [player] = useRecoilState(loggedInPlayerState);
 
   useEffect(() => {
     resetPlayerGuessHistory();
