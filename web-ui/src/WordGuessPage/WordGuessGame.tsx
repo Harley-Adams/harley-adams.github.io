@@ -11,7 +11,12 @@ import {
   WordlePlayerContract,
 } from "./WordleContract";
 import PfLoginResult from "../PlayFab/models/PfLoginResult";
-import { useRecoilState, useRecoilValue, useResetRecoilState } from "recoil";
+import {
+  useRecoilState,
+  useRecoilValue,
+  useResetRecoilState,
+  useSetRecoilState,
+} from "recoil";
 import {
   answerWordState,
   customIdState,
@@ -23,6 +28,10 @@ import GameOverView from "./GameViews/GameOverView";
 import IsLetterGuessImprovement from "./GameLogic/IsLetterGuessImprovement";
 import { IsValidGuess } from "./GameLogic/IsValidGuess";
 import { UpdateWordleStatistics } from "./GameLogic/UpdateWordleStatistics";
+import {
+  PuzzleTimeGameModes,
+  currentGameMode,
+} from "../PuzzleTime/PuzzleTimePage";
 
 interface WordGuessGameProps {
   wordProp: string;
@@ -42,6 +51,7 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
   const [startTime, setStartTime] = useState<number>(0);
   const resetPlayerGuessHistory = useResetRecoilState(playerGuessHistory);
   const resetLetterGuessState = useResetRecoilState(playerLetterGuessState);
+  const setGameMode = useSetRecoilState(currentGameMode);
 
   useEffect(() => {
     resetPlayerGuessHistory();
@@ -165,7 +175,12 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
             handleBackspace={handleBackspace}
           />
         ) : (
-          <GameOverView onClickGameCompleteCallback={gameCompleteCallback} />
+          <GameOverView
+            onClickGameCompleteCallback={() => {
+              gameCompleteCallback();
+              setGameMode(PuzzleTimeGameModes.MainMenu);
+            }}
+          />
         )}
       </div>
 

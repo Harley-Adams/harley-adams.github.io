@@ -14,8 +14,8 @@ import PfLoginResult, { EntityTokenResponse } from "./models/PfLoginResult";
 export async function loginWithCustomId(
   customId: string
 ): Promise<PfLoginResult | null> {
-  const loginResultCacheKey = `PfLoginResult:${customId}`;
-  const storedPfLoginResult = localStorage.getItem(loginResultCacheKey);
+  const currentLoginCacheKey = `currentCustomId`;
+  const storedPfLoginResult = localStorage.getItem(currentLoginCacheKey);
 
   if (storedPfLoginResult != null) {
     let storedLoginResult: PfLoginResult = JSON.parse(storedPfLoginResult);
@@ -52,7 +52,7 @@ export async function loginWithCustomId(
       EntityToken: rawResponse.data.EntityToken,
       SessionTicket: rawResponse.data.SessionTicket,
     };
-    localStorage.setItem(loginResultCacheKey, JSON.stringify(loginResult));
+    localStorage.setItem(currentLoginCacheKey, JSON.stringify(loginResult));
 
     await UpdateDisplayName(loginResult.EntityToken, customId);
 

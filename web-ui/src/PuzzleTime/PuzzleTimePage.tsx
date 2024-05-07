@@ -1,32 +1,33 @@
-import React, { useState } from "react";
+import React from "react";
 import WordGuessGame from "../WordGuessPage/WordGuessGame";
 import { PickRandomWord } from "../WordGuessPage/GameLogic/PickRandomWord";
 import { GameMenu } from "./GameMenu";
-import { useResetRecoilState } from "recoil";
-import {
-  playerGuessHistory,
-  playerLetterGuessState,
-} from "../WordGuessPage/WordleState";
+import { atom, useRecoilState } from "recoil";
+
+export enum PuzzleTimeGameModes {
+  MainMenu,
+  WordGuessSingle,
+  WordGuessMulti,
+}
+
+export const currentGameMode = atom<PuzzleTimeGameModes>({
+  key: "currentGameMode",
+  default: PuzzleTimeGameModes.MainMenu,
+});
 
 export const PuzzleTimePage: React.FC = () => {
-  const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [gameMode] = useRecoilState(currentGameMode);
 
-  const GameStart = () => {
-    setGameStarted(true);
-  };
-
-  if (gameStarted) {
+  if (gameMode === PuzzleTimeGameModes.WordGuessSingle) {
     return (
       <div>
         <WordGuessGame
           wordProp={PickRandomWord(5)}
-          gameCompleteCallback={() => {
-            setGameStarted(false);
-          }}
+          gameCompleteCallback={() => {}}
         />
       </div>
     );
   }
 
-  return <GameMenu setGameStart={GameStart} />;
+  return <GameMenu />;
 };

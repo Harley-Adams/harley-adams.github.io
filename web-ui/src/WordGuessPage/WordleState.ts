@@ -75,8 +75,24 @@ export const currentLobbyIdState = atom<string>({
 
 export const loggedInPlayerState = atom<PfLoginResult | null>({
   key: "loggedInPlayer",
-  default: null,
+  default: getAlreadyLoggedInUser(),
 });
+
+function getAlreadyLoggedInUser() {
+  const currentLoginCacheKey = `currentCustomId`;
+  const storedPfLoginResult = localStorage.getItem(currentLoginCacheKey);
+  if (storedPfLoginResult) {
+    let storedLoginResult: PfLoginResult = JSON.parse(storedPfLoginResult);
+    let tokenExpiration = Date.parse(
+      storedLoginResult.EntityToken.TokenExpiration
+    );
+    const oneHourFromNow = Date.now() + 60 * 60 * 1000;
+    if (tokenExpiration >= oneHourFromNow) {
+      console.log("Found login with valid time");
+      return storedLoginResult;
+    }
+  }
+}
 
 export const customIdState = atom<string>({
   key: "loggedInPlayerCustomId",

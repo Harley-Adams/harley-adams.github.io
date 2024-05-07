@@ -12,12 +12,16 @@ import { Theme, useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import GameFinder from "./GameFinder";
 import LoginModal from "./LoginModal";
+import { PuzzleTimeGameModes, currentGameMode } from "./PuzzleTimePage";
+import LeaderboardModal from "./LeaderboardModal";
+import { useSetRecoilState } from "recoil";
+import StatisticsView from "../WordGuessPage/LeaderboardViews/StatisticsView";
 
 interface Game {
   title: string;
   description: string;
-  singlePlayerAction: () => void;
-  multiplayerAction?: () => void;
+  singleGameMode: PuzzleTimeGameModes;
+  multiGameMode: PuzzleTimeGameModes;
 }
 
 interface GameCardProps {
@@ -28,6 +32,7 @@ const GameCard: React.FC<GameCardProps> = ({ game }) => {
   const { title, description } = game;
   const theme: Theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const setGameMode = useSetRecoilState(currentGameMode);
 
   return (
     <Card
@@ -67,7 +72,7 @@ const GameCard: React.FC<GameCardProps> = ({ game }) => {
           variant="contained"
           color="primary"
           sx={{ minWidth: "48%", margin: "4px" }}
-          onClick={game.singlePlayerAction}
+          onClick={setGameMode.bind(null, game.singleGameMode)}
         >
           {isSmallScreen ? "SP" : "Single Player"}
         </Button>
@@ -76,36 +81,26 @@ const GameCard: React.FC<GameCardProps> = ({ game }) => {
           variant="contained"
           color="secondary"
           sx={{ minWidth: "48%", margin: "4px" }}
-          onClick={game.multiplayerAction}
+          onClick={setGameMode.bind(null, game.multiGameMode)}
         >
           {isSmallScreen ? "MP" : "Multiplayer"}
         </Button>
-        <Button
-          size="small"
-          variant="outlined"
-          color="primary"
-          sx={{ minWidth: "48%", margin: "4px" }}
-        >
-          {isSmallScreen ? "Stats" : "View Stats"}
-        </Button>
-        <Button
+        <StatisticsView />
+        <LeaderboardModal />
+        {/* <Button
           size="small"
           variant="outlined"
           color="secondary"
           sx={{ minWidth: "48%", margin: "4px" }}
         >
           {isSmallScreen ? "Leaderboards" : "View Leaderboards"}
-        </Button>
+        </Button> */}
       </CardActions>
     </Card>
   );
 };
 
-interface GameMenuProps {
-  setGameStart: () => void;
-}
-
-export const GameMenu: React.FC<GameMenuProps> = (props) => {
+export const GameMenu: React.FC = () => {
   const [showGameFinder, setShowGameFinder] = useState<boolean>(false);
 
   const games: Game[] = [
@@ -113,20 +108,20 @@ export const GameMenu: React.FC<GameMenuProps> = (props) => {
       title: "Not Wordle",
       description: `Guess the word, each guess reveals which 
           letters are in the correct space, wrong space, or not used at all.`,
-      singlePlayerAction: props.setGameStart,
-      multiplayerAction: () => {
-        setShowGameFinder(true);
-      },
+      singleGameMode: PuzzleTimeGameModes.WordGuessSingle,
+      multiGameMode: PuzzleTimeGameModes.WordGuessMulti,
     },
     {
       title: "My next game",
       description: ``,
-      singlePlayerAction: props.setGameStart,
+      singleGameMode: PuzzleTimeGameModes.WordGuessSingle,
+      multiGameMode: PuzzleTimeGameModes.WordGuessMulti,
     },
     {
       title: "The one after that",
       description: ``,
-      singlePlayerAction: props.setGameStart,
+      singleGameMode: PuzzleTimeGameModes.WordGuessSingle,
+      multiGameMode: PuzzleTimeGameModes.WordGuessMulti,
     },
     // {
     //   title: "Math Mapper",

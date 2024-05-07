@@ -22,6 +22,7 @@ const style = {
 const LoginModal: React.FC = () => {
   const [loggedInPlayer, setLoggedInPlayer] =
     useRecoilState(loggedInPlayerState);
+
   const [customIdInput, setCustomIdInput] = useRecoilState(customIdState);
   const [open, setOpen] = useState(false);
 

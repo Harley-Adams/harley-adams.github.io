@@ -1,91 +1,113 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Button,
+  Grid,
+} from "@mui/material";
 import { GetStatistics } from "../../PlayFab/PlayFabWrapper";
-import PfLoginResult from "../../PlayFab/models/PfLoginResult";
-import { GetStatisticsResponse } from "../../PlayFab/modules/PlayFabLeaderboardsModule";
+import {
+  GetStatisticsResponse,
+  Statistic,
+} from "../../PlayFab/modules/PlayFabLeaderboardsModule";
+import { useRecoilState } from "recoil";
+import { loggedInPlayerState } from "../WordleState";
 
-interface StatisticsViewProps {
-  player: PfLoginResult;
-}
-
-const StatisticsView: React.FC<StatisticsViewProps> = ({ player }) => {
+const StatisticsView: React.FC = () => {
+  const [open, setOpen] = useState<boolean>(false);
   const [statisticsResult, setStatisticsResult] =
     useState<GetStatisticsResponse | null>(null);
+  const [player] = useRecoilState(loggedInPlayerState);
 
   useEffect(() => {
-    GetStatistics(player.EntityToken).then((statsResponse) => {
-      if (statsResponse) {
+    if (open && player) {
+      // Only fetch statistics when the modal is opened
+      GetStatistics(player.EntityToken).then((statsResponse) => {
         setStatisticsResult(statsResponse);
-      } else {
-        return <div>Loading...</div>;
-      }
-    });
-  }, []);
+      });
+    }
+  }, [player, open]); // Add `open` to the dependency array to refetch when reopened
 
-  if (!statisticsResult) {
-    return <div>Loading...</div>;
-  }
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const columns = [
-    {
-      key: "statName",
-      label: "statName",
-      _props: { scope: "col" },
-    },
-    {
-      key: "version",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_1",
-      label: "Score1",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_2",
-      label: "Score2",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_3",
-      label: "Score3",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_4",
-      label: "Score4",
-      _props: { scope: "col" },
-    },
-    {
-      key: "col_5",
-      label: "Score5",
-      _props: { scope: "col" },
-    },
-    {
-      key: "metadata",
-      label: "Metadata",
-      _props: { scope: "col" },
-    },
+    { key: "statName", label: "Statistic Name" },
+    { key: "version", label: "Version" },
+    { key: "col_1", label: "Score1" },
+    { key: "col_2", label: "Score2" },
+    { key: "col_3", label: "Score3" },
+    { key: "col_4", label: "Score4" },
+    { key: "col_5", label: "Score5" },
+    { key: "metadata", label: "Metadata" },
   ];
 
-  console.log(`${JSON.stringify(statisticsResult.Statistics)}`);
-  let projectedDataItems = Object.entries(statisticsResult.Statistics).map(
-    ([statName, stat]) => ({
-      statName: statName,
-      version: stat.Version ? stat.Version : "0",
-      col_1: stat.Scores[0] ? stat.Scores[0] : "",
-      col_2: stat.Scores[1] ? stat.Scores[1] : "",
-      col_3: stat.Scores[2] ? stat.Scores[2] : "",
-      col_4: stat.Scores[3] ? stat.Scores[3] : "",
-      col_5: stat.Scores[4] ? stat.Scores[4] : "",
-      metadata: stat.Metadata ? stat.Metadata : "",
-      _cellProps: { id: { scope: "row" } },
-    })
-  );
+  const projectedDataItems = statisticsResult
+    ? Object.entries(statisticsResult.Statistics).map(
+        ([statName, stat]: [string, Statistic]) => ({
+          statName,
+          version: stat.Version ?? "0",
+          col_1: stat.Scores[0] ?? "",
+          col_2: stat.Scores[1] ?? "",
+          col_3: stat.Scores[2] ?? "",
+          col_4: stat.Scores[3] ?? "",
+          col_5: stat.Scores[4] ?? "",
+          metadata: stat.Metadata ?? "",
+        })
+      )
+    : [];
 
   return (
-    <div>
-      {/* <CTable columns={columns} items={projectedDataItems} striped={true} /> */}
-    </div>
+    <Grid sx={{ minWidth: "48%", margin: "4px" }}>
+      <Button
+        size="small"
+        variant="outlined"
+        color="primary"
+        onClick={handleOpen}
+        sx={{ minWidth: "100%" }}
+      >
+        View Statistics
+      </Button>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="lg">
+        <DialogTitle>Player Statistics</DialogTitle>
+        <DialogContent>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell key={column.key}>{column.label}</TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {projectedDataItems.map((item, index) => (
+                <TableRow key={index}>
+                  {columns.map((column) => (
+                    <TableCell key={column.key}>
+                      {item[column.key as keyof typeof item]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DialogContent>
+        <Button onClick={handleClose} color="primary">
+          Close
+        </Button>
+      </Dialog>
+    </Grid>
   );
 };
 

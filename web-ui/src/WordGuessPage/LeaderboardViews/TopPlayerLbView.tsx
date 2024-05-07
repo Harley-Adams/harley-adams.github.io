@@ -9,16 +9,23 @@ import {
   LeaderboardViewProps,
   TransformMsStringToSeconds,
 } from "./LeaderboardView";
+import { useRecoilState } from "recoil";
+import { loggedInPlayerState } from "../WordleState";
 
 const TopPlayerLbView: React.FC<LeaderboardViewProps> = ({
-  player,
   leaderboardName,
   version,
 }) => {
   const [leaderboardResult, setLeaderboardResult] =
     useState<GetEntityLeaderboardResponse | null>(null);
 
+  const [player] = useRecoilState(loggedInPlayerState);
+
   useEffect(() => {
+    if (!player) {
+      return;
+    }
+
     GetLeaderboard(player.EntityToken, leaderboardName, version).then(
       (data) => {
         setLeaderboardResult(data);
