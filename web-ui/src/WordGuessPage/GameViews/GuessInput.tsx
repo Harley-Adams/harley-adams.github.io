@@ -25,6 +25,7 @@ export const GuessInput: React.FC<GuessInputProps> = ({
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
       autoComplete="off"
+      className="guessInputField"
     />
     <button className="submitButton" onClick={handleGuessSubmit}>
       Submit

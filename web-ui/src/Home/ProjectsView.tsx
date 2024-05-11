@@ -17,11 +17,12 @@ import { Link as RouterLink } from "react-router-dom";
 const items = [
   {
     icon: <div />,
-    title: "Totally Not Wordle",
-    description: `Inspired by Josh Wardle's viral 'Wordle' puzzle game from 2021.
-      Includes live service" features such as stat tracking and
-      leaderboards via PlayFab.`,
-    link: "/WordGuessGame",
+    title: "PuzzleTime",
+    description: `Material UI themed website for playing puzzle games. 
+    Inspired by Josh Wardle's viral 'Wordle' puzzle game from 2021.
+    Includes live service" features such as stat tracking and
+    leaderboards via PlayFab. Built with React, TypeScript, and Material UI.`,
+    link: "/puzzletime",
     imageLight: "url(" + wordleImg + ")",
     imageDark: "url(" + wordleImg + ")",
   },
@@ -31,7 +32,7 @@ const items = [
     description: `Taking my wordle clone one step further, I updated the game to be multiplayer! 
     Players can join a lobby and compete against each other to see who can guess the word first. 
     Multiplayer functionality is powered by PlayFab.`,
-    link: "/MultiplayerGames",
+    link: "/puzzletime",
     imageLight: "url(" + wordleRoyaleImg + ")",
     imageDark: "url(" + wordleRoyaleImg + ")",
   },

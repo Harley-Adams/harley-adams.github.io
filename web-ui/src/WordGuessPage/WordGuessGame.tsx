@@ -33,6 +33,7 @@ import {
   PuzzleTimeGameModes,
   currentGameMode,
 } from "../PuzzleTime/PuzzleTimePage";
+import { GuessRow } from "./GameViews/GuessRow";
 
 interface WordGuessGameProps {
   wordProp: string;
@@ -157,6 +158,31 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
       handleGuessSubmit();
     }
   };
+  let inputDiv: React.ReactNode = (
+    <div className="userInputArea">
+      <Keyboard onKeyHit={handleLetterHit} />
+
+      <GuessInput
+        currentGuess={currentGuess}
+        wordLength={word.length}
+        handleInputChange={handleInputChange}
+        handleKeyDown={handleKeyDown}
+        handleGuessSubmit={handleGuessSubmit}
+        handleBackspace={handleBackspace}
+      />
+    </div>
+  );
+
+  const currentGuessAsFeedback: GuessFeedback = {
+    lettersFeedback: [
+      ...currentGuess
+        .padEnd(5, " ")
+        .split("")
+        .map((letter) => {
+          return { letter, state: LetterGuessState.Unused };
+        }),
+    ],
+  };
 
   return (
     <div className="App">
@@ -164,16 +190,11 @@ const WordGuessGame: React.FC<WordGuessGameProps> = ({
       <p>Attempts: {guessHistory.length}</p>
       <div className="game-container">
         <GuessHistory guessHistory={guessHistory} />
-        {!isGameComplete ? <Keyboard onKeyHit={handleLetterHit} /> : null}
         {!isGameComplete ? (
-          <GuessInput
-            currentGuess={currentGuess}
-            wordLength={word.length}
-            handleInputChange={handleInputChange}
-            handleKeyDown={handleKeyDown}
-            handleGuessSubmit={handleGuessSubmit}
-            handleBackspace={handleBackspace}
-          />
+          <GuessRow guessFeedback={currentGuessAsFeedback} index={1} />
+        ) : null}
+        {!isGameComplete ? (
+          inputDiv
         ) : (
           <GameOverView
             onClickGameCompleteCallback={() => {
