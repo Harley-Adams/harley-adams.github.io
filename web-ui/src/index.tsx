@@ -19,46 +19,49 @@ import { CssBaseline } from "@mui/material";
 import { HomePage } from "./Home/HomePage";
 import { PuzzleTimePage } from "./PuzzleTime/PuzzleTimePage";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Layout />,
-    children: [
-      {
-        path: "/",
-        element: <HomePage />,
-      },
-      {
-        path: "/Profile",
-        element: <Profile />,
-      },
-      {
-        path: "/Crossword",
-        element: <Crossword />,
-      },
-      {
-        path: "/FivePM",
-        element: <FivePM />,
-      },
-      {
-        path: "/Posts",
-        element: <MarkdownHost />,
-      },
-      {
-        path: "/WordGuessGame",
-        element: <WordGuessPage />,
-      },
-      {
-        path: "/MultiplayerGames",
-        element: <LobbyPage />,
-      },
-      {
-        path: "/PuzzleTime",
-        element: <PuzzleTimePage />,
-      },
-    ],
-  },
-]);
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <Layout />,
+      children: [
+        {
+          path: "/",
+          element: <HomePage />,
+        },
+        {
+          path: "/Profile",
+          element: <Profile />,
+        },
+        {
+          path: "/Crossword",
+          element: <Crossword />,
+        },
+        {
+          path: "/FivePM",
+          element: <FivePM />,
+        },
+        {
+          path: "/Posts",
+          element: <MarkdownHost />,
+        },
+        {
+          path: "/WordGuessGame",
+          element: <WordGuessPage />,
+        },
+        {
+          path: "/MultiplayerGames",
+          element: <LobbyPage />,
+        },
+        {
+          path: "/PuzzleTime",
+          element: <PuzzleTimePage />,
+        },
+      ],
+    },
+  ],
+  { basename: "/games" }
+);
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

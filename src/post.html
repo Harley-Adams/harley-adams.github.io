@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{TITLE_TAG}}</title>
+    <meta name="description" content="{{DESCRIPTION}}" />
+    <link rel="canonical" href="{{CANONICAL}}" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="{{OG_TITLE}}" />
+    <meta property="og:description" content="{{DESCRIPTION}}" />
+    <meta property="og:url" content="{{CANONICAL}}" />
+    {{SOCIAL}}
+    <style>
+{{STYLES}}
+    </style>
+  </head>
+  <body>
+    {{NAV}}
+    <main class="post">
+      <article class="post-article">
+        {{COVER}}
+        <header class="post-header">
+          <p class="post-kicker"><a href="{{THOUGHTS_HREF}}">Thoughts</a></p>
+          <h1 class="post-title">{{TITLE}}</h1>
+          <p class="post-meta"><time datetime="{{DATE_ISO}}">{{DATE_HUMAN}}</time>{{TAGS}}</p>
+        </header>
+        <div class="post-body">
+{{CONTENT}}
+        </div>
+        <footer class="post-footer">
+          <a href="{{THOUGHTS_HREF}}">&larr; All thoughts</a>
+        </footer>
+      </article>
+    </main>
+    {{SCRIPTS}}
+  </body>
+</html>
