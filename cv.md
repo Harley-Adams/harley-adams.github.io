@@ -5,7 +5,7 @@ tagline: Xbox · PlayFab · Building gaming cloud services at Microsoft.
 github: https://github.com/Harley-Adams
 email: harley.g.adams@gmail.com
 linkedin: https://www.linkedin.com/in/harleyadams
-location: Redmond, WA
+location: Seattle, WA
 ---
 
 ## Summary
@@ -14,33 +14,34 @@ Software engineer with a decade of experience building and operating cloud servi
 
 ## Experience
 
-### Architect, Xbox Developer Organization · 2025 – Present
+### Microsoft · 2016 – Present
 
-*Microsoft*
+#### Architect, Xbox Developer Organization · 2025 – Present
 
 - Lead the architecture for modernizing legacy Xbox Live services onto a cloud-native [AKS](https://azure.microsoft.com/products/kubernetes-service) stack, setting the technical direction for the wider organization.
 - Designing the next generation of Achievements — enriching the semantic meaning of an Achievement with AI-driven enhancements.
 
-### Tech Lead & Senior Software Engineer, Xbox / PlayFab · 2020 – 2025
-
-*Microsoft*
+#### Tech Lead & Senior Software Engineer, Xbox / PlayFab · 2020 – 2025
 
 - Tech lead for gaming cloud services across the Xbox Network ecosystem and Microsoft's [PlayFab](https://playfab.com/) offering.
 - Key engineer driving the design, delivery, and operation of the Achievements, Leaderboards, Stats, and Minutes Played services — owning architecture decisions and leading the implementation efforts end to end.
 
-### Software Engineer II, Microsoft Sway · 2016 – 2020
+#### Software Engineer II, Microsoft Sway · 2016 – 2020
 
-*Microsoft*
-
-- Instrumental in making [Sway](https://sway.office.com/) accessible — from compliance through to a delightful experience for every user.
-- Assessed new feature work, and triaged and fixed publicly reported bug bounties to keep the Sway service safe and secure.
-- Designed and implemented the full stack for Sway Author Analytics, giving authors visibility into how their Sways are consumed: client-side tracking, endpoints for the Sway clients to post and fetch data, Azure Stream Analytics processing, and SQL storage.
+- Designed and shipped the full-stack Sway Author Analytics platform end to end — client-side tracking, ingestion endpoints, Azure Stream Analytics processing, and SQL storage — giving authors visibility into how their content is consumed.
+- Drove accessibility across [Sway](https://sway.office.com/) and hardened the service by triaging and fixing publicly reported security bug bounties.
 
 ### Junior Software Engineer, Fiserv · 2015 – 2016
 
 *Auckland, New Zealand*
 
 - Wrote backend services in C# / .NET for mobile banking applications, along with the deployment pipelines for those services.
+
+### Game Tester, Ninja Kiwi · 2013
+
+*Auckland, New Zealand*
+
+- Tested games across web and mobile, reporting and verifying bugs ahead of release.
 
 ## Projects
 
