@@ -115,6 +115,7 @@ function nav(base, active) {
         ${brand}
         <div class="site-nav-links">
           <a href="${base}index.html"${cur('cv')}>CV</a>
+          <a href="${base}press/index.html"${cur('press')}>Press</a>
           <a href="${base}games/index.html"${cur('games')}>Games</a>
           <a href="${base}thoughts/index.html"${cur('thoughts')}>Thoughts</a>
         </div>
@@ -223,6 +224,26 @@ function buildCV(styles) {
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'index.html'), html, 'utf8');
   console.log('Built dist/index.html');
+}
+
+function buildPress(styles) {
+  const raw = fs.readFileSync(path.join(root, 'press.md'), 'utf8');
+  const { data, content } = matter(raw);
+
+  const bodyHtml = md.render(content);
+  const template = fs.readFileSync(path.join(srcDir, 'press.html'), 'utf8');
+
+  const html = template
+    .replaceAll('{{TITLE_TAG}}', `${escapeHtml(data.title || 'Press')} \u00b7 ${escapeHtml(BRAND)}`)
+    .replaceAll('{{DESCRIPTION}}', escapeHtml(data.tagline || ''))
+    .replaceAll('{{NAV}}', nav('../', 'press'))
+    .replaceAll('{{STYLES}}', styles)
+    .replaceAll('{{CONTENT}}', bodyHtml);
+
+  const dir = path.join(outDir, 'press');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+  console.log('Built dist/press/index.html');
 }
 
 function buildThoughts(styles, siteUrl) {
@@ -373,6 +394,7 @@ function main() {
   }
 
   buildCV(styles);
+  buildPress(styles);
   buildThoughts(styles, siteUrl);
   copyGames();
   writeRoot404();

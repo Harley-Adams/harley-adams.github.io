@@ -8,7 +8,8 @@
     "build:cv": "node build.mjs",
     "build:games": "CI=false npm --prefix web-ui run build",
     "build": "npm run build:games && npm run build:cv",
-    "preview": "node scripts/preview.mjs"
+    "preview": "node scripts/preview.mjs",
+    "dev": "npm run build:cv && npm run preview"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
