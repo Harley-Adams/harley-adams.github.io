@@ -37,17 +37,15 @@ Cloud architect for global gaming services on Xbox and PlayFab — a network of 
 
 - Wrote backend services in C# / .NET for mobile banking applications, along with the deployment pipelines for those services.
 
-### Game Tester, Ninja Kiwi · 2013
+### Game Developer, Ninja Kiwi · 2013
 
-*Auckland, New Zealand*
-
-- Tested games across web and mobile, reporting and verifying bugs ahead of release.
+- Junior developer contributing to the Bloons Monkey City and SAS: Zombie Assault 4 games. Auckland, New Zealand.
 
 ## Projects
 
 ### TotallyNotWordle — Battle Royale Edition
 
-- A Wordle-inspired puzzle game (after Josh Wardle's viral 2021 hit) with a multiplayer battle-royale mode: players join a lobby and race to guess the word first. Backed by "live service" features — stat tracking, leaderboards, and multiplayer — powered by PlayFab. Built with React, TypeScript, and Material UI. [Play it](/games/MultiplayerGames).
+- A Wordle-inspired puzzle game with a multiplayer battle-royale mode: players join a lobby and race to guess the word first. Backed by "live service" features — stat tracking, leaderboards, and multiplayer — powered by PlayFab. Built with React, TypeScript, and Material UI. [Play it](/games/MultiplayerGames).
 
 ### Run Box Run
 
@@ -57,15 +55,9 @@ Cloud architect for global gaming services on Xbox and PlayFab — a network of 
 
 - **Programming:** C# / .NET 8 · Python · JavaScript / TypeScript · PowerShell · Bash
 - **Architecture & Leadership:** Distributed systems design · live-service reliability · technical direction · mentorship
-- **Platform & Infra:** Azure Kubernetes Service · Docker · Bicep · Terraform · Azure CLI
-- **Data & Messaging:** Cosmos DB · Event Hubs · Redis
-- **Observability & Load:** Grafana · Prometheus · Locust · Azure Load Testing
+- **Cloud & Infra:** Azure Kubernetes Service · Docker · Bicep · Terraform · Cosmos DB · Event Hubs · Redis · Grafana · Prometheus · Locust · Azure Load Testing
 - **AI:** Leading AI adoption for engineers across the Xbox Developer organization — driving practices that lift team velocity while holding the line on service reliability across multiple teams.
 
 ## Education
 
 ### BSc, Computer Science · University of Auckland · 2012 – 2014
-
-*Auckland, New Zealand*
-
-- Worked as a Teaching Assistant for the Computer Science department, helping and teaching students with course material and assignments.
