@@ -25,6 +25,7 @@ Cloud architect for global gaming services on Xbox and PlayFab — a network of 
 
 - Tech lead for gaming cloud services across the Xbox Network ecosystem and Microsoft's [PlayFab](https://playfab.com/) offering.
 - Key engineer driving the design, delivery, and operation of the Achievements, Leaderboards, Stats, and Time Played services — owning architecture decisions and leading the implementation efforts end to end.
+- Re-architected the Achievements backend to eliminate critical player data loss, applying at-least-once delivery guarantees so achievement unlocks survive failures and are never silently dropped.
 
 #### Software Engineer II, Microsoft Sway · 2016 – 2020
 
