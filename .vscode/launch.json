@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // F5 default: build + serve the CV/site and open it in Chrome.
+      "name": "CV site (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:4178",
+      "webRoot": "${workspaceFolder}/dist",
+      "preLaunchTask": "cv: dev server"
+    },
+    {
+      // Launch the React /games SPA dev server and debug it in Chrome.
+      "name": "Games SPA (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000/games",
+      "webRoot": "${workspaceFolder}/web-ui/src",
+      "sourceMapPathOverrides": {
+        "webpack://web-ui/./src/*": "${workspaceFolder}/web-ui/src/*",
+        "webpack:///./src/*": "${workspaceFolder}/web-ui/src/*"
+      },
+      "preLaunchTask": "games: dev server"
+    }
+  ]
+}

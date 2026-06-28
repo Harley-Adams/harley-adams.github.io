@@ -1,0 +1,65 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // Builds the CV/site into dist/ and serves it with the GitHub Pages
+      // emulating static server (scripts/preview.mjs) at http://localhost:4178.
+      "label": "cv: dev server",
+      "type": "shell",
+      "command": "npm run dev",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": [
+          {
+            "regexp": ".",
+            "file": 1,
+            "location": 2,
+            "message": 3
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Serving dist/ at"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      // Starts the Create React App dev server for the /games SPA.
+      // BROWSER=none stops CRA opening its own tab so the debugger owns it.
+      "label": "games: dev server",
+      "type": "shell",
+      "command": "npm start",
+      "options": {
+        "cwd": "${workspaceFolder}/web-ui",
+        "env": {
+          "BROWSER": "none"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": [
+          {
+            "regexp": ".",
+            "file": 1,
+            "location": 2,
+            "message": 3
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Compiling|Starting the development server",
+          "endsPattern": "Compiled successfully|Compiled with warnings|webpack compiled"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}

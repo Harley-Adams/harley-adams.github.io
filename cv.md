@@ -1,7 +1,7 @@
 ---
 name: Harley Adams
-title: Senior Software Engineer · Tech Lead
-tagline: Xbox · PlayFab · Building gaming cloud services at Microsoft.
+title: Architect · Xbox Developer Organization
+tagline: Xbox · PlayFab · Building Progression and Multiplayer gaming services at XBOX.
 github: https://github.com/Harley-Adams
 email: harley.g.adams@gmail.com
 linkedin: https://www.linkedin.com/in/harleyadams
@@ -10,7 +10,7 @@ location: Seattle, WA
 
 ## Summary
 
-Software engineer with a decade of experience building and operating cloud services across gaming and productivity. Currently a tech lead for gaming cloud services on Xbox and PlayFab at Microsoft, where I design, ship, and maintain live-service platform features used across the Xbox Network. Comfortable across the stack in C#/.NET and TypeScript/React, with a focus on reliable, well-instrumented backend systems.
+Cloud architect for global gaming services on Xbox and PlayFab — a network of over a billion players. I set the technical direction for modernizing Xbox Live's live-service platform onto a cloud-native AKS stack, and I've personally designed, built, and operated the Achievements, Leaderboards, Stats, and Time Played systems that sustain 200,000 requests per second across the Xbox Network.
 
 ## Experience
 
@@ -24,7 +24,7 @@ Software engineer with a decade of experience building and operating cloud servi
 #### Tech Lead & Senior Software Engineer, Xbox / PlayFab · 2020 – 2025
 
 - Tech lead for gaming cloud services across the Xbox Network ecosystem and Microsoft's [PlayFab](https://playfab.com/) offering.
-- Key engineer driving the design, delivery, and operation of the Achievements, Leaderboards, Stats, and Minutes Played services — owning architecture decisions and leading the implementation efforts end to end.
+- Key engineer driving the design, delivery, and operation of the Achievements, Leaderboards, Stats, and Time Played services — owning architecture decisions and leading the implementation efforts end to end.
 
 #### Software Engineer II, Microsoft Sway · 2016 – 2020
 
@@ -55,8 +55,12 @@ Software engineer with a decade of experience building and operating cloud servi
 
 ## Skills
 
-- **Programming:** C# / .NET 8 · Python · JavaScript / TypeScript · PowerShell · Bash · Azure CLI
-- **Cloud & DevOps:** Azure Kubernetes Service · Cosmos DB · Event Hubs · Redis · Docker · Bicep · Terraform · Grafana · Prometheus · Locust · Azure Load Testing · PlayFab
+- **Programming:** C# / .NET 8 · Python · JavaScript / TypeScript · PowerShell · Bash
+- **Architecture & Leadership:** Distributed systems design · live-service reliability · technical direction · mentorship
+- **Platform & Infra:** Azure Kubernetes Service · Docker · Bicep · Terraform · Azure CLI
+- **Data & Messaging:** Cosmos DB · Event Hubs · Redis
+- **Observability & Load:** Grafana · Prometheus · Locust · Azure Load Testing
+- **AI:** Leading AI adoption for engineers across the Xbox Developer organization — driving practices that lift team velocity while holding the line on service reliability across multiple teams.
 
 ## Education
 
