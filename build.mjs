@@ -263,11 +263,10 @@ function buildThoughts(styles, siteUrl) {
     if (!file.endsWith('.md')) continue;
     const raw = fs.readFileSync(path.join(postsDir, file), 'utf8');
     const { data, content } = matter(raw);
-    if (data.draft) continue;
     const slug = path.basename(file, '.md');
     const { iso, human } = formatDate(data.date);
     const sortKey = data.date ? new Date(data.date).getTime() : 0;
-    posts.push({ slug, data, content, iso, human, sortKey });
+    posts.push({ slug, data, content, iso, human, sortKey, draft: !!data.draft });
   }
   posts.sort((a, b) => b.sortKey - a.sortKey);
 
@@ -293,6 +292,12 @@ function buildThoughts(styles, siteUrl) {
       .replaceAll('{{DATE_HUMAN}}', escapeHtml(post.human))
       .replaceAll('{{TAGS}}', renderTags(post.data.tags))
       .replaceAll('{{COVER}}', renderCover(post.data, post.slug, postsDir))
+      .replaceAll(
+        '{{DRAFT_BANNER}}',
+        post.draft
+          ? '<div class="post-draft-banner">Draft \u2014 this post is unpublished and may change.</div>'
+          : ''
+      )
       .replaceAll('{{CONTENT}}', bodyHtml)
       .replaceAll('{{SCRIPTS}}', hasMermaid ? mermaidScript : '');
 
@@ -310,22 +315,36 @@ function buildThoughts(styles, siteUrl) {
               .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
               .join('')}</div>`
           : '';
-      return `        <li class="post-list-item">
+      return `        <li class="post-list-item${post.draft ? ' is-draft' : ''}">
           <p class="post-list-date"><time datetime="${post.iso}">${escapeHtml(post.human)}</time></p>
-          <h2 class="post-list-title"><a href="${post.slug}/index.html">${escapeHtml(post.data.title)}</a></h2>
+          <h2 class="post-list-title"><a href="${post.slug}/index.html">${escapeHtml(post.data.title)}</a>${
+            post.draft ? '<span class="draft-badge">Draft</span>' : ''
+          }</h2>
           <p class="post-list-summary">${escapeHtml(post.data.summary || '')}</p>${tags}
         </li>`;
     })
     .join('\n');
+
+  const hasPublished = posts.some((post) => !post.draft);
+  const draftsScript = `<script>
+      (function () {
+        if (new URLSearchParams(location.search).has('drafts')) {
+          document.documentElement.classList.add('show-drafts');
+        }
+      })();
+    </script>`;
 
   const listHtml = thoughtsTemplate
     .replaceAll('{{TITLE_TAG}}', `Thoughts \u00b7 ${escapeHtml(BRAND)}`)
     .replaceAll('{{DESCRIPTION}}', 'Writing on software engineering, gaming cloud services, and side projects.')
     .replaceAll('{{NAV}}', nav('../', 'thoughts'))
     .replaceAll('{{STYLES}}', styles)
+    .replaceAll('{{SCRIPTS}}', draftsScript)
     .replaceAll(
       '{{LIST}}',
-      items || '        <li class="post-list-item"><p class="post-list-summary">Nothing here yet.</p></li>'
+      hasPublished
+        ? items
+        : `${items}\n        <li class="post-list-item"><p class="post-list-summary">Nothing here yet.</p></li>`
     );
 
   const dir = path.join(outDir, 'thoughts');

@@ -692,6 +692,41 @@ body {
   gap: 0.4rem;
 }
 
+/* ===== Drafts (hidden in list unless ?drafts) ===== */
+.post-list-item.is-draft {
+  display: none;
+}
+
+html.show-drafts .post-list-item.is-draft {
+  display: block;
+}
+
+.draft-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  background: #fff4e5;
+  color: #9a5b00;
+  border: 1px solid #f0c89a;
+}
+
+.post-draft-banner {
+  margin: 0 0 1.5rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  background: #fff4e5;
+  color: #9a5b00;
+  border: 1px solid #f0c89a;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 @media (max-width: 640px) {
   .site-nav-inner {
     padding: 1.1rem 1.4rem 0;
