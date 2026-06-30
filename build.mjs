@@ -33,6 +33,8 @@ const icons = {
     '<svg class="ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3V9Zm6 0h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.85V21H9V9Z"/></svg>',
   GitHub:
     '<svg class="ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.36 1.09 2.94.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 22 12 10 10 0 0 0 12 2Z"/></svg>',
+  Website:
+    '<svg class="ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.93 6h-2.95a15.7 15.7 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.93 8ZM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96ZM4.26 14a7.96 7.96 0 0 1 0-4h3.38a16.6 16.6 0 0 0 0 4H4.26Zm.81 2h2.95c.36 1.27.83 2.46 1.38 3.56A8.03 8.03 0 0 1 5.07 16Zm2.95-8H5.07a8.03 8.03 0 0 1 4.33-3.56A15.7 15.7 0 0 0 8.02 8ZM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96ZM9.66 14a14.4 14.4 0 0 1 0-4h4.68a14.4 14.4 0 0 1 0 4H9.66Zm4.98 5.56c.55-1.1 1.02-2.29 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56ZM16.36 14a16.6 16.6 0 0 0 0-4h3.38a7.96 7.96 0 0 1 0 4h-3.38Z"/></svg>',
 };
 
 function escapeHtml(s) {
@@ -48,6 +50,7 @@ function handleFromUrl(label, url) {
     const u = new URL(url);
     const p = u.pathname.replace(/^\/+|\/+$/g, '');
     if (label === 'GitHub') return '@' + (p.split('/').pop() || u.hostname);
+    if (label === 'Website') return u.hostname.replace(/^www\./, '') + (p ? '/' + p : '');
     return p || u.hostname;
   } catch (_) {
     return url;
@@ -60,6 +63,8 @@ function collectLinks(data) {
     links.push({ label: 'LinkedIn', url: data.linkedin, handle: handleFromUrl('LinkedIn', data.linkedin) });
   if (data.github)
     links.push({ label: 'GitHub', url: data.github, handle: handleFromUrl('GitHub', data.github) });
+  if (data.website)
+    links.push({ label: 'Website', url: data.website, handle: handleFromUrl('Website', data.website) });
   if (Array.isArray(data.links)) {
     for (const l of data.links)
       links.push({ label: l.label, url: l.url, handle: l.handle || handleFromUrl(l.label, l.url) });
