@@ -121,7 +121,7 @@ function nav(base, active) {
         <div class="site-nav-links">
           <a href="${base}index.html"${cur('cv')}>CV</a>
           <a href="${base}press/index.html"${cur('press')}>Press</a>
-          <a href="${base}games/index.html"${cur('games')}>Games</a>
+          <a href="${base}games/"${cur('games')}>Games</a>
           <a href="${base}thoughts/index.html"${cur('thoughts')}>Thoughts</a>
         </div>
       </div>
