@@ -11,11 +11,13 @@ location: Seattle, WA
 
 ## Summary
 
-Cloud architect for global gaming services on Xbox and PlayFab — a network of over a billion players. I set the technical direction for modernizing Xbox Live's live-service platform onto a cloud-native AKS stack, and I've personally designed, built, and operated the Achievements, Leaderboards, Stats, and Time Played systems that sustain 200,000 requests per second across the Xbox Network.
+Cloud architect for global gaming services on Xbox and PlayFab — a network of over a billion players. I set the technical direction for modernizing Xbox Live's live-service platform onto a cloud-native AKS stack. Along the way I've personally designed, built, and operated the Achievements, Leaderboards, Stats, and Time Played systems that sustain 200,000 requests per second across the Xbox Network.
 
 ## Experience
 
 ### Microsoft · 2016 – Present
+
+*Seattle, WA*
 
 #### Architect, Xbox Developer Organization · 2025 – Present
 
@@ -31,17 +33,23 @@ Cloud architect for global gaming services on Xbox and PlayFab — a network of 
 #### Software Engineer II, Microsoft Sway · 2016 – 2020
 
 - Designed and shipped the full-stack Sway Author Analytics platform end to end — client-side tracking, ingestion endpoints, Azure Stream Analytics processing, and SQL storage — giving authors visibility into how their content is consumed.
-- Drove accessibility across [Sway](https://sway.office.com/) and hardened the service by triaging and fixing publicly reported security bug bounties.
+- Drove accessibility across [Sway](https://sway.office.com/) and hardened the service by triaging and fixing publicly reported security vulnerabilities.
 
-### Junior Software Engineer, Fiserv · 2015 – 2016
+### Fiserv · 2015 – 2016
 
 *Auckland, New Zealand*
 
+#### Junior Software Engineer
+
 - Wrote backend services in C# / .NET for mobile banking applications, along with the deployment pipelines for those services.
 
-### Game Developer, Ninja Kiwi · 2013
+### Ninja Kiwi · 2013
 
-- Junior developer contributing to the Bloons Monkey City and SAS: Zombie Assault 4 games. Auckland, New Zealand.
+*Auckland, New Zealand*
+
+#### Game Developer
+
+- Junior developer contributing to the Bloons Monkey City and SAS: Zombie Assault 4 games.
 
 ## Projects
 
