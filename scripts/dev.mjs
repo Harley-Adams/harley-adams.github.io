@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dist = path.join(root, 'dist');
+const gamesBuildDir = path.join(root, 'web-ui', 'build');
 const port = Number(process.env.PORT) || 4178;
 
 const types = {
@@ -45,6 +46,25 @@ function build() {
   }
 }
 
+// The React games under /games/ are built by their own CRA pipeline into
+// web-ui/build, which build.mjs then copies into dist/games/. That build is slow,
+// so we only run it when the output is missing (e.g. a fresh checkout). Without
+// this, `npm run dev` would skip games entirely and the Games tab would 404.
+function ensureGamesBuilt() {
+  if (fs.existsSync(path.join(gamesBuildDir, 'index.html'))) return;
+  console.log('Games build not found — building web-ui once (this may take a minute)…');
+  try {
+    execFileSync('npm', ['--prefix', 'web-ui', 'run', 'build'], {
+      cwd: root,
+      stdio: 'inherit',
+      env: { ...process.env, CI: 'false' },
+    });
+  } catch (err) {
+    console.error('Games build failed:', err.message);
+    console.error('The Games tab will 404 until "npm run build:games" succeeds.');
+  }
+}
+
 // Open SSE connections; notified to reload after each successful rebuild.
 const clients = new Set();
 
@@ -67,6 +87,7 @@ function watch(target, options) {
   fs.watch(target, options, () => scheduleRebuild());
 }
 
+ensureGamesBuilt();
 build();
 
 // Watch the source inputs that feed build.mjs.

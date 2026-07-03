@@ -34,10 +34,14 @@ Edit the CV by editing **`cv.md`**. Add a blog post by dropping a Markdown file 
 
 ```bash
 npm install                 # install generator deps (gray-matter, markdown-it)
+npm run dev                 # watch cv.md/posts/src, live-reload at http://localhost:4178
 npm run build:cv            # build only the CV + thoughts (fast)
 npm run build               # full build: games + CV -> dist/
 npm run preview             # serve dist/ at http://localhost:4178
 ```
+
+`npm run dev` builds the games once on first run (if `web-ui/build` is missing) so the
+Games tab works locally, then watches the CV/blog sources for live reload.
 
 `npm run build` runs the games build with `CI=false` so pre-existing CRA lint warnings
 do not fail the build.
