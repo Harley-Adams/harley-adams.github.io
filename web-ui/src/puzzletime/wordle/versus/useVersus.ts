@@ -50,6 +50,7 @@ import {
   publishSnapshot,
 } from "../../net/lobby";
 import { LobbyPubSub } from "../../net/pubsub";
+import { RateLimitError } from "../../net/errors";
 import { EntityKey, EntityTokenResponse } from "../../net/types";
 import { incrementVersusWins } from "../../lib/storage";
 import { recordVersusWin } from "../../net/stats";
@@ -241,6 +242,7 @@ export interface VersusController {
   roomCode: string | null;
   memberCount: number;
   signedIn: boolean;
+  throttled: boolean;
   quickMatch: () => void;
   createPrivate: () => void;
   joinPrivate: (code: string) => void;
@@ -262,6 +264,9 @@ export function useVersus(): VersusController {
     Record<string, OpponentSnapshot>
   >({});
   const [winnerId, setWinnerId] = useState<string | null | undefined>(undefined);
+  // True while PlayFab is actively rate-limiting our lobby calls (429s). Drives
+  // a small UI signal and a short relay backoff.
+  const [throttled, setThrottled] = useState(false);
 
   // Refs for the relay + lifecycle (avoid re-subscribing on every render).
   const boardRef = useRef(board);
@@ -277,6 +282,8 @@ export function useVersus(): VersusController {
   const relayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const cancelledRef = useRef(false);
   const recordedWinRef = useRef(false);
+  // While rate-limited, hold off all lobby calls until this timestamp.
+  const backoffUntilRef = useRef(0);
 
   const tokenOf = (): EntityTokenResponse | null =>
     session ? session.entityToken : null;
@@ -333,6 +340,8 @@ export function useVersus(): VersusController {
       finishedAtRef.current = null;
       lastPublishedRef.current = "";
       recordedWinRef.current = false;
+      backoffUntilRef.current = 0;
+      setThrottled(false);
       setOpponents({});
       setWinnerId(undefined);
       const answer = answerForSeed(seed);
@@ -367,16 +376,34 @@ export function useVersus(): VersusController {
       // so the healthy path stays purely push-driven.
       let ticks = 0;
       let lastFetchTick = -100;
+      // Record a 429: back off all lobby calls and flag the UI.
+      const noteThrottle = (e: unknown) => {
+        if (e instanceof RateLimitError) {
+          backoffUntilRef.current = Date.now() + e.retryAfterMs;
+          setThrottled(true);
+          return true;
+        }
+        return false;
+      };
       relayRef.current = setInterval(async () => {
         if (cancelledRef.current) return;
+        // While throttled, skip every lobby call until the backoff elapses so we
+        // stop adding to the rate-limit pressure. Keep the UI signal on until
+        // the next successful call clears it.
+        if (Date.now() < backoffUntilRef.current) {
+          ticks += 1;
+          return;
+        }
         const snap = buildSnapshot(boardRef.current, finishedAtRef.current);
         const json = encodeSnapshot(snap);
         if (json !== lastPublishedRef.current) {
           lastPublishedRef.current = json;
           try {
             await publishSnapshot(token, entity, lobbyId, json);
-          } catch {
-            /* transient — retried next tick */
+          } catch (e) {
+            // On throttle, roll back so we retry this snapshot after the backoff.
+            if (noteThrottle(e)) lastPublishedRef.current = "";
+            /* other errors: transient — retried next tick */
           }
         }
         const pushArrived = pendingFetchRef.current;
@@ -394,8 +421,9 @@ export function useVersus(): VersusController {
               if (decoded) next[e.entityId] = decoded;
             }
             setOpponents(next);
-          } catch {
-            /* ignore, retry next tick */
+            setThrottled(false); // a clean read means we're no longer throttled
+          } catch (e) {
+            if (!noteThrottle(e)) pendingFetchRef.current = true; // retry non-429
           }
         }
         ticks += 1;
@@ -586,6 +614,7 @@ export function useVersus(): VersusController {
     setMemberCount(1);
     setOpponents({});
     setWinnerId(undefined);
+    setThrottled(false);
     dispatch({ type: "RESET", answer: "STARE" });
     cancelledRef.current = false;
   }, [teardown]);
@@ -617,6 +646,7 @@ export function useVersus(): VersusController {
     roomCode,
     memberCount,
     signedIn: !!session,
+    throttled,
     quickMatch,
     createPrivate,
     joinPrivate,

@@ -12,6 +12,7 @@
  */
 import { PLAYFAB_BASE_API } from "./config";
 import { EntityKey, EntityTokenResponse } from "./types";
+import { RateLimitError } from "./errors";
 
 async function entityPost<T>(
   endpoint: string,
@@ -26,6 +27,23 @@ async function entityPost<T>(
     },
     body: JSON.stringify(body),
   });
+  // Surface throttling distinctly so the relay can back off and the UI can show
+  // a signal, rather than treating it as a generic transient failure.
+  if (res.status === 429) {
+    let retrySecs = Number(res.headers.get("Retry-After")) || 0;
+    try {
+      const j = await res.json();
+      retrySecs =
+        retrySecs ||
+        j?.retryAfterSeconds ||
+        j?.RetryAfterSeconds ||
+        j?.errorDetails?.retryAfterSeconds ||
+        0;
+    } catch {
+      /* body may be empty */
+    }
+    throw new RateLimitError(Math.max(1000, (retrySecs || 2) * 1000));
+  }
   const json = await res.json();
   if (!res.ok) {
     throw new Error(json.errorMessage || `PlayFab ${endpoint} failed (${res.status})`);

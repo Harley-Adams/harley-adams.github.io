@@ -162,6 +162,15 @@ function Status({ text }: { text: string }) {
 function Race({ v }: { v: VersusController }) {
   return (
     <div className="pt-race">
+      {v.throttled && (
+        <div
+          className="pt-throttle"
+          title="PlayFab is rate-limiting our requests. Live updates may lag for a moment; they'll catch up automatically."
+        >
+          <span className="pt-throttle-dot" />
+          Rate limited — updates may lag briefly
+        </div>
+      )}
       {v.isOver && (
         <div
           className="pt-versus-banner"
