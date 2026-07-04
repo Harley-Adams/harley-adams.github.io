@@ -1,9 +1,38 @@
-/* body {
+/* Global reset + defaults for the PuzzleTime web app. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--pt-background, #0e0f13);
+  color: var(--pt-text-primary, #f4f5f7);
+  font-family: var(
+    --pt-font,
+    ui-rounded,
+    "SF Pro Rounded",
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif
+  );
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-} */
+}
+
+button {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+}

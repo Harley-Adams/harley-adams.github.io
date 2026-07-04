@@ -1,0 +1,55 @@
+/*
+ * PuzzleTime design tokens — a faithful web port of the iOS app's Theme.swift.
+ * Dark-first charcoal palette, layered surfaces, category accents, SF Rounded.
+ * Never hardcode these values in a component; always pull from a var().
+ */
+:root {
+  /* Surfaces */
+  --pt-background: #0e0f13;
+  --pt-surface: #1a1c22;
+  --pt-surface-elevated: #23262e;
+  --pt-well: #141519;
+  --pt-stroke: #2e313a;
+  --pt-stroke-strong: #3c404b;
+
+  /* Text (3-step ramp) */
+  --pt-text-primary: #f4f5f7;
+  --pt-text-secondary: #9da2ad;
+  --pt-text-tertiary: #6a6f7b;
+
+  /* Semantic */
+  --pt-success: #4ec58a;
+  --pt-warning: #e2b23c;
+  --pt-danger: #e5715e;
+
+  /* Category accents */
+  --pt-word: #6fae58;
+  --pt-spatial: #5891d8;
+  --pt-numeric: #e0a04b;
+  --pt-logic: #a678d6;
+
+  /* Wordle tile / key colors (classic Wordle scale, from LetterState+Style.swift) */
+  --pt-tile-absent: #3b3d40;
+  --pt-tile-present: #b59e45;
+  --pt-tile-correct: #6b9e5c;
+  --pt-tile-border-empty: #404040;
+  --pt-tile-border-tbd: #737373;
+  --pt-key-default: #808080;
+
+  /* Radius */
+  --pt-r-tile: 8px;
+  --pt-r-control: 12px;
+  --pt-r-card: 16px;
+  --pt-r-sheet: 24px;
+
+  /* Spacing scale */
+  --pt-s-xs: 6px;
+  --pt-s-sm: 10px;
+  --pt-s-md: 16px;
+  --pt-s-lg: 24px;
+  --pt-s-xl: 32px;
+
+  /* Typography — SF Rounded on Apple platforms, graceful fallbacks elsewhere. */
+  --pt-font: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI", system-ui,
+    -apple-system, sans-serif;
+}

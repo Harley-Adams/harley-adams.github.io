@@ -53,9 +53,9 @@ Cloud architect for global gaming services on Xbox and PlayFab — a network of 
 
 ## Projects
 
-### TotallyNotWordle — Battle Royale Edition
+### PuzzleTime — Web Edition
 
-- A Wordle-inspired puzzle game with a multiplayer battle-royale mode: players join a lobby and race to guess the word first. Backed by "live service" features — stat tracking, leaderboards, and multiplayer — powered by PlayFab. Built with React, TypeScript, and Material UI. [Play it](/games/MultiplayerGames).
+- A web port of my iOS "PuzzleTime" puzzle app, starting with a fully-featured Wordle: daily and random modes, on-screen and physical keyboard, per-key coloring, hints, stats and streaks with a guess distribution, and shareable results. Local-first — no backend or account required. Built with React and TypeScript. [Play it](/games/wordle).
 
 ### Run Box Run
 
