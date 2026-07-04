@@ -513,7 +513,9 @@ on match start:
         if snap != lastSnap:
             UpdateLobby(memberData = { snap })
             lastSnap = snap
-        if pendingReconcile or (not connected and slowPollTick):
+        # Reconcile only when we have to: a push told us to, we're offline, or
+        # the slow watchdog fired (belt-and-suspenders for a silently missed push).
+        if pendingReconcile or (not connected and slowPollTick) or watchdogTick(~20s):
             members = GetLobby().members
             for m in members where m.id != myId:
                 applyOpponent(m.id, m.data.snap)
@@ -524,8 +526,38 @@ on match start:
 
 The publish half still runs on a tick (publish only when your serialized state actually
 changed). The *read* half is now push-driven: opponents are applied inside the push
-handler, and `GetLobby` only fires to reconcile — initial seed, a reconnect, or a frame
-you couldn't apply. Connected and quiet, this loop makes zero reads.
+handler, and `GetLobby` only fires to reconcile — initial seed, a reconnect, an
+unapplyable frame, or that slow watchdog. Connected and quiet, this loop makes **one
+read every ~20 s** and nothing more.
+
+### Why keep a slow reconcile if pushes work?
+
+Because PubSub is **best-effort delivery, not a durable log.** There's no server-side
+replay of messages you missed — if a frame never reaches you, nothing in your own code
+will ever know. Most of the ways that happens are already covered by the loop above (the
+initial seed handles the join→subscribe gap; an unparseable frame sets `pendingReconcile`;
+a dropped socket flips `connected` false and the offline poll takes over; a reconnect
+re-subscribes and forces a reconcile). The watchdog exists for the two failure modes that
+those *don't* catch — the nasty ones, because they leave the socket looking perfectly
+healthy while updates silently stop:
+
+- **A frame is dropped while the connection still reads "live."** A single
+  `ReceiveMessage` lost on the wire (or coalesced/dropped server-side under load) fires no
+  error and no reconnect event. Your state machine thinks everything's fine; the opponent
+  just freezes.
+- **The subscription lapses without the socket dropping.** The subscription is bound to
+  the connection handle. If that handle rotates or the server-side subscription expires
+  while the WebSocket stays open, pushes quietly stop routing — again, no disconnect, no
+  error to react to.
+
+In both cases there is no event to hang a recovery on, so the only defense is to *not
+fully trust the socket*: refetch on a slow timer and let the fetched truth win. At one
+`GetLobby` every ~20 s this is ~0.05 req/s — a rounding error against the rate limit — and
+it caps worst-case staleness at the watchdog interval instead of "until the next change
+happens to get through." This is the standard realtime posture: **push for latency, poll
+slowly for correctness.** If you take one thing from this section: a push you didn't
+receive is invisible, so always keep a cheap reconcile that doesn't depend on the socket
+being honest.
 
 ## Hard-won gotchas (read this section twice)
 
@@ -561,29 +593,37 @@ and most of them masquerade as a different problem than they are.
 5. **Keep the WebSocket alive.** No ping → dead socket in ~20–30 s → no more pushes. The
    tell is unmistakable once you know it: the first few updates work, then nothing.
 
-6. **Always time-box the socket handshake.** If the handshake stalls, don't let your
+6. **Pushes are best-effort — a missed one is invisible.** PubSub has no server-side
+   replay, so a frame dropped on the wire, or a subscription that silently lapses while
+   the socket stays open, stops your updates with *no* error and *no* disconnect event to
+   react to. The opponent just freezes. Don't fully trust the socket: keep a slow
+   reconcile (`GetLobby` every ~20 s) that runs regardless of connection state. It's
+   ~0.05 req/s and it's the only thing that recovers a silently missed push. Push for
+   latency, poll slowly for correctness.
+
+7. **Always time-box the socket handshake.** If the handshake stalls, don't let your
    relay block forever waiting for the connection handle. Cap it (e.g. 6 s) and fall
    back to polling. Otherwise one bad negotiate hangs the entire match with zero updates.
 
-7. **Don't trust matchmaking `Members` for opponent identity.** The ticket's member list
+8. **Don't trust matchmaking `Members` for opponent identity.** The ticket's member list
    can come back without opponent ids. Create your opponent slots from
    **match size − 1** and fill them positionally from lobby membership. If you key
    opponents strictly by the ticket's ids and they're missing, every incoming snapshot
    is silently dropped and the opponent looks idle. This masquerades as "the relay is
    broken" when it's actually "there was no slot to put the data in."
 
-8. **Use `JoinArrangedLobby`, not host-elected `CreateLobby`/`JoinLobby`** for matchmade
+9. **Use `JoinArrangedLobby`, not host-elected `CreateLobby`/`JoinLobby`** for matchmade
    games. The non-host join is the classic point where one player silently fails to enter
    the shared room.
 
-9. **`UseConnections: true` is mandatory** with automatic/manual owner migration, and is
-   what enables change notifications. Forgetting it gives you confusing bad-request
-   errors or a lobby that never pushes.
+10. **`UseConnections: true` is mandatory** with automatic/manual owner migration, and is
+    what enables change notifications. Forgetting it gives you confusing bad-request
+    errors or a lobby that never pushes.
 
-10. **The negotiate response isn't enveloped.** Read `url`/`accessToken` from the top
+11. **The negotiate response isn't enveloped.** Read `url`/`accessToken` from the top
     level, unlike every other call where you read `data.*`.
 
-11. **Never ship your secret key.** Queue creation and other admin calls use the *title*
+12. **Never ship your secret key.** Queue creation and other admin calls use the *title*
     entity token derived from the secret key. Do that server-side or in tooling. Clients
     only ever touch a player session ticket / entity token.
 
