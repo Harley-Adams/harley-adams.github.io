@@ -359,8 +359,14 @@ export function useVersus(): VersusController {
         new Promise((r) => setTimeout(r, 6000)),
       ]);
 
-      // Relay loop: publish on change, fetch on push (plus a slow safety poll).
+      // Relay loop. Updates are event-driven: a PubSub push sets pendingFetch
+      // and we refetch then — no steady polling, so we don't hammer GetLobby
+      // into rate limits (429s). We only *poll* when the socket is actually
+      // down (fallback), plus a slow ~20s watchdog reconcile as belt-and-braces
+      // in case a push is ever missed. Reconnects re-subscribe (see pubsub.ts),
+      // so the healthy path stays purely push-driven.
       let ticks = 0;
+      let lastFetchTick = -100;
       relayRef.current = setInterval(async () => {
         if (cancelledRef.current) return;
         const snap = buildSnapshot(boardRef.current, finishedAtRef.current);
@@ -373,12 +379,12 @@ export function useVersus(): VersusController {
             /* transient — retried next tick */
           }
         }
-        // Fetch immediately on a push, and also on a slow safety cadence
-        // (~every 3s) regardless of socket state. PubSub can silently stop
-        // delivering (e.g. after a reconnect), so this guarantees the opponent
-        // board keeps updating even if pushes dry up.
-        if (pendingFetchRef.current || ticks % 3 === 0) {
+        const pushArrived = pendingFetchRef.current;
+        const offlinePoll = !connectedRef.current && ticks % 3 === 0;
+        const watchdog = ticks - lastFetchTick >= 20;
+        if (pushArrived || offlinePoll || watchdog) {
           pendingFetchRef.current = false;
+          lastFetchTick = ticks;
           try {
             const entries = await getLobbySnapshots(token, lobbyId);
             const next: Record<string, OpponentSnapshot> = {};
