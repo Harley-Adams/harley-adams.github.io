@@ -26,7 +26,8 @@ blocks, and the whole trick is chaining them.
 
 - **Matchmaking** answers *who do I play with* and hands you a `MatchId`.
 - **Lobby** is a shared key/value room with per-member data — your state channel.
-- **PubSub** is a SignalR WebSocket that pushes "this lobby changed" — the doorbell.
+- **PubSub** is a SignalR WebSocket that pushes the change itself — not just "something
+  changed," but *what* changed. It's your delivery channel, not merely a doorbell.
 
 Wire those three together and you get low-latency multiplayer state relay for a
 handful of players without operating a single box of your own.
@@ -61,24 +62,31 @@ sequenceDiagram
     participant L as PlayFab Lobby
     participant PS as PlayFab PubSub (WebSocket)
 
+    A->>PS: negotiate + WebSocket handshake → connectionHandle
     A->>MM: CreateMatchmakingTicket
+    A->>MM: SubscribeToMatchmakingResource(ticket, handle)
     B->>MM: CreateMatchmakingTicket
-    MM-->>A: ticket Matched (MatchId)
-    MM-->>B: ticket Matched (MatchId)
+    MM-->>A: PubSub push "ticket status changed"
+    A->>MM: GetMatchmakingTicket → Matched (MatchId)
     A->>MM: GetMatch(MatchId) → ArrangementString A
     B->>MM: GetMatch(MatchId) → ArrangementString B
     A->>L: JoinArrangedLobby(ArrangementString A) → LobbyId
     B->>L: JoinArrangedLobby(ArrangementString B) → same LobbyId
-    A->>PS: negotiate + WebSocket handshake → connectionHandle
     A->>L: SubscribeToLobbyResource(LobbyId, handle)
     Note over A,B: match begins
     A->>L: UpdateLobby(member data = my snapshot)
-    L-->>B: PubSub push "lobby changed"
-    B->>L: GetLobby → read A's snapshot
+    L-->>B: PubSub push carrying A's snapshot
+    Note over B: apply A's snapshot straight from the push — no GetLobby
     B->>L: UpdateLobby(member data = my snapshot)
-    L-->>A: PubSub push "lobby changed"
-    A->>L: GetLobby → read B's snapshot
+    L-->>A: PubSub push carrying B's snapshot
+    Note over A: apply B's snapshot straight from the push
 ```
+
+One socket does double duty here: the same PubSub connection handle subscribes both
+the matchmaking ticket *and* the lobby. In the steady state of a match there is **no
+polling at all** — every transition arrives as a push. Polling only survives as a slow
+safety net for when the socket can't connect. I'll build up to that; the polling
+version is the honest starting point and the push version is the upgrade.
 
 ## Prerequisites and the auth model
 
@@ -161,7 +169,7 @@ A few things I've learned to do by default:
 
 Response: `{ "TicketId": "..." }`.
 
-### Poll until matched
+### Wait until matched
 
 `POST /Match/GetMatchmakingTicket`
 
@@ -169,7 +177,7 @@ Response: `{ "TicketId": "..." }`.
 { "TicketId": "<TICKET_ID>", "QueueName": "versus_default", "EscapeObject": false }
 ```
 
-Poll about **once per second**. You're waiting for `Status: "Matched"`:
+You're waiting for `Status: "Matched"`:
 
 ```jsonc
 {
@@ -180,9 +188,16 @@ Poll about **once per second**. You're waiting for `Status: "Matched"`:
 ```
 
 The other statuses you'll see are `WaitingForPlayers`, `WaitingForMatch`, and
-`Canceled`. When a player times out or backs out, **cancel the ticket** so it can't
-linger and poach the next match — this is a real bug I've watched ship, and it's in the
-gotchas section below:
+`Canceled`. The obvious way to wait is to **poll this endpoint about once per second**
+until it flips to `Matched`. That works, and it's the right thing to ship first — but
+it's also a request every second per searching player, and it's the first poll I go back
+and kill once the socket is up. PlayFab can *push* you the status change instead; I cover
+that under **"Skip the ticket poll, too"** below, once we have a PubSub connection to
+hang it on. Until then, poll.
+
+When a player times out or backs out, **cancel the ticket** so it can't linger and poach
+the next match — this is a real bug I've watched ship, and it's in the gotchas section
+below:
 
 `POST /Match/CancelAllMatchmakingTicketsForPlayer`
 
@@ -302,7 +317,8 @@ The payload design is where most of the engineering judgment actually lives:
 
 Polling `GetLobby` works, but it's laggy and it burns your rate budget. PlayFab PubSub
 is a **SignalR-over-WebSocket** channel that pushes a notification whenever a subscribed
-lobby changes; you then fetch once, on demand. There's no SDK requirement — the wire
+lobby changes — and, as we'll see, that notification carries the change itself, so in
+the common case you never call back for it. There's no SDK requirement — the wire
 protocol is small enough to speak directly, and I'd rather own those ~40 lines than take
 a dependency for them.
 
@@ -364,10 +380,58 @@ Back on the REST API:
 }
 ```
 
+### Read the push instead of refetching
+
 Now, whenever the lobby changes, the socket receives a frame with
-`"target":"ReceiveMessage"`. Treat that as **"refetch the lobby"** and call `GetLobby`
-once. Resist the urge to parse state out of the push itself — the push is a doorbell,
-not a payload.
+`"target":"ReceiveMessage"`. The tempting first implementation — and the one I shipped
+first, and the one most sample code shows — is to treat that frame as a bare doorbell:
+*"something changed, go call `GetLobby`."* It works. It's also a wasted round-trip,
+because **the push already contains everything `GetLobby` would tell you.**
+
+The frame's single argument looks like this:
+
+```jsonc
+{
+  "topic": "1~lobby~LobbyChange~<lobbyId>",
+  "payload": "<base64>",
+  "traceId": "..."
+}
+```
+
+Base64-decode `payload` and you get the actual delta:
+
+```jsonc
+{
+  "lobbyId": "<lobbyId>",
+  "lobbyChanges": [
+    {
+      "changeNumber": 7,
+      "memberToMerge": {
+        "memberEntity": { "Type": "title_player_account", "Id": "B..." },
+        "memberData": { "snap": "<B's serialized state>" }
+      }
+    }
+  ]
+}
+```
+
+That's *who* changed **and** their full `snap` — the same string `GetLobby` would hand
+back. So apply it directly and skip the fetch entirely. Two things fall out of this that
+the doorbell model can't give you:
+
+- **You can drop your own echo.** Your own `UpdateLobby` fires a `LobbyChange` push back
+  to *you*. Because the frame names the changed member (`memberEntity.Id`), you just
+  skip any change whose id is your own — no pointless refetch of state you just wrote.
+- **`GetLobby` becomes the exception, not the rule.** You still keep it, but only to
+  *reconcile*: the initial read right after joining, after a reconnect (you may have
+  missed changes while the socket was down), and when a frame arrives that you can't
+  fully apply — a member *removal*, a lobby-property change, or a change that carries
+  only a `pubSubConnectionHandle` and no `snap` (that's a member (re)subscribing, not new
+  state). If a frame's shape is anything other than a clean member merge, fall back to
+  one `GetLobby` rather than guessing.
+
+In the happy path of a live match, this takes `GetLobby` to **zero** calls — every
+opponent update rides in on a push you already received.
 
 ### Keep the socket alive
 
@@ -383,6 +447,50 @@ Skip it and the socket silently dies a few seconds into the match, updates stop,
 there's no error anywhere in your own code to point you at it. If you decide to skip
 PubSub entirely, fall back to polling `GetLobby` every couple of seconds.
 
+### Skip the ticket poll, too
+
+Now that we have a live socket and a connection handle, come back and kill that
+once-a-second matchmaking poll. Matchmaking tickets are subscribable on the *same*
+PubSub connection, so PlayFab will push you the status change the moment a match forms.
+
+`POST /Match/SubscribeToMatchmakingResource`
+
+```jsonc
+{
+  "Type": "MatchTicketStatusChange",
+  "EntityKey": { "Id": "<PLAYER_ENTITY_ID>", "Type": "title_player_account" },
+  "ResourceId": "<QUEUE_NAME>|<TICKET_ID>",
+  "SubscriptionVersion": 1,
+  "PubSubConnectionHandle": "<newConnectionHandle>"
+}
+```
+
+Two traps I hit here, both worth calling out because they cost me time:
+
+- **The endpoint path doesn't match its request-type name.** The SDK type is
+  `SubscribeToMatchResourceRequest`, but the REST route is
+  `/Match/SubscribeToMatchmakingResource`. Guess the "obvious" path and you get a 404.
+- **The success response has an empty body.** Unlike almost every other call, a
+  successful subscribe returns *no* `{ code, data }` envelope — it's a bare `200` with
+  nothing in it. If your HTTP helper blindly does `response.json()`, it'll throw
+  "Unexpected end of JSON input" on success. Read the body as text and only parse it if
+  it's non-empty.
+
+And one that will have you swearing at a silent socket: **the match-ticket push arrives
+on a different SignalR client method than lobby changes.** Lobby changes come in on
+`ReceiveMessage`; match-ticket status changes come in on
+**`ReceiveSubscriptionChangeMessage`**. If you only registered a handler for
+`ReceiveMessage`, the SignalR client logs a cheerful *"No client method with the name
+'receivesubscriptionchangemessage' found"* and drops the push on the floor — and you
+sit there wondering why your fallback poll is doing all the work. Register both.
+
+Unlike the lobby push, I don't bother parsing the match payload — a ticket only matters
+once, at the instant it flips to `Matched`. So I treat this push purely as a signal:
+"status changed, go call `GetMatchmakingTicket` once." That single call replaces the
+whole 1-second loop. Keep a slow safety-net poll (I use ~25 s) in case the subscribe
+fails or the socket never came up, and fall back to steady 1 s polling only when you
+couldn't subscribe at all.
+
 ### The relay loop
 
 Here's the whole thing in pseudo-code. Notice how small it is — that's the point.
@@ -390,22 +498,34 @@ Here's the whole thing in pseudo-code. Notice how small it is — that's the poi
 ```text
 on match start:
     connect pubsub (with a hard timeout, e.g. 6s); on success subscribe(lobbyId)
-    pendingFetch = false
-    pubsub.onLobbyChanged = () => pendingFetch = true
+    pubsub.onPush = (frame) =>
+        changes = parseLobbyChanges(frame)   # base64-decode payload
+        if changes == null:                  # unparseable / membership change
+            pendingReconcile = true          # → one GetLobby
+        else:
+            for c in changes where c.id != myId and c.snap != null:
+                applyOpponent(c.id, c.snap)  # straight from the push
+
+    reconcileOnce()                          # initial GetLobby to seed opponents
 
     loop every 1s while match running:
         snap = serialize(myState)            # deterministic!
         if snap != lastSnap:
             UpdateLobby(memberData = { snap })
             lastSnap = snap
-        if pendingFetch or (not connected and slowPollTick):
+        if pendingReconcile or (not connected and slowPollTick):
             members = GetLobby().members
             for m in members where m.id != myId:
-                applyOpponent(m.data.snap)
-            pendingFetch = false
+                applyOpponent(m.id, m.data.snap)
+            pendingReconcile = false
 
     pubsub.close()   # also stop the keepalive ping
 ```
+
+The publish half still runs on a tick (publish only when your serialized state actually
+changed). The *read* half is now push-driven: opponents are applied inside the push
+handler, and `GetLobby` only fires to reconcile — initial seed, a reconnect, or a frame
+you couldn't apply. Connected and quiet, this loop makes zero reads.
 
 ## Hard-won gotchas (read this section twice)
 
@@ -420,38 +540,52 @@ and most of them masquerade as a different problem than they are.
    changes. This one bug produces three different-looking symptoms.
 
 2. **Respect the lobby rate limit.** Lobby read/write is rate-limited per entity. With
-   two players each pushing and each pulling-on-push, it's easy to exceed. Budget for
-   roughly **≤1 request per second per client**: publish only on change, fetch only on a
-   push (plus a slow safety poll). Treat a 429 as "back off," not "retry immediately."
+   two players each pushing and each reading, it's easy to exceed — especially if you
+   refetch `GetLobby` on every push. Budget for roughly **≤1 request per second per
+   client**: publish only on change, and *apply the push payload directly* instead of
+   refetching (see the **"Read the push instead of refetching"** section above), keeping
+   `GetLobby` for reconcile only. Treat a 429 as "back off," not "retry immediately."
+   Getting this wrong is the single fastest way into 429 territory.
 
-3. **Keep the WebSocket alive.** No ping → dead socket in ~20–30 s → no more pushes. The
+3. **Match-ticket pushes use a different client method.** Lobby changes arrive on
+   `ReceiveMessage`; matchmaking-ticket status changes arrive on
+   `ReceiveSubscriptionChangeMessage`. Register a handler for *both*, or the ticket push
+   is silently dropped ("No client method with the name 'receivesubscriptionchangemessage'
+   found") and you quietly fall back to polling without realizing it.
+
+4. **`SubscribeToMatchmakingResource` returns an empty body and lives at a surprising
+   path.** The route is `/Match/SubscribeToMatchmakingResource` (not the SDK's
+   `SubscribeToMatchResource`), and a successful call returns no JSON envelope at all. A
+   naive `response.json()` throws on success — read text first, parse only if non-empty.
+
+5. **Keep the WebSocket alive.** No ping → dead socket in ~20–30 s → no more pushes. The
    tell is unmistakable once you know it: the first few updates work, then nothing.
 
-4. **Always time-box the socket handshake.** If the handshake stalls, don't let your
+6. **Always time-box the socket handshake.** If the handshake stalls, don't let your
    relay block forever waiting for the connection handle. Cap it (e.g. 6 s) and fall
    back to polling. Otherwise one bad negotiate hangs the entire match with zero updates.
 
-5. **Don't trust matchmaking `Members` for opponent identity.** The ticket's member list
+7. **Don't trust matchmaking `Members` for opponent identity.** The ticket's member list
    can come back without opponent ids. Create your opponent slots from
    **match size − 1** and fill them positionally from lobby membership. If you key
    opponents strictly by the ticket's ids and they're missing, every incoming snapshot
    is silently dropped and the opponent looks idle. This masquerades as "the relay is
    broken" when it's actually "there was no slot to put the data in."
 
-6. **Use `JoinArrangedLobby`, not host-elected `CreateLobby`/`JoinLobby`** for matchmade
+8. **Use `JoinArrangedLobby`, not host-elected `CreateLobby`/`JoinLobby`** for matchmade
    games. The non-host join is the classic point where one player silently fails to enter
    the shared room.
 
-7. **`UseConnections: true` is mandatory** with automatic/manual owner migration, and is
+9. **`UseConnections: true` is mandatory** with automatic/manual owner migration, and is
    what enables change notifications. Forgetting it gives you confusing bad-request
    errors or a lobby that never pushes.
 
-8. **The negotiate response isn't enveloped.** Read `url`/`accessToken` from the top
-   level, unlike every other call where you read `data.*`.
+10. **The negotiate response isn't enveloped.** Read `url`/`accessToken` from the top
+    level, unlike every other call where you read `data.*`.
 
-9. **Never ship your secret key.** Queue creation and other admin calls use the *title*
-   entity token derived from the secret key. Do that server-side or in tooling. Clients
-   only ever touch a player session ticket / entity token.
+11. **Never ship your secret key.** Queue creation and other admin calls use the *title*
+    entity token derived from the secret key. Do that server-side or in tooling. Clients
+    only ever touch a player session ticket / entity token.
 
 ## Testing tips
 
@@ -462,9 +596,10 @@ A little discipline here turns "it doesn't work" into a one-line answer:
   matchmaking always has a predictable pair.
 - **Two emulators/simulators** can fully exercise the flow — each gets its own anonymous
   identity. A phone plus an emulator works too.
-- **Log the relay, not the render loop.** Log the chain: socket connected? push received?
-  members fetched? snapshot decoded? slot applied? Almost every failure is one specific
-  link, so instrument each link.
+- **Log the relay, not the render loop.** Log the chain: socket connected? subscribed?
+  push received (and on which method — `ReceiveMessage` vs `ReceiveSubscriptionChangeMessage`)?
+  payload decoded? slot applied? Almost every failure is one specific link, so instrument
+  each link.
 - **Verify the backend independently.** A 30-line script that logs in two accounts,
   tickets them, joins the arranged lobby, has A `UpdateLobby` and B `GetLobby`, and
   asserts B sees A's data will prove the server flow before you waste time blaming the
@@ -478,6 +613,7 @@ A little discipline here turns "it doesn't work" into a one-line answer:
 | Get entity token    | `/Authentication/GetEntityToken`               | `X-Authorization`  |
 | Create queue (admin)| `/Match/SetMatchmakingQueue`                   | title `X-EntityToken` |
 | Create ticket       | `/Match/CreateMatchmakingTicket`               | `X-EntityToken`    |
+| Subscribe ticket    | `/Match/SubscribeToMatchmakingResource`        | `X-EntityToken`    |
 | Poll ticket         | `/Match/GetMatchmakingTicket`                  | `X-EntityToken`    |
 | Cancel tickets      | `/Match/CancelAllMatchmakingTicketsForPlayer`  | `X-EntityToken`    |
 | Get match / arr str | `/Match/GetMatch`                              | `X-EntityToken`    |
@@ -488,17 +624,20 @@ A little discipline here turns "it doesn't work" into a one-line answer:
 | Subscribe lobby     | `/Lobby/SubscribeToLobbyResource`              | `X-EntityToken`    |
 
 All under `https://<TITLEID>.playfabapi.com`, all `POST`, all JSON. Responses are
-`{ code, status, data }` except `/PubSub/Negotiate` (top-level).
+`{ code, status, data }` except `/PubSub/Negotiate` (top-level) and
+`/Match/SubscribeToMatchmakingResource` (empty body on success).
 
 ## The whole trick, in four sentences
 
-- **Matchmaking** answers *who do I play with* and hands you a `MatchId`.
+- **Matchmaking** answers *who do I play with* and hands you a `MatchId` — and you can
+  subscribe to the ticket so the match arrives as a push, not a poll.
 - **Arranged Lobby** turns that match into *one shared room* everybody reliably joins,
   with no host handshake.
 - **Member data** is your *state channel* — small, owner-writable, world-readable.
-- **PubSub** is the *doorbell* — it tells you the room changed so you can read it
-  immediately instead of polling.
+- **PubSub** is the *delivery truck*, not just a doorbell — its push carries the changed
+  member's snapshot, so you apply it directly instead of calling back for it.
 
-Keep payloads tiny, serialize them deterministically, publish on change, fetch on push,
-and keep the socket warm. Do that and you've got real-time-enough multiplayer running on
-infrastructure you never have to wake up for at 3 a.m. That's the whole point.
+Keep payloads tiny, serialize them deterministically, publish on change, apply the push
+(don't refetch it), and keep the socket warm. Do that and you've got real-time-enough
+multiplayer running on infrastructure you never have to wake up for at 3 a.m. That's the
+whole point.
