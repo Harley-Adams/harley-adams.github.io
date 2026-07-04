@@ -49,7 +49,7 @@ import {
   leaveLobby,
   publishSnapshot,
 } from "../../net/lobby";
-import { LobbyPubSub } from "../../net/pubsub";
+import { LobbyPubSub, PubSubState } from "../../net/pubsub";
 import { RateLimitError } from "../../net/errors";
 import { EntityKey, EntityTokenResponse } from "../../net/types";
 import { incrementVersusWins } from "../../lib/storage";
@@ -243,6 +243,7 @@ export interface VersusController {
   memberCount: number;
   signedIn: boolean;
   throttled: boolean;
+  connectionState: PubSubState;
   quickMatch: () => void;
   createPrivate: () => void;
   joinPrivate: (code: string) => void;
@@ -267,6 +268,8 @@ export function useVersus(): VersusController {
   // True while PlayFab is actively rate-limiting our lobby calls (429s). Drives
   // a small UI signal and a short relay backoff.
   const [throttled, setThrottled] = useState(false);
+  // Live state of the realtime relay socket, for a connection indicator.
+  const [connState, setConnState] = useState<PubSubState>("connecting");
 
   // Refs for the relay + lifecycle (avoid re-subscribing on every render).
   const boardRef = useRef(board);
@@ -348,20 +351,31 @@ export function useVersus(): VersusController {
       dispatch({ type: "RESET", answer });
       startMsRef.current = Date.now();
       setPhase("playing");
+      setConnState("connecting");
 
-      // Connect PubSub (time-boxed); fall back to polling if it stalls.
+      // Connect PubSub (time-boxed); fall back to polling if it stalls. The
+      // onState callback drives both the UI indicator and the fallback-poll
+      // gate (connectedRef is true only while the socket is genuinely live).
       const pubsub = new LobbyPubSub();
       pubsubRef.current = pubsub;
       pendingFetchRef.current = true;
+      const onState = (s: PubSubState) => {
+        setConnState(s);
+        connectedRef.current = s === "live";
+      };
       const connectPromise = pubsub
-        .connect(token, entity, lobbyId, () => {
-          pendingFetchRef.current = true;
-        })
-        .then(() => {
-          connectedRef.current = true;
-        })
+        .connect(
+          token,
+          entity,
+          lobbyId,
+          () => {
+            pendingFetchRef.current = true;
+          },
+          onState
+        )
         .catch(() => {
           connectedRef.current = false;
+          setConnState("offline");
         });
       await Promise.race([
         connectPromise,
@@ -647,6 +661,7 @@ export function useVersus(): VersusController {
     memberCount,
     signedIn: !!session,
     throttled,
+    connectionState: connState,
     quickMatch,
     createPrivate,
     joinPrivate,

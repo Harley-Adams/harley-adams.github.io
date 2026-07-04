@@ -12,6 +12,7 @@ import OpponentBoard from "./OpponentBoard";
 import SignInModal from "../../auth/SignInModal";
 import { useAuth } from "../../auth/AuthContext";
 import { useVersus, VersusController } from "./useVersus";
+import { PubSubState } from "../../net/pubsub";
 
 const ACCENT = "var(--pt-spatial)";
 
@@ -159,18 +160,57 @@ function Status({ text }: { text: string }) {
   return <div className="pt-lb-status">{text}</div>;
 }
 
+const CONN_META: Record<
+  PubSubState,
+  { label: string; cls: string; title: string }
+> = {
+  connecting: {
+    label: "Connecting…",
+    cls: "is-connecting",
+    title: "Opening the realtime connection.",
+  },
+  live: {
+    label: "Live",
+    cls: "is-live",
+    title: "Realtime connection active — opponent updates arrive instantly.",
+  },
+  reconnecting: {
+    label: "Reconnecting…",
+    cls: "is-reconnecting",
+    title: "Lost the realtime connection; reconnecting. Updates are polled meanwhile.",
+  },
+  offline: {
+    label: "Polling",
+    cls: "is-offline",
+    title: "Realtime connection unavailable — falling back to periodic polling.",
+  },
+};
+
+function ConnectionBadge({ state }: { state: PubSubState }) {
+  const meta = CONN_META[state];
+  return (
+    <div className={`pt-conn ${meta.cls}`} title={meta.title}>
+      <span className="pt-conn-dot" />
+      {meta.label}
+    </div>
+  );
+}
+
 function Race({ v }: { v: VersusController }) {
   return (
     <div className="pt-race">
-      {v.throttled && (
-        <div
-          className="pt-throttle"
-          title="PlayFab is rate-limiting our requests. Live updates may lag for a moment; they'll catch up automatically."
-        >
-          <span className="pt-throttle-dot" />
-          Rate limited — updates may lag briefly
-        </div>
-      )}
+      <div className="pt-conn-row">
+        <ConnectionBadge state={v.connectionState} />
+        {v.throttled && (
+          <div
+            className="pt-throttle"
+            title="PlayFab is rate-limiting our requests. Live updates may lag for a moment; they'll catch up automatically."
+          >
+            <span className="pt-throttle-dot" />
+            Rate limited — updates may lag briefly
+          </div>
+        )}
+      </div>
       {v.isOver && (
         <div
           className="pt-versus-banner"

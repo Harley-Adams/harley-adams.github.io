@@ -30,6 +30,9 @@ interface StartSessionResponse {
   newConnectionHandle: string;
 }
 
+/** Live state of the realtime relay socket, surfaced to the UI. */
+export type PubSubState = "connecting" | "live" | "reconnecting" | "offline";
+
 export class LobbyPubSub {
   private connection: HubConnection | null = null;
   // Subscription context, kept so we can re-subscribe after a reconnect.
@@ -37,21 +40,27 @@ export class LobbyPubSub {
   private entity: EntityKey | null = null;
   private lobbyId: string | null = null;
   private onChanged: (() => void) | null = null;
+  private onState: ((state: PubSubState) => void) | null = null;
 
-  /** Connect, subscribe the lobby, and invoke `onChanged` on every push. */
+  /** Connect, subscribe the lobby, and invoke `onChanged` on every push.
+   *  `onState` reports the socket lifecycle for a UI indicator. */
   async connect(
     token: EntityTokenResponse,
     entity: EntityKey,
     lobbyId: string,
-    onChanged: () => void
+    onChanged: () => void,
+    onState?: (state: PubSubState) => void
   ): Promise<void> {
     this.token = token;
     this.entity = entity;
     this.lobbyId = lobbyId;
     this.onChanged = onChanged;
+    this.onState = onState ?? null;
+    this.onState?.("connecting");
     const negotiate = await this.negotiate(token);
     await this.openConnection(negotiate.url, negotiate.accessToken, onChanged);
     await this.startAndSubscribe();
+    this.onState?.("live");
   }
 
   private async negotiate(token: EntityTokenResponse): Promise<NegotiateResponse> {
@@ -89,15 +98,25 @@ export class LobbyPubSub {
     // Any lobby-change message means "go refetch"; we don't parse the payload.
     connection.on("ReceiveMessage", () => onChanged());
 
+    // Surface the socket lifecycle so the UI can show whether we're live.
+    connection.onreconnecting(() => this.onState?.("reconnecting"));
+
     // After an automatic reconnect the socket has a brand-new connection handle,
     // so the old lobby subscription no longer routes to it. Re-run the session +
     // subscribe handshake and force an immediate refetch so we don't miss the
     // changes that happened while we were disconnected.
     connection.onreconnected(() => {
       this.startAndSubscribe()
-        .then(() => onChanged())
-        .catch(() => {});
+        .then(() => {
+          this.onState?.("live");
+          onChanged();
+        })
+        .catch(() => this.onState?.("offline"));
     });
+
+    // Reconnect attempts exhausted (or an explicit close). The relay falls back
+    // to polling from here.
+    connection.onclose(() => this.onState?.("offline"));
 
     this.connection = connection;
     return connection.start();
