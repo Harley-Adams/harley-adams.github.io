@@ -153,3 +153,23 @@ export function clearRandomGame(): void {
     /* ignore */
   }
 }
+
+const VERSUS_WINS_KEY = "pt:wordle:versusWins";
+
+export function loadVersusWins(): number {
+  try {
+    return Number(localStorage.getItem(VERSUS_WINS_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function incrementVersusWins(): number {
+  const next = loadVersusWins() + 1;
+  try {
+    localStorage.setItem(VERSUS_WINS_KEY, String(next));
+  } catch {
+    /* ignore */
+  }
+  return next;
+}

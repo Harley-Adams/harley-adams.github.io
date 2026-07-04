@@ -19,9 +19,9 @@ interface ScaffoldProps {
   toast?: string | null;
   onToastDone?: () => void;
   onHint?: () => void;
-  onHelp: () => void;
-  onStats: () => void;
-  onNew: () => void;
+  onHelp?: () => void;
+  onStats?: () => void;
+  onNew?: () => void;
   newLabel?: string;
   children: React.ReactNode;
 }
@@ -72,29 +72,35 @@ export default function Scaffold({
               <HintIcon />
             </button>
           )}
-          <button className="pt-icon-btn pt-accent" onClick={onStats} aria-label="Statistics">
-            <StatsIcon />
-          </button>
-          <button className="pt-icon-btn pt-accent" onClick={onHelp} aria-label="How to play">
-            <HelpIcon />
-          </button>
-          <div className="pt-menu-wrap" ref={menuRef}>
-            <button
-              className="pt-icon-btn pt-accent"
-              onClick={() => setMenuOpen((o) => !o)}
-              aria-label="More"
-              aria-haspopup="menu"
-              aria-expanded={menuOpen}
-            >
-              <MoreIcon />
+          {onStats && (
+            <button className="pt-icon-btn pt-accent" onClick={onStats} aria-label="Statistics">
+              <StatsIcon />
             </button>
-            {menuOpen && (
+          )}
+          {onHelp && (
+            <button className="pt-icon-btn pt-accent" onClick={onHelp} aria-label="How to play">
+              <HelpIcon />
+            </button>
+          )}
+          <div className="pt-menu-wrap" ref={menuRef}>
+            {onNew && (
+              <button
+                className="pt-icon-btn pt-accent"
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-label="More"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+              >
+                <MoreIcon />
+              </button>
+            )}
+            {menuOpen && onNew && (
               <div className="pt-menu" role="menu">
                 <button
                   role="menuitem"
                   onClick={() => {
                     setMenuOpen(false);
-                    onNew();
+                    onNew?.();
                   }}
                 >
                   {newLabel}

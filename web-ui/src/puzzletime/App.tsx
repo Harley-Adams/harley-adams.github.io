@@ -5,8 +5,11 @@ import {
   Outlet,
   RouterProvider,
 } from "react-router-dom";
+import { AuthProvider } from "./auth/AuthContext";
 import HubPage from "./hub/HubPage";
 import WordlePage from "./wordle/WordlePage";
+import VersusPage from "./wordle/versus/VersusPage";
+import LeaderboardPage from "./leaderboard/LeaderboardPage";
 
 function Shell() {
   return (
@@ -27,6 +30,8 @@ const router = createBrowserRouter(
         { index: true, element: <HubPage /> },
         { path: "wordle", element: <WordlePage mode="random" /> },
         { path: "wordle/daily", element: <WordlePage mode="daily" /> },
+        { path: "versus", element: <VersusPage /> },
+        { path: "leaderboard", element: <LeaderboardPage /> },
         { path: "*", element: <HubPage /> },
       ],
     },
@@ -35,5 +40,9 @@ const router = createBrowserRouter(
 );
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }

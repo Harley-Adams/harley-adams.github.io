@@ -1,21 +1,22 @@
 /*
- * HubPage — the PuzzleTime landing screen: title + tagline, a daily hero, and a
- * category grid of playable puzzles. Only Wordle is live today; the rest are
- * shown as "coming soon" placeholders mirroring the iOS category set.
+ * HubPage — the PuzzleTime landing screen: an auth chip, title + tagline, a
+ * daily hero, and a grid of modes (Wordle, Versus, Leaderboard).
  */
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { dailyNumber } from "../lib/seed";
+import { useAuth } from "../auth/AuthContext";
+import SignInModal from "../auth/SignInModal";
 
-interface Category {
+interface Mode {
   key: string;
   name: string;
   blurb: string;
   accent: string;
-  to?: string;
+  to: string;
 }
 
-const CATEGORIES: Category[] = [
+const MODES: Mode[] = [
   {
     key: "wordle",
     name: "Wordle",
@@ -24,28 +25,49 @@ const CATEGORIES: Category[] = [
     to: "/wordle",
   },
   {
-    key: "spatial",
-    name: "Spatial",
-    blurb: "Shape and grid puzzles.",
+    key: "versus",
+    name: "Versus",
+    blurb: "Race others to solve the same word.",
     accent: "var(--pt-spatial)",
+    to: "/versus",
   },
   {
-    key: "numeric",
-    name: "Numeric",
-    blurb: "Number games and logic math.",
+    key: "leaderboard",
+    name: "Leaderboards",
+    blurb: "See who's on top across the world.",
     accent: "var(--pt-numeric)",
-  },
-  {
-    key: "logic",
-    name: "Logic",
-    blurb: "Deduction and reasoning puzzles.",
-    accent: "var(--pt-logic)",
+    to: "/leaderboard",
   },
 ];
 
+function AuthChip({ onSignIn }: { onSignIn: () => void }) {
+  const { session, signOut } = useAuth();
+  if (session) {
+    return (
+      <div className="pt-auth-chip">
+        <span className="pt-auth-name">{session.displayName}</span>
+        <button className="pt-auth-link" onClick={signOut}>
+          Sign out
+        </button>
+      </div>
+    );
+  }
+  return (
+    <button className="pt-auth-chip pt-auth-signin" onClick={onSignIn}>
+      Sign in
+    </button>
+  );
+}
+
 export default function HubPage() {
+  const [showSignIn, setShowSignIn] = useState(false);
+
   return (
     <div className="pt-hub">
+      <div className="pt-hub-top">
+        <AuthChip onSignIn={() => setShowSignIn(true)} />
+      </div>
+
       <header className="pt-hub-head">
         <h1 className="pt-hub-title">PuzzleTime</h1>
         <p className="pt-hub-tagline">A daily puzzle break.</p>
@@ -58,32 +80,21 @@ export default function HubPage() {
       </Link>
 
       <div className="pt-cat-grid">
-        {CATEGORIES.map((c) =>
-          c.to ? (
-            <Link
-              key={c.key}
-              to={c.to}
-              className="pt-cat-card"
-              style={{ ["--accent" as string]: c.accent }}
-            >
-              <span className="pt-cat-dot" />
-              <span className="pt-cat-name">{c.name}</span>
-              <span className="pt-cat-blurb">{c.blurb}</span>
-            </Link>
-          ) : (
-            <div
-              key={c.key}
-              className="pt-cat-card pt-cat-soon"
-              style={{ ["--accent" as string]: c.accent }}
-            >
-              <span className="pt-cat-dot" />
-              <span className="pt-cat-name">{c.name}</span>
-              <span className="pt-cat-blurb">{c.blurb}</span>
-              <span className="pt-cat-badge">Coming soon</span>
-            </div>
-          )
-        )}
+        {MODES.map((m) => (
+          <Link
+            key={m.key}
+            to={m.to}
+            className="pt-cat-card"
+            style={{ ["--accent" as string]: m.accent }}
+          >
+            <span className="pt-cat-dot" />
+            <span className="pt-cat-name">{m.name}</span>
+            <span className="pt-cat-blurb">{m.blurb}</span>
+          </Link>
+        ))}
       </div>
+
+      {showSignIn && <SignInModal onClose={() => setShowSignIn(false)} />}
     </div>
   );
 }
