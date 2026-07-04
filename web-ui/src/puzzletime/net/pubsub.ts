@@ -33,22 +33,73 @@ interface StartSessionResponse {
 /** Live state of the realtime relay socket, surfaced to the UI. */
 export type PubSubState = "connecting" | "live" | "reconnecting" | "offline";
 
+/** One member's change parsed out of a lobby-change push. `snap` is present
+ *  when this change updated the member's "snap" data (i.e. their board state);
+ *  it's absent for non-data changes like a member (re)subscribing. */
+export interface LobbyMemberChange {
+  entityId: string;
+  changeNumber: number;
+  snap?: string;
+}
+
+/** Push handler. Receives the parsed member changes from a lobby-change push,
+ *  or `null` when a push arrived that we couldn't fully parse (or membership may
+ *  have changed) — in which case the caller should fall back to a GetLobby. */
+export type LobbyChangeHandler = (changes: LobbyMemberChange[] | null) => void;
+
+/** Decode the base64 JSON payload of a lobby-change push into member changes.
+ *  Returns null if the frame shape is unrecognized so the caller can reconcile
+ *  via GetLobby rather than silently dropping a change. */
+export function parseLobbyChanges(args: unknown[]): LobbyMemberChange[] | null {
+  try {
+    const frame = args[0] as { payload?: string } | undefined;
+    if (!frame?.payload) return null;
+    const decoded = JSON.parse(atob(frame.payload)) as {
+      lobbyChanges?: {
+        changeNumber?: number;
+        memberToMerge?: {
+          memberEntity?: { Id?: string };
+          memberData?: Record<string, string>;
+        };
+      }[];
+    };
+    const changes = decoded.lobbyChanges;
+    if (!Array.isArray(changes)) return null;
+    const out: LobbyMemberChange[] = [];
+    for (const c of changes) {
+      // Only member *merges* are safe to apply incrementally. Anything else
+      // (a member removal, a lobby-property change, an unexpected shape) means
+      // "go reconcile with GetLobby".
+      const id = c.memberToMerge?.memberEntity?.Id;
+      if (!id) return null;
+      out.push({
+        entityId: id,
+        changeNumber: c.changeNumber ?? 0,
+        snap: c.memberToMerge?.memberData?.snap,
+      });
+    }
+    return out;
+  } catch {
+    return null;
+  }
+}
+
 export class LobbyPubSub {
   private connection: HubConnection | null = null;
   // Subscription context, kept so we can re-subscribe after a reconnect.
   private token: EntityTokenResponse | null = null;
   private entity: EntityKey | null = null;
   private lobbyId: string | null = null;
-  private onChanged: (() => void) | null = null;
+  private onChanged: LobbyChangeHandler | null = null;
   private onState: ((state: PubSubState) => void) | null = null;
 
-  /** Connect, subscribe the lobby, and invoke `onChanged` on every push.
-   *  `onState` reports the socket lifecycle for a UI indicator. */
+  /** Connect, subscribe the lobby, and invoke `onChanged` on every push with
+   *  the parsed member changes. `onState` reports the socket lifecycle. */
   async connect(
     token: EntityTokenResponse,
     entity: EntityKey,
     lobbyId: string,
-    onChanged: () => void,
+    onChanged: LobbyChangeHandler,
     onState?: (state: PubSubState) => void
   ): Promise<void> {
     this.token = token;
@@ -79,7 +130,7 @@ export class LobbyPubSub {
   private openConnection(
     url: string,
     accessToken: string,
-    onChanged: () => void
+    onChanged: LobbyChangeHandler
   ): Promise<void> {
     const connection = new HubConnectionBuilder()
       .withUrl(url, {
@@ -95,21 +146,26 @@ export class LobbyPubSub {
     // open; the relay's safety poll covers anything we still miss.
     connection.serverTimeoutInMilliseconds = 120_000;
 
-    // Any lobby-change message means "go refetch"; we don't parse the payload.
-    connection.on("ReceiveMessage", () => onChanged());
+    // Each lobby-change push carries the changed member data (including the
+    // full "snap"), so we parse it and hand the changes to the relay to apply
+    // directly — no GetLobby round-trip. A frame we can't parse yields null,
+    // which tells the relay to reconcile via GetLobby instead.
+    connection.on("ReceiveMessage", (...args: unknown[]) => {
+      onChanged(parseLobbyChanges(args));
+    });
 
     // Surface the socket lifecycle so the UI can show whether we're live.
     connection.onreconnecting(() => this.onState?.("reconnecting"));
 
     // After an automatic reconnect the socket has a brand-new connection handle,
     // so the old lobby subscription no longer routes to it. Re-run the session +
-    // subscribe handshake and force an immediate refetch so we don't miss the
+    // subscribe handshake and force a full reconcile (null) so we don't miss the
     // changes that happened while we were disconnected.
     connection.onreconnected(() => {
       this.startAndSubscribe()
         .then(() => {
           this.onState?.("live");
-          onChanged();
+          onChanged(null);
         })
         .catch(() => this.onState?.("offline"));
     });

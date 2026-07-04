@@ -49,7 +49,7 @@ import {
   leaveLobby,
   publishSnapshot,
 } from "../../net/lobby";
-import { LobbyPubSub, PubSubState } from "../../net/pubsub";
+import { LobbyPubSub, PubSubState, LobbyMemberChange } from "../../net/pubsub";
 import { RateLimitError } from "../../net/errors";
 import { EntityKey, EntityTokenResponse } from "../../net/types";
 import { incrementVersusWins } from "../../lib/storage";
@@ -358,21 +358,37 @@ export function useVersus(): VersusController {
       // gate (connectedRef is true only while the socket is genuinely live).
       const pubsub = new LobbyPubSub();
       pubsubRef.current = pubsub;
+      // Force one GetLobby on the first tick to load any snapshots members
+      // published before we subscribed; after that the relay is push-driven.
       pendingFetchRef.current = true;
       const onState = (s: PubSubState) => {
         setConnState(s);
         connectedRef.current = s === "live";
       };
+      // Apply lobby-change pushes directly: each carries the changed member's
+      // full snapshot, so we merge opponents in place and never hit GetLobby on
+      // the happy path. Our own echo is skipped (we already know our board), and
+      // a null (unparsable push / possible membership change) falls back to a
+      // GetLobby reconcile on the next tick.
+      const applyChanges = (changes: LobbyMemberChange[] | null) => {
+        if (changes === null) {
+          pendingFetchRef.current = true;
+          return;
+        }
+        const updates: Record<string, OpponentSnapshot> = {};
+        for (const c of changes) {
+          if (c.entityId === entity.Id) continue; // our own echo
+          if (!c.snap) continue; // e.g. a member (re)subscribing — no board data
+          const decoded = decodeSnapshot(c.snap);
+          if (decoded) updates[c.entityId] = decoded;
+        }
+        if (Object.keys(updates).length > 0) {
+          setOpponents((prev) => ({ ...prev, ...updates }));
+          setThrottled(false); // a live push means we're healthy again
+        }
+      };
       const connectPromise = pubsub
-        .connect(
-          token,
-          entity,
-          lobbyId,
-          () => {
-            pendingFetchRef.current = true;
-          },
-          onState
-        )
+        .connect(token, entity, lobbyId, applyChanges, onState)
         .catch(() => {
           connectedRef.current = false;
           setConnState("offline");
@@ -382,12 +398,14 @@ export function useVersus(): VersusController {
         new Promise((r) => setTimeout(r, 6000)),
       ]);
 
-      // Relay loop. Updates are event-driven: a PubSub push sets pendingFetch
-      // and we refetch then — no steady polling, so we don't hammer GetLobby
-      // into rate limits (429s). We only *poll* when the socket is actually
-      // down (fallback), plus a slow ~20s watchdog reconcile as belt-and-braces
-      // in case a push is ever missed. Reconnects re-subscribe (see pubsub.ts),
-      // so the healthy path stays purely push-driven.
+      // Relay loop. On the happy path this only *publishes* our own snapshot
+      // when it changes — opponent state arrives via PubSub pushes and is
+      // applied directly (see applyChanges above), so we don't call GetLobby at
+      // all mid-match and stay well clear of the lobby rate limits (429s).
+      // GetLobby ("reconcile") runs only when needed: the one-shot initial sync
+      // on join, while the socket is down (fallback poll), a slow ~20s watchdog
+      // in case a push is ever missed, and after a reconnect. Reconnects
+      // re-subscribe (see pubsub.ts), so the healthy path stays push-driven.
       let ticks = 0;
       let lastFetchTick = -100;
       // Record a 429: back off all lobby calls and flag the UI.
@@ -420,10 +438,12 @@ export function useVersus(): VersusController {
             /* other errors: transient — retried next tick */
           }
         }
-        const pushArrived = pendingFetchRef.current;
+        // GetLobby reconcile — only for initial sync, fallback while offline, or
+        // the periodic watchdog. Pushes handle the steady state.
+        const needReconcile = pendingFetchRef.current;
         const offlinePoll = !connectedRef.current && ticks % 3 === 0;
         const watchdog = ticks - lastFetchTick >= 20;
-        if (pushArrived || offlinePoll || watchdog) {
+        if (needReconcile || offlinePoll || watchdog) {
           pendingFetchRef.current = false;
           lastFetchTick = ticks;
           try {
