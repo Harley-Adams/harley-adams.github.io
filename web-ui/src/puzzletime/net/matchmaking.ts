@@ -23,7 +23,10 @@ async function entityPost<T>(
     },
     body: JSON.stringify(body),
   });
-  const json = await res.json();
+  // Some endpoints (e.g. SubscribeToMatchmakingResource) can return an empty
+  // body on success, so don't assume the response is always JSON.
+  const text = await res.text();
+  const json = text ? JSON.parse(text) : {};
   if (!res.ok) {
     throw new Error(json.errorMessage || `PlayFab ${endpoint} failed (${res.status})`);
   }
@@ -70,6 +73,26 @@ export interface TicketStatus {
   status: string;
   matchId: string | null;
   players: string[];
+}
+
+/** Subscribe a matchmaking ticket's status changes to a PubSub connection
+ *  handle, so we get pushed a notification the moment it flips to Matched
+ *  instead of polling GetMatchmakingTicket on a timer. ResourceId format is
+ *  "{queueName}|{ticketId}" per the PlayFab Match/SubscribeToMatchResource API. */
+export async function subscribeToMatchTicket(
+  token: EntityTokenResponse,
+  entity: EntityKey,
+  ticketId: string,
+  connectionHandle: string,
+  queue = WORDLE_QUEUE
+): Promise<void> {
+  await entityPost("Match/SubscribeToMatchmakingResource", token, {
+    Type: "MatchTicketStatusChange",
+    EntityKey: entity,
+    ResourceId: `${queue}|${ticketId}`,
+    SubscriptionVersion: 1,
+    PubSubConnectionHandle: connectionHandle,
+  });
 }
 
 export async function pollTicket(

@@ -39,6 +39,7 @@ import {
   createTicket,
   getArrangementString,
   pollTicket,
+  WORDLE_QUEUE,
 } from "../../net/matchmaking";
 import {
   createLobby,
@@ -49,7 +50,7 @@ import {
   leaveLobby,
   publishSnapshot,
 } from "../../net/lobby";
-import { LobbyPubSub, PubSubState, LobbyMemberChange } from "../../net/pubsub";
+import { PlayFabPubSub, PubSubState, LobbyMemberChange } from "../../net/pubsub";
 import { RateLimitError } from "../../net/errors";
 import { EntityKey, EntityTokenResponse } from "../../net/types";
 import { incrementVersusWins } from "../../lib/storage";
@@ -277,7 +278,10 @@ export function useVersus(): VersusController {
   const lobbyIdRef = useRef<string | null>(null);
   const startMsRef = useRef(0);
   const finishedAtRef = useRef<number | null>(null);
-  const pubsubRef = useRef<LobbyPubSub | null>(null);
+  const pubsubRef = useRef<PlayFabPubSub | null>(null);
+  // Separate PubSub used only during Quick Match search (subscribes to the
+  // matchmaking ticket so we're pushed the "Matched" event instead of polling).
+  const searchPubsubRef = useRef<PlayFabPubSub | null>(null);
   const pendingFetchRef = useRef(false);
   const connectedRef = useRef(false);
   const lastPublishedRef = useRef("");
@@ -302,6 +306,9 @@ export function useVersus(): VersusController {
     const pubsub = pubsubRef.current;
     pubsubRef.current = null;
     if (pubsub) await pubsub.disconnect();
+    const searchPubsub = searchPubsubRef.current;
+    searchPubsubRef.current = null;
+    if (searchPubsub) await searchPubsub.disconnect();
     const token = tokenOf();
     const entity = entityOf();
     if (token && entity && lobbyIdRef.current) {
@@ -356,7 +363,7 @@ export function useVersus(): VersusController {
       // Connect PubSub (time-boxed); fall back to polling if it stalls. The
       // onState callback drives both the UI indicator and the fallback-poll
       // gate (connectedRef is true only while the socket is genuinely live).
-      const pubsub = new LobbyPubSub();
+      const pubsub = new PlayFabPubSub();
       pubsubRef.current = pubsub;
       // Force one GetLobby on the first tick to load any snapshots members
       // published before we subscribed; after that the relay is push-driven.
@@ -388,7 +395,15 @@ export function useVersus(): VersusController {
         }
       };
       const connectPromise = pubsub
-        .connect(token, entity, lobbyId, applyChanges, onState)
+        .connect(
+          token,
+          entity,
+          { kind: "lobby", lobbyId },
+          (e) => {
+            if (e.kind === "lobby") applyChanges(e.changes);
+          },
+          onState
+        )
         .catch(() => {
           connectedRef.current = false;
           setConnState("offline");
@@ -541,12 +556,55 @@ export function useVersus(): VersusController {
     try {
       await cancelAllTickets(token, entity);
       const ticketId = await createTicket(token, entity, MATCH_TIMEOUT_SECONDS);
+
+      // Subscribe to the ticket's status changes so PlayFab pushes us the
+      // "Matched" event, instead of polling GetMatchmakingTicket on a 1s timer.
+      // We check the ticket on each push (the push is just a signal) plus a slow
+      // fallback in case a push is missed or the socket never came up.
+      let pollNow = true; // do one initial check right away
+      const mm = new PlayFabPubSub();
+      searchPubsubRef.current = mm;
+      let subscribed = false;
+      try {
+        await mm.connect(
+          token,
+          entity,
+          { kind: "matchTicket", queue: WORDLE_QUEUE, ticketId },
+          () => {
+            pollNow = true;
+          }
+        );
+        subscribed = true;
+      } catch {
+        /* subscription failed — fall back to steady polling below */
+      }
+
       const start = Date.now();
+      let lastPoll = 0;
+      // When subscribed, the push tells us the moment the ticket is matched, so
+      // we only poll as a rare safety net (in case a push is missed or the
+      // socket died); otherwise poll steadily.
+      const fallbackMs = subscribed ? 25000 : 1500;
       while (Date.now() - start < MATCH_TIMEOUT_SECONDS * 1000) {
-        if (cancelledRef.current) return;
-        await new Promise((r) => setTimeout(r, 1000));
-        const status = await pollTicket(token, ticketId);
+        if (cancelledRef.current) {
+          await mm.disconnect();
+          searchPubsubRef.current = null;
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 400));
+        const now = Date.now();
+        if (!pollNow && now - lastPoll < fallbackMs) continue;
+        pollNow = false;
+        lastPoll = now;
+        let status;
+        try {
+          status = await pollTicket(token, ticketId);
+        } catch {
+          continue; // transient — try again on the next signal/fallback
+        }
         if (status.status === "Matched" && status.matchId) {
+          await mm.disconnect();
+          searchPubsubRef.current = null;
           setStatusText("Opponent found!");
           const arrangement = await getArrangementString(token, status.matchId);
           const lobbyId = await joinArrangedLobby(
@@ -559,12 +617,17 @@ export function useVersus(): VersusController {
           return;
         }
       }
+      await mm.disconnect();
+      searchPubsubRef.current = null;
       await cancelAllTickets(token, entity);
       if (!cancelledRef.current) {
         setPhase("idle");
         setError("No opponent found. Try again, or create a private game.");
       }
     } catch (e) {
+      const mm = searchPubsubRef.current;
+      searchPubsubRef.current = null;
+      if (mm) await mm.disconnect();
       setPhase("idle");
       setError(e instanceof Error ? e.message : "Matchmaking failed.");
     }

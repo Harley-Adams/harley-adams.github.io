@@ -20,6 +20,7 @@ import {
 import { PLAYFAB_BASE_API } from "./config";
 import { EntityKey, EntityTokenResponse } from "./types";
 import { subscribeToLobby } from "./lobby";
+import { subscribeToMatchTicket } from "./matchmaking";
 
 interface NegotiateResponse {
   accessToken: string;
@@ -42,10 +43,20 @@ export interface LobbyMemberChange {
   snap?: string;
 }
 
-/** Push handler. Receives the parsed member changes from a lobby-change push,
- *  or `null` when a push arrived that we couldn't fully parse (or membership may
- *  have changed) — in which case the caller should fall back to a GetLobby. */
-export type LobbyChangeHandler = (changes: LobbyMemberChange[] | null) => void;
+/** What a PubSub connection is subscribed to. */
+export type PubSubResource =
+  | { kind: "lobby"; lobbyId: string }
+  | { kind: "matchTicket"; queue: string; ticketId: string };
+
+/** A push event handed to the consumer. A lobby subscription carries the parsed
+ *  member changes (or null → reconcile via GetLobby). A match-ticket
+ *  subscription is just a "status may have changed, go poll the ticket" signal
+ *  (the payload shape isn't relied upon). */
+export type PubSubEvent =
+  | { kind: "lobby"; changes: LobbyMemberChange[] | null }
+  | { kind: "match" };
+
+export type PubSubEventHandler = (event: PubSubEvent) => void;
 
 /** Decode the base64 JSON payload of a lobby-change push into member changes.
  *  Returns null if the frame shape is unrecognized so the caller can reconcile
@@ -84,34 +95,52 @@ export function parseLobbyChanges(args: unknown[]): LobbyMemberChange[] | null {
   }
 }
 
-export class LobbyPubSub {
+export class PlayFabPubSub {
   private connection: HubConnection | null = null;
   // Subscription context, kept so we can re-subscribe after a reconnect.
   private token: EntityTokenResponse | null = null;
   private entity: EntityKey | null = null;
-  private lobbyId: string | null = null;
-  private onChanged: LobbyChangeHandler | null = null;
+  private resource: PubSubResource | null = null;
+  private onEvent: PubSubEventHandler | null = null;
   private onState: ((state: PubSubState) => void) | null = null;
 
-  /** Connect, subscribe the lobby, and invoke `onChanged` on every push with
-   *  the parsed member changes. `onState` reports the socket lifecycle. */
+  /** Connect, subscribe to `resource`, and invoke `onEvent` on every push.
+   *  `onState` reports the socket lifecycle for a UI indicator. */
   async connect(
     token: EntityTokenResponse,
     entity: EntityKey,
-    lobbyId: string,
-    onChanged: LobbyChangeHandler,
+    resource: PubSubResource,
+    onEvent: PubSubEventHandler,
     onState?: (state: PubSubState) => void
   ): Promise<void> {
     this.token = token;
     this.entity = entity;
-    this.lobbyId = lobbyId;
-    this.onChanged = onChanged;
+    this.resource = resource;
+    this.onEvent = onEvent;
     this.onState = onState ?? null;
     this.onState?.("connecting");
     const negotiate = await this.negotiate(token);
-    await this.openConnection(negotiate.url, negotiate.accessToken, onChanged);
+    await this.openConnection(negotiate.url, negotiate.accessToken);
     await this.startAndSubscribe();
     this.onState?.("live");
+  }
+
+  /** Deliver a push to the consumer, shaped per the subscribed resource. */
+  private emitMessage(args: unknown[]): void {
+    if (this.resource?.kind === "lobby") {
+      this.onEvent?.({ kind: "lobby", changes: parseLobbyChanges(args) });
+    } else {
+      this.onEvent?.({ kind: "match" });
+    }
+  }
+
+  /** Ask the consumer to reconcile from scratch (e.g. after a reconnect). */
+  private emitReconcile(): void {
+    if (this.resource?.kind === "lobby") {
+      this.onEvent?.({ kind: "lobby", changes: null });
+    } else {
+      this.onEvent?.({ kind: "match" });
+    }
   }
 
   private async negotiate(token: EntityTokenResponse): Promise<NegotiateResponse> {
@@ -129,8 +158,7 @@ export class LobbyPubSub {
 
   private openConnection(
     url: string,
-    accessToken: string,
-    onChanged: LobbyChangeHandler
+    accessToken: string
   ): Promise<void> {
     const connection = new HubConnectionBuilder()
       .withUrl(url, {
@@ -146,26 +174,33 @@ export class LobbyPubSub {
     // open; the relay's safety poll covers anything we still miss.
     connection.serverTimeoutInMilliseconds = 120_000;
 
-    // Each lobby-change push carries the changed member data (including the
-    // full "snap"), so we parse it and hand the changes to the relay to apply
-    // directly — no GetLobby round-trip. A frame we can't parse yields null,
-    // which tells the relay to reconcile via GetLobby instead.
+    // Lobby changes are pushed via `ReceiveMessage` and carry the changed
+    // member's full "snap" so the relay can apply it without GetLobby.
     connection.on("ReceiveMessage", (...args: unknown[]) => {
-      onChanged(parseLobbyChanges(args));
+      this.emitMessage(args);
+    });
+
+    // Match-ticket status changes are pushed via `ReceiveSubscriptionChangeMessage`
+    // (a different client method than lobby changes). We treat it purely as a
+    // "your subscription changed, go poll the ticket" signal.
+    connection.on("ReceiveSubscriptionChangeMessage", () => {
+      if (this.resource?.kind === "matchTicket") {
+        this.onEvent?.({ kind: "match" });
+      }
     });
 
     // Surface the socket lifecycle so the UI can show whether we're live.
     connection.onreconnecting(() => this.onState?.("reconnecting"));
 
     // After an automatic reconnect the socket has a brand-new connection handle,
-    // so the old lobby subscription no longer routes to it. Re-run the session +
-    // subscribe handshake and force a full reconcile (null) so we don't miss the
-    // changes that happened while we were disconnected.
+    // so the old subscription no longer routes to it. Re-run the session +
+    // subscribe handshake and force a full reconcile so we don't miss changes
+    // that happened while we were disconnected.
     connection.onreconnected(() => {
       this.startAndSubscribe()
         .then(() => {
           this.onState?.("live");
-          onChanged(null);
+          this.emitReconcile();
         })
         .catch(() => this.onState?.("offline"));
     });
@@ -178,16 +213,26 @@ export class LobbyPubSub {
     return connection.start();
   }
 
-  /** (Re)establish the PubSub session and subscribe the lobby to this socket. */
+  /** (Re)establish the PubSub session and subscribe the resource to this socket. */
   private async startAndSubscribe(): Promise<void> {
-    if (!this.connection || !this.token || !this.entity || !this.lobbyId) return;
+    if (!this.connection || !this.token || !this.entity || !this.resource) return;
     const session = await this.startSession();
-    await subscribeToLobby(
-      this.token,
-      this.entity,
-      this.lobbyId,
-      session.newConnectionHandle
-    );
+    if (this.resource.kind === "lobby") {
+      await subscribeToLobby(
+        this.token,
+        this.entity,
+        this.resource.lobbyId,
+        session.newConnectionHandle
+      );
+    } else {
+      await subscribeToMatchTicket(
+        this.token,
+        this.entity,
+        this.resource.ticketId,
+        session.newConnectionHandle,
+        this.resource.queue
+      );
+    }
   }
 
   private async startSession(): Promise<StartSessionResponse> {
@@ -203,8 +248,8 @@ export class LobbyPubSub {
     this.connection = null;
     this.token = null;
     this.entity = null;
-    this.lobbyId = null;
-    this.onChanged = null;
+    this.resource = null;
+    this.onEvent = null;
     try {
       await connection?.stop();
     } catch {
