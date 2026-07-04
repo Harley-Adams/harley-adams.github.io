@@ -1,8 +1,9 @@
 /*
- * PlayFab PubSub — realtime lobby updates over SignalR. Negotiates a connection,
- * subscribes to a lobby's change feed, and decodes member/lobby payloads. Also
- * exposes updateLobby to broadcast this player's data (and, for the host, the
- * shared game data) to everyone subscribed. Ported from the prior implementation.
+ * PlayFab PubSub — a SignalR socket that pushes a notification whenever a
+ * subscribed lobby changes. We treat every push as "refetch the lobby" (the
+ * relay then calls getLobbySnapshots), exactly like the iOS PubSubClient, so we
+ * never depend on the push payload shape. A short keepalive ping stops the
+ * SignalR service from dropping the idle socket mid-match.
  */
 import {
   HubConnection,
@@ -11,6 +12,7 @@ import {
 } from "@microsoft/signalr";
 import { PLAYFAB_BASE_API } from "./config";
 import { EntityKey, EntityTokenResponse } from "./types";
+import { subscribeToLobby } from "./lobby";
 
 interface NegotiateResponse {
   accessToken: string;
@@ -19,46 +21,27 @@ interface NegotiateResponse {
 
 interface StartSessionResponse {
   newConnectionHandle: string;
-  status: string;
-  traceId: string;
 }
 
-export interface MemberChange<PlayerData> {
-  memberEntity: EntityKey;
-  memberData: PlayerData | null;
-}
-
-export interface LobbyChange<LobbyData, PlayerData> {
-  changeNumber: number;
-  memberToMerge?: {
-    memberEntity: EntityKey;
-    memberData?: { d: string } | PlayerData;
-  };
-  lobbyData?: LobbyData;
-}
-
-export interface PubSubMessage<LobbyData, PlayerData> {
-  lobbyId: string;
-  lobbyChanges: LobbyChange<LobbyData, PlayerData>[];
-}
-
-export class PlayFabPubSub<LobbyData, PlayerData> {
+export class LobbyPubSub {
   private connection: HubConnection | null = null;
+  private keepAlive: ReturnType<typeof setInterval> | null = null;
 
+  /** Connect, subscribe the lobby, and invoke `onChanged` on every push. */
   async connect(
     token: EntityTokenResponse,
+    entity: EntityKey,
     lobbyId: string,
-    onSubscribed: () => void,
-    onMessage: (msg: PubSubMessage<LobbyData, PlayerData>) => void
+    onChanged: () => void
   ): Promise<void> {
     const negotiate = await this.negotiate(token);
-    await this.openConnection(negotiate.url, negotiate.accessToken, onMessage);
+    await this.openConnection(negotiate.url, negotiate.accessToken, onChanged);
     const session = await this.startSession();
-    await this.subscribe(token, session.newConnectionHandle, lobbyId);
-    onSubscribed();
+    await subscribeToLobby(token, entity, lobbyId, session.newConnectionHandle);
   }
 
   private async negotiate(token: EntityTokenResponse): Promise<NegotiateResponse> {
+    // Note: the negotiate response is NOT wrapped in the usual data envelope.
     const res = await fetch(PLAYFAB_BASE_API + "PubSub/Negotiate", {
       method: "POST",
       headers: {
@@ -73,7 +56,7 @@ export class PlayFabPubSub<LobbyData, PlayerData> {
   private openConnection(
     url: string,
     accessToken: string,
-    onMessage: (msg: PubSubMessage<LobbyData, PlayerData>) => void
+    onChanged: () => void
   ): Promise<void> {
     this.connection = new HubConnectionBuilder()
       .withUrl(url, {
@@ -85,91 +68,30 @@ export class PlayFabPubSub<LobbyData, PlayerData> {
       .configureLogging(LogLevel.Warning)
       .build();
 
-    this.connection.on("ReceiveMessage", (message: { payload: string }) => {
-      try {
-        const update = JSON.parse(atob(message.payload)) as PubSubMessage<
-          LobbyData,
-          PlayerData
-        >;
-        update.lobbyChanges?.forEach((change) => {
-          const md = change.memberToMerge?.memberData as { d?: string } | undefined;
-          if (md?.d && change.memberToMerge) {
-            change.memberToMerge.memberData = JSON.parse(atob(md.d)) as PlayerData;
-          }
-        });
-        onMessage(update);
-      } catch (err) {
-        console.error("Failed to parse pubsub message", err);
-      }
-    });
+    // Any lobby-change message means "go refetch"; we don't parse the payload.
+    this.connection.on("ReceiveMessage", () => onChanged());
 
-    return this.connection.start();
+    return this.connection.start().then(() => {
+      // Belt-and-braces keepalive ping so the socket doesn't die when idle.
+      this.keepAlive = setInterval(() => {
+        this.connection?.send("ping").catch(() => {});
+      }, 5000);
+    });
   }
 
   private async startSession(): Promise<StartSessionResponse> {
-    if (!this.connection) throw new Error("No connection");
+    if (!this.connection) throw new Error("No PubSub connection");
     return (await this.connection.invoke("StartOrRecoverSession", {
-      traceId: traceParent(),
+      traceParent: traceParent(),
+      oldConnectionHandle: null,
     })) as StartSessionResponse;
   }
 
-  private async subscribe(
-    token: EntityTokenResponse,
-    pubsubHandle: string,
-    lobbyId: string
-  ): Promise<void> {
-    const res = await fetch(PLAYFAB_BASE_API + "Lobby/SubscribeToLobbyResource", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-EntityToken": token.EntityToken,
-      },
-      body: JSON.stringify({
-        EntityKey: token.Entity,
-        PubSubConnectionHandle: pubsubHandle,
-        ResourceId: lobbyId,
-        SubscriptionVersion: 1,
-        Type: "LobbyChange",
-      }),
-    });
-    if (!res.ok) throw new Error(`Subscribe to lobby failed (${res.status})`);
-  }
-
-  /** Broadcast this member's data and/or (host-only) the shared lobby data. */
-  async updateLobby(
-    token: EntityTokenResponse,
-    lobbyId: string,
-    opts: { lobbyData?: LobbyData; playerData?: PlayerData }
-  ): Promise<void> {
-    const body: {
-      LobbyId: string;
-      MemberEntity: EntityKey;
-      MemberData?: { d: string };
-      LobbyData?: LobbyData;
-    } = {
-      LobbyId: lobbyId,
-      MemberEntity: token.Entity,
-    };
-    if (opts.playerData !== undefined) {
-      body.MemberData = { d: btoa(JSON.stringify(opts.playerData)) };
-    }
-    if (opts.lobbyData !== undefined) {
-      body.LobbyData = opts.lobbyData;
-    }
-    const res = await fetch(PLAYFAB_BASE_API + "Lobby/UpdateLobby", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-EntityToken": token.EntityToken,
-      },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      console.error(`UpdateLobby failed: ${await res.text()}`);
-    }
-  }
-
   async disconnect(): Promise<void> {
+    if (this.keepAlive) {
+      clearInterval(this.keepAlive);
+      this.keepAlive = null;
+    }
     try {
       await this.connection?.stop();
     } catch {

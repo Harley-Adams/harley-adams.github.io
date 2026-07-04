@@ -1,25 +1,23 @@
 /*
- * VersusPage — the multiplayer race UI. Requires sign-in, then walks through
- * lobby browsing, a waiting room, the live race (my board + keyboard alongside
- * opponents' color-only boards), and the results standings.
+ * VersusPage — the multiplayer UI. Requires sign-in, then offers Quick Match
+ * (matchmaking) or a private game (create + share a code, or join by code).
+ * During play it shows the local board + keyboard alongside opponents' color-
+ * only boards, then the result. Cross-compatible with the iOS PuzzleTime app.
  */
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Scaffold from "../../components/Scaffold";
 import Board from "../Board";
 import Keyboard from "../Keyboard";
 import OpponentBoard from "./OpponentBoard";
 import SignInModal from "../../auth/SignInModal";
 import { useAuth } from "../../auth/AuthContext";
-import { useVersus } from "./useVersus";
+import { useVersus, VersusController } from "./useVersus";
 
 const ACCENT = "var(--pt-spatial)";
 
 export default function VersusPage() {
   const { session } = useAuth();
-
-  if (!session) {
-    return <VersusSignIn />;
-  }
+  if (!session) return <VersusSignIn />;
   return <VersusGame key={session.playFabId} />;
 }
 
@@ -43,162 +41,180 @@ function VersusSignIn() {
 }
 
 function VersusGame() {
-  const { session } = useAuth();
-  const v = useVersus(session!);
+  const v = useVersus();
 
-  // Load the lobby list once when browsing begins.
-  useEffect(() => {
-    if (v.phase === "browsing") v.refreshLobbies();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Physical keyboard during the race.
-  useEffect(() => {
-    if (v.phase !== "playing") return;
+  const useKeyboardHandlers = v.phase === "playing";
+  React.useEffect(() => {
+    if (!useKeyboardHandlers) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === "Enter") v.submit();
       else if (e.key === "Backspace") v.backspace();
       else if (/^[a-zA-Z]$/.test(e.key)) v.typeLetter(e.key);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [v]);
-
-  const title =
-    v.phase === "playing" || v.phase === "results" ? "Versus" : "Find a match";
+  }, [useKeyboardHandlers, v]);
 
   return (
-    <Scaffold
-      title={title}
-      accent={ACCENT}
-      onNew={v.phase === "browsing" ? () => v.refreshLobbies() : () => v.leave()}
-      newLabel={v.phase === "browsing" ? "Refresh" : "Leave match"}
-    >
+    <Scaffold title="Versus" accent={ACCENT}>
       <div className="pt-versus">
         {v.error && <div className="pt-form-error">{v.error}</div>}
-        {v.status && <div className="pt-lb-status">{v.status}</div>}
-
-        {v.phase === "browsing" && (
-          <Browsing lobbies={v.lobbies} onJoin={v.join} onCreate={v.create} />
-        )}
-
-        {v.phase === "lobby" && (
-          <WaitingRoom
-            roster={v.roster.map((r) => r.name)}
-            isHost={v.isHost}
-            onStart={v.start}
-          />
-        )}
-
-        {(v.phase === "playing" || v.phase === "results") && (
-          <Race v={v} />
-        )}
+        {v.phase === "idle" && <ModeSelect v={v} />}
+        {v.phase === "searching" && <Searching v={v} />}
+        {v.phase === "connecting" && <Status text={v.statusText} />}
+        {v.phase === "waiting" && <WaitingRoom v={v} />}
+        {(v.phase === "playing" || v.phase === "over") && <Race v={v} />}
       </div>
     </Scaffold>
   );
 }
 
-function Browsing({
-  lobbies,
-  onJoin,
-  onCreate,
-}: {
-  lobbies: { LobbyId: string; ConnectionString: string; CurrentPlayers: number; MaxPlayers: number }[];
-  onJoin: (conn: string) => void;
-  onCreate: () => void;
-}) {
+function ModeSelect({ v }: { v: VersusController }) {
+  const [showJoin, setShowJoin] = useState(false);
+  const [code, setCode] = useState("");
   return (
     <div className="pt-browsing">
-      <button className="pt-share-btn" style={{ background: ACCENT }} onClick={onCreate}>
-        Create match
+      <button
+        className="pt-share-btn"
+        style={{ background: ACCENT }}
+        onClick={v.quickMatch}
+      >
+        Quick Match
       </button>
-      <div className="pt-lobby-list">
-        {lobbies.map((l) => (
-          <button
-            key={l.LobbyId}
-            className="pt-lobby-row"
-            onClick={() => onJoin(l.ConnectionString)}
-          >
-            <span className="pt-lobby-name">Match {l.LobbyId.slice(0, 6)}</span>
-            <span className="pt-lobby-count">
-              {l.CurrentPlayers}/{l.MaxPlayers}
-            </span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function WaitingRoom({
-  roster,
-  isHost,
-  onStart,
-}: {
-  roster: string[];
-  isHost: boolean;
-  onStart: () => void;
-}) {
-  return (
-    <div className="pt-waiting">
-      <h3 className="pt-guide-h3">Players ({roster.length})</h3>
-      <ul className="pt-roster">
-        {roster.map((name, i) => (
-          <li key={i} className="pt-roster-item">
-            {name}
-          </li>
-        ))}
-      </ul>
-      {isHost ? (
-        <button className="pt-share-btn" style={{ background: ACCENT }} onClick={onStart}>
-          Start match
+      <button className="pt-lobby-row" onClick={v.createPrivate}>
+        <span className="pt-lobby-name">Create private game</span>
+        <span className="pt-lobby-count">share a code →</span>
+      </button>
+      {!showJoin ? (
+        <button className="pt-lobby-row" onClick={() => setShowJoin(true)}>
+          <span className="pt-lobby-name">Join with a code</span>
         </button>
       ) : (
-        <p className="pt-lb-status">Waiting for the host to start…</p>
+        <div className="pt-signin-form">
+          <textarea
+            className="pt-input"
+            placeholder="Paste game code"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            rows={2}
+          />
+          <button
+            className="pt-share-btn"
+            style={{ background: ACCENT }}
+            onClick={() => v.joinPrivate(code)}
+          >
+            Join game
+          </button>
+        </div>
       )}
     </div>
   );
 }
 
-function Race({ v }: { v: ReturnType<typeof useVersus> }) {
-  const sorted = [...v.opponents].sort((a, b) => {
-    if (a.solved !== b.solved) return a.solved ? -1 : 1;
-    return b.guessCount - a.guessCount;
-  });
+function Searching({ v }: { v: VersusController }) {
+  return (
+    <div className="pt-waiting">
+      <Status text={v.statusText || "Finding an opponent…"} />
+      <button className="pt-lobby-row" onClick={v.leave}>
+        <span className="pt-lobby-name">Cancel</span>
+      </button>
+    </div>
+  );
+}
 
+function WaitingRoom({ v }: { v: VersusController }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    if (!v.roomCode) return;
+    try {
+      await navigator.clipboard.writeText(v.roomCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard blocked — the code is still selectable below */
+    }
+  };
+  return (
+    <div className="pt-waiting">
+      <Status text={v.statusText} />
+      <p className="pt-lb-status">
+        Share this code with a friend (works with the iOS app too):
+      </p>
+      <textarea className="pt-input" readOnly value={v.roomCode ?? ""} rows={3} />
+      <button
+        className="pt-share-btn"
+        style={{ background: ACCENT }}
+        onClick={copy}
+      >
+        {copied ? "Copied!" : "Copy code"}
+      </button>
+      <button className="pt-lobby-row" onClick={v.leave}>
+        <span className="pt-lobby-name">Cancel</span>
+      </button>
+    </div>
+  );
+}
+
+function Status({ text }: { text: string }) {
+  return <div className="pt-lb-status">{text}</div>;
+}
+
+function Race({ v }: { v: VersusController }) {
   return (
     <div className="pt-race">
-      {v.phase === "results" && (
-        <div className="pt-versus-banner" style={{ borderColor: ACCENT }}>
-          {v.iWon ? "🏆 You won!" : `${v.winnerName} won this round`}
+      {v.isOver && (
+        <div
+          className="pt-versus-banner"
+          style={{
+            borderColor: v.didWin
+              ? "var(--pt-success)"
+              : v.isDraw
+              ? "var(--pt-text-secondary)"
+              : "var(--pt-danger)",
+          }}
+        >
+          {v.didWin
+            ? "You win! 🎉"
+            : v.isDraw
+            ? "Draw"
+            : "Opponent won"}
+          {v.answer && ` — ${v.answer}`}
         </div>
       )}
-
       <div className="pt-race-main">
         <div className="pt-race-me">
           <Board guesses={v.board.guesses} shakeRow={v.board.shakeRow} />
-          <Keyboard
-            keyStates={v.board.keyStates}
-            onLetter={v.typeLetter}
-            onEnter={v.submit}
-            onBackspace={v.backspace}
-          />
         </div>
-
-        {sorted.length > 0 && (
-          <div className="pt-race-opponents">
-            {sorted.map((o) => (
-              <OpponentBoard
-                key={o.entityId}
-                name={o.name}
-                states={o.states}
-                solved={o.solved}
-              />
-            ))}
-          </div>
-        )}
+        <div className="pt-race-opponents">
+          {v.opponents.length === 0 && (
+            <div className="pt-mini-label">Waiting for opponent…</div>
+          )}
+          {v.opponents.map((o, i) => (
+            <OpponentBoard
+              key={o.id}
+              name={`Opponent ${i + 1}`}
+              rows={o.snapshot.rows}
+              solved={o.snapshot.didWin}
+            />
+          ))}
+        </div>
       </div>
+      {v.phase === "playing" ? (
+        <Keyboard
+          keyStates={v.board.keyStates}
+          onLetter={v.typeLetter}
+          onEnter={v.submit}
+          onBackspace={v.backspace}
+        />
+      ) : (
+        <button
+          className="pt-share-btn"
+          style={{ background: ACCENT }}
+          onClick={v.leave}
+        >
+          Back to menu
+        </button>
+      )}
     </div>
   );
 }

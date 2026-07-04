@@ -1,27 +1,31 @@
-/* A compact, letter-free view of an opponent's board (color states only). */
+/* A compact, letter-free view of an opponent's board — color marks only, so a
+ * letter is never leaked. Marks match the cross-play contract: correct=0,
+ * present=1, absent=2, neutral=3. */
 import React from "react";
-import { CODE_STATE } from "./contract";
+import { ProgressMark } from "../../net/snapshot";
 import { WORD_LENGTH, MAX_GUESSES } from "../engine";
 
-const stateClass: Record<string, string> = {
-  empty: "pt-mini-empty",
-  tbd: "pt-mini-empty",
-  absent: "pt-tile-absent",
-  present: "pt-tile-present",
-  correct: "pt-tile-correct",
+const markClass: Record<number, string> = {
+  0: "pt-tile-correct",
+  1: "pt-tile-present",
+  2: "pt-tile-absent",
+  3: "pt-mini-empty",
 };
 
 interface Props {
   name: string;
-  states: number[];
+  rows: ProgressMark[][];
   solved: boolean;
   rank?: number | null;
 }
 
-export default function OpponentBoard({ name, states, solved, rank }: Props) {
+export default function OpponentBoard({ name, rows, solved, rank }: Props) {
   const cells: number[] = [];
-  for (let i = 0; i < MAX_GUESSES * WORD_LENGTH; i++) {
-    cells.push(states[i] ?? 0);
+  for (let r = 0; r < MAX_GUESSES; r++) {
+    const row = rows[r];
+    for (let c = 0; c < WORD_LENGTH; c++) {
+      cells.push(row ? row[c] ?? 3 : 3);
+    }
   }
   return (
     <div className={`pt-mini${solved ? " pt-mini-solved" : ""}`}>
@@ -32,7 +36,7 @@ export default function OpponentBoard({ name, states, solved, rank }: Props) {
       </div>
       <div className="pt-mini-grid">
         {cells.map((code, i) => (
-          <span key={i} className={`pt-mini-cell ${stateClass[CODE_STATE[code]]}`} />
+          <span key={i} className={`pt-mini-cell ${markClass[code]}`} />
         ))}
       </div>
     </div>
