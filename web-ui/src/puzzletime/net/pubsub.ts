@@ -2,8 +2,15 @@
  * PlayFab PubSub — a SignalR socket that pushes a notification whenever a
  * subscribed lobby changes. We treat every push as "refetch the lobby" (the
  * relay then calls getLobbySnapshots), exactly like the iOS PubSubClient, so we
- * never depend on the push payload shape. A short keepalive ping stops the
- * SignalR service from dropping the idle socket mid-match.
+ * never depend on the push payload shape.
+ *
+ * Keepalive: we rely on SignalR's built-in protocol ping (withKeepAliveInterval)
+ * — the client sends `{"type":6}` frames, matching what the iOS client does by
+ * hand. We also widen the server timeout so a quiet match (nobody guessing for a
+ * while, so PlayFab sends nothing) doesn't make the client declare the socket
+ * dead and tear it down. If the socket does drop and auto-reconnect, we
+ * re-subscribe the lobby to the *new* connection handle — otherwise the
+ * reconnected socket would stay silent and updates would stop mid-match.
  */
 import {
   HubConnection,
@@ -25,7 +32,11 @@ interface StartSessionResponse {
 
 export class LobbyPubSub {
   private connection: HubConnection | null = null;
-  private keepAlive: ReturnType<typeof setInterval> | null = null;
+  // Subscription context, kept so we can re-subscribe after a reconnect.
+  private token: EntityTokenResponse | null = null;
+  private entity: EntityKey | null = null;
+  private lobbyId: string | null = null;
+  private onChanged: (() => void) | null = null;
 
   /** Connect, subscribe the lobby, and invoke `onChanged` on every push. */
   async connect(
@@ -34,10 +45,13 @@ export class LobbyPubSub {
     lobbyId: string,
     onChanged: () => void
   ): Promise<void> {
+    this.token = token;
+    this.entity = entity;
+    this.lobbyId = lobbyId;
+    this.onChanged = onChanged;
     const negotiate = await this.negotiate(token);
     await this.openConnection(negotiate.url, negotiate.accessToken, onChanged);
-    const session = await this.startSession();
-    await subscribeToLobby(token, entity, lobbyId, session.newConnectionHandle);
+    await this.startAndSubscribe();
   }
 
   private async negotiate(token: EntityTokenResponse): Promise<NegotiateResponse> {
@@ -58,7 +72,7 @@ export class LobbyPubSub {
     accessToken: string,
     onChanged: () => void
   ): Promise<void> {
-    this.connection = new HubConnectionBuilder()
+    const connection = new HubConnectionBuilder()
       .withUrl(url, {
         accessTokenFactory: () => accessToken,
         headers: { "X-EntityToken": accessToken },
@@ -67,16 +81,38 @@ export class LobbyPubSub {
       .withKeepAliveInterval(5000)
       .configureLogging(LogLevel.Warning)
       .build();
+    // Don't let a quiet match (no server traffic) trip the default 30s server
+    // timeout and needlessly drop the socket. Our own keepalive pings hold it
+    // open; the relay's safety poll covers anything we still miss.
+    connection.serverTimeoutInMilliseconds = 120_000;
 
     // Any lobby-change message means "go refetch"; we don't parse the payload.
-    this.connection.on("ReceiveMessage", () => onChanged());
+    connection.on("ReceiveMessage", () => onChanged());
 
-    return this.connection.start().then(() => {
-      // Belt-and-braces keepalive ping so the socket doesn't die when idle.
-      this.keepAlive = setInterval(() => {
-        this.connection?.send("ping").catch(() => {});
-      }, 5000);
+    // After an automatic reconnect the socket has a brand-new connection handle,
+    // so the old lobby subscription no longer routes to it. Re-run the session +
+    // subscribe handshake and force an immediate refetch so we don't miss the
+    // changes that happened while we were disconnected.
+    connection.onreconnected(() => {
+      this.startAndSubscribe()
+        .then(() => onChanged())
+        .catch(() => {});
     });
+
+    this.connection = connection;
+    return connection.start();
+  }
+
+  /** (Re)establish the PubSub session and subscribe the lobby to this socket. */
+  private async startAndSubscribe(): Promise<void> {
+    if (!this.connection || !this.token || !this.entity || !this.lobbyId) return;
+    const session = await this.startSession();
+    await subscribeToLobby(
+      this.token,
+      this.entity,
+      this.lobbyId,
+      session.newConnectionHandle
+    );
   }
 
   private async startSession(): Promise<StartSessionResponse> {
@@ -88,16 +124,17 @@ export class LobbyPubSub {
   }
 
   async disconnect(): Promise<void> {
-    if (this.keepAlive) {
-      clearInterval(this.keepAlive);
-      this.keepAlive = null;
-    }
+    const connection = this.connection;
+    this.connection = null;
+    this.token = null;
+    this.entity = null;
+    this.lobbyId = null;
+    this.onChanged = null;
     try {
-      await this.connection?.stop();
+      await connection?.stop();
     } catch {
       /* ignore */
     }
-    this.connection = null;
   }
 }
 

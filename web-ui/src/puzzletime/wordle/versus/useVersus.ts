@@ -373,7 +373,11 @@ export function useVersus(): VersusController {
             /* transient — retried next tick */
           }
         }
-        if (pendingFetchRef.current || (!connectedRef.current && ticks % 3 === 0)) {
+        // Fetch immediately on a push, and also on a slow safety cadence
+        // (~every 3s) regardless of socket state. PubSub can silently stop
+        // delivering (e.g. after a reconnect), so this guarantees the opponent
+        // board keeps updating even if pushes dry up.
+        if (pendingFetchRef.current || ticks % 3 === 0) {
           pendingFetchRef.current = false;
           try {
             const entries = await getLobbySnapshots(token, lobbyId);
