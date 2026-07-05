@@ -58,6 +58,10 @@ import { recordVersusWin } from "../../net/stats";
 
 const PLAYER_COUNT = 2;
 const MATCH_TIMEOUT_SECONDS = 30;
+/** Total match duration once play begins. When it elapses the match ends even
+ *  if a player is still going. Configurable; the iOS app uses the same value
+ *  via MatchConfig.timeLimit so cross-play matches end together. */
+const MATCH_DURATION_SECONDS = 60;
 
 export type VersusPhase =
   | "idle"
@@ -245,6 +249,8 @@ export interface VersusController {
   signedIn: boolean;
   throttled: boolean;
   connectionState: PubSubState;
+  /** Seconds left on the match clock while playing, else null. */
+  remaining: number | null;
   quickMatch: () => void;
   createPrivate: () => void;
   joinPrivate: (code: string) => void;
@@ -266,6 +272,8 @@ export function useVersus(): VersusController {
     Record<string, OpponentSnapshot>
   >({});
   const [winnerId, setWinnerId] = useState<string | null | undefined>(undefined);
+  // Seconds left on the match clock while playing (null before/after a match).
+  const [remaining, setRemaining] = useState<number | null>(null);
   // True while PlayFab is actively rate-limiting our lobby calls (429s). Drives
   // a small UI signal and a short relay backoff.
   const [throttled, setThrottled] = useState(false);
@@ -275,6 +283,8 @@ export function useVersus(): VersusController {
   // Refs for the relay + lifecycle (avoid re-subscribing on every render).
   const boardRef = useRef(board);
   boardRef.current = board;
+  const opponentsRef = useRef(opponents);
+  opponentsRef.current = opponents;
   const lobbyIdRef = useRef<string | null>(null);
   const startMsRef = useRef(0);
   const finishedAtRef = useRef<number | null>(null);
@@ -482,31 +492,67 @@ export function useVersus(): VersusController {
     [session]
   );
 
-  // Decide the winner whenever snapshots change. firstToFinish: as soon as any
-  // player has solved, the earliest solver wins; if everyone's finished with no
-  // solve, it's a draw.
+  // Match end + countdown. Runs on a 250ms clock while playing so the countdown
+  // stays live and the time-up end fires even if no snapshot changes. The match
+  // ends when ANY of these hold (whichever comes first):
+  //   1. everyone has finished,
+  //   2. "equalize guesses": once the first player has finished at N guesses,
+  //      every other player has either finished or made at least N guesses — so
+  //      the trailing player always gets an equal number of guesses to catch up,
+  //   3. the total match clock (MATCH_DURATION_SECONDS) runs out.
+  // The winner is then decided by the shared resolver (fewest guesses among
+  // solvers, ties by finish time then id), so both clients agree.
   useEffect(() => {
     if (phase !== "playing") return;
     const localId = localIdRef.current;
-    const localSnap = buildSnapshot(board, finishedAtRef.current);
-    const snapshots: Record<string, OpponentSnapshot> = {
-      [localId]: localSnap,
-      ...opponents,
+
+    const evaluate = () => {
+      const elapsed = startMsRef.current
+        ? (Date.now() - startMsRef.current) / 1000
+        : 0;
+      const left = Math.max(0, Math.ceil(MATCH_DURATION_SECONDS - elapsed));
+      setRemaining(left);
+
+      const localSnap = buildSnapshot(boardRef.current, finishedAtRef.current);
+      const snapshots: Record<string, OpponentSnapshot> = {
+        [localId]: localSnap,
+        ...opponentsRef.current,
+      };
+      const ids = Object.keys(snapshots);
+      const bothPresent = ids.length >= PLAYER_COUNT;
+
+      const everyoneFinished =
+        bothPresent &&
+        ids.every((id) => (snapshots[id] ?? START_SNAPSHOT).isFinished);
+
+      // Lowest guess count among players who have already finished. Undefined
+      // until at least one player finishes — the bar the others must reach.
+      const finishedSteps = ids
+        .map((id) => snapshots[id] ?? START_SNAPSHOT)
+        .filter((s) => s.isFinished)
+        .map((s) => s.stepsTaken);
+      const bar = finishedSteps.length ? Math.min(...finishedSteps) : undefined;
+      const equalized =
+        bothPresent &&
+        bar !== undefined &&
+        ids.every((id) => {
+          const s = snapshots[id] ?? START_SNAPSHOT;
+          return s.isFinished || s.stepsTaken >= bar;
+        });
+
+      const timeUp = elapsed >= MATCH_DURATION_SECONDS;
+
+      if (everyoneFinished || equalized || timeUp) {
+        setWinnerId(decideWinner(ids, snapshots, "guessRace"));
+        setPhase("over");
+      }
     };
-    const ids = Object.keys(snapshots);
-    const winner = decideWinner(ids, snapshots);
-    const everyoneFinished =
-      ids.length >= PLAYER_COUNT &&
-      ids.every((id) => (snapshots[id] ?? START_SNAPSHOT).isFinished);
-    if (winner !== null) {
-      setWinnerId(winner);
-      setPhase("over");
-    } else if (everyoneFinished) {
-      setWinnerId(null);
-      setPhase("over");
-    }
+
+    evaluate();
+    const t = setInterval(evaluate, 250);
+    return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board.status, board.submitted.length, opponents, phase]);
+  }, [phase]);
 
   // On match end: stop the relay (one last publish of our finished snapshot so
   // the opponent sees the result), and record a versus win if we won.
@@ -712,6 +758,7 @@ export function useVersus(): VersusController {
     setOpponents({});
     setWinnerId(undefined);
     setThrottled(false);
+    setRemaining(null);
     dispatch({ type: "RESET", answer: "STARE" });
     cancelledRef.current = false;
   }, [teardown]);
@@ -745,6 +792,7 @@ export function useVersus(): VersusController {
     signedIn: !!session,
     throttled,
     connectionState: connState,
+    remaining,
     quickMatch,
     createPrivate,
     joinPrivate,

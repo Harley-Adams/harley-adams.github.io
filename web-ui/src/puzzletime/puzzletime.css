@@ -772,6 +772,56 @@
   border-radius: var(--pt-r-control);
   background: var(--pt-surface);
 }
+.pt-match-timer {
+  margin-left: auto;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+.pt-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pt-s-sm);
+  padding: 16px;
+  border: 2px solid;
+  border-radius: var(--pt-r-control);
+  background: var(--pt-surface);
+  text-align: center;
+}
+.pt-result-headline {
+  font-weight: 800;
+  font-size: 1.35rem;
+}
+.pt-result-answer {
+  font-size: 0.95rem;
+  color: var(--pt-text-secondary);
+}
+.pt-result-answer strong {
+  color: var(--pt-text);
+  letter-spacing: 0.12em;
+}
+.pt-result-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0;
+}
+.pt-result-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+.pt-result-who {
+  color: var(--pt-text-secondary);
+}
+.pt-result-val {
+  font-weight: 700;
+}
+.pt-result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pt-s-sm);
+  margin-top: 4px;
+}
 .pt-race-main {
   display: flex;
   flex-direction: column;

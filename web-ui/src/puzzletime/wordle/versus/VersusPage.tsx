@@ -201,6 +201,9 @@ function Race({ v }: { v: VersusController }) {
     <div className="pt-race">
       <div className="pt-conn-row">
         <ConnectionBadge state={v.connectionState} />
+        {v.phase === "playing" && v.remaining !== null && (
+          <MatchTimer seconds={v.remaining} />
+        )}
         {v.throttled && (
           <div
             className="pt-throttle"
@@ -211,25 +214,7 @@ function Race({ v }: { v: VersusController }) {
           </div>
         )}
       </div>
-      {v.isOver && (
-        <div
-          className="pt-versus-banner"
-          style={{
-            borderColor: v.didWin
-              ? "var(--pt-success)"
-              : v.isDraw
-              ? "var(--pt-text-secondary)"
-              : "var(--pt-danger)",
-          }}
-        >
-          {v.didWin
-            ? "You win! 🎉"
-            : v.isDraw
-            ? "Draw"
-            : "Opponent won"}
-          {v.answer && ` — ${v.answer}`}
-        </div>
-      )}
+      {v.isOver && <Result v={v} />}
       <div className="pt-race-main">
         <div className="pt-race-me">
           <Board guesses={v.board.guesses} shakeRow={v.board.shakeRow} />
@@ -248,22 +233,97 @@ function Race({ v }: { v: VersusController }) {
           ))}
         </div>
       </div>
-      {v.phase === "playing" ? (
-        <Keyboard
-          keyStates={v.board.keyStates}
-          onLetter={v.typeLetter}
-          onEnter={v.submit}
-          onBackspace={v.backspace}
-        />
-      ) : (
+      {v.phase === "playing" &&
+        (v.board.status === "playing" ? (
+          <Keyboard
+            keyStates={v.board.keyStates}
+            onLetter={v.typeLetter}
+            onEnter={v.submit}
+            onBackspace={v.backspace}
+          />
+        ) : (
+          <div className="pt-lb-status">
+            {v.board.status === "won" ? "Solved! " : "Out of guesses — "}
+            waiting for your opponent…
+          </div>
+        ))}
+    </div>
+  );
+}
+
+function MatchTimer({ seconds }: { seconds: number }) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  const label = `${m}:${String(s).padStart(2, "0")}`;
+  const low = seconds <= 10;
+  return (
+    <div
+      className="pt-match-timer"
+      title="Time left in the match."
+      style={{
+        color: low ? "var(--pt-danger)" : "var(--pt-text-secondary)",
+        fontVariantNumeric: "tabular-nums",
+        fontWeight: 700,
+      }}
+    >
+      ⏱ {label}
+    </div>
+  );
+}
+
+/** The end-of-match screen: result, the answer, each player's guess count, and
+ *  actions to play again or return to the menu. */
+function Result({ v }: { v: VersusController }) {
+  const solved = v.board.status === "won";
+  const myGuesses = v.board.submitted.length;
+  const headline = v.didWin
+    ? "You win! 🎉"
+    : v.isDraw
+    ? "Draw"
+    : "Opponent won";
+  const color = v.didWin
+    ? "var(--pt-success)"
+    : v.isDraw
+    ? "var(--pt-text-secondary)"
+    : "var(--pt-danger)";
+  const guessLabel = (n: number, didWin: boolean) =>
+    didWin ? `${n} guess${n === 1 ? "" : "es"}` : "did not solve";
+  return (
+    <div className="pt-result" style={{ borderColor: color }}>
+      <div className="pt-result-headline" style={{ color }}>
+        {headline}
+      </div>
+      {v.answer && (
+        <div className="pt-result-answer">
+          The word was <strong>{v.answer.toUpperCase()}</strong>
+        </div>
+      )}
+      <div className="pt-result-stats">
+        <div className="pt-result-stat">
+          <span className="pt-result-who">You</span>
+          <span className="pt-result-val">{guessLabel(myGuesses, solved)}</span>
+        </div>
+        {v.opponents.map((o, i) => (
+          <div className="pt-result-stat" key={o.id}>
+            <span className="pt-result-who">Opponent {i + 1}</span>
+            <span className="pt-result-val">
+              {guessLabel(o.snapshot.stepsTaken, o.snapshot.didWin)}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="pt-result-actions">
+        <button className="pt-lobby-row" onClick={v.leave}>
+          <span className="pt-lobby-name">Back to menu</span>
+        </button>
         <button
           className="pt-share-btn"
           style={{ background: ACCENT }}
-          onClick={v.leave}
+          onClick={v.quickMatch}
         >
-          Back to menu
+          Play again
         </button>
-      )}
+      </div>
     </div>
   );
 }
