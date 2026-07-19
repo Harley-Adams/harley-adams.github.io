@@ -248,6 +248,15 @@ function buildPress(styles) {
   const dir = path.join(outDir, 'press');
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+
+  const assetsDir = path.join(root, 'press-assets');
+  if (fs.existsSync(assetsDir) && fs.statSync(assetsDir).isDirectory()) {
+    for (const f of fs.readdirSync(assetsDir)) {
+      const src = path.join(assetsDir, f);
+      if (fs.statSync(src).isFile()) fs.copyFileSync(src, path.join(dir, f));
+    }
+  }
+
   console.log('Built dist/press/index.html');
 }
 

@@ -202,6 +202,148 @@ body {
   font-style: italic;
 }
 
+/* ===== Press page ===== */
+.press .cv-body > h2:first-child {
+  display: none;
+}
+
+.press-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.press-kicker {
+  margin: 0 0 0.6rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.press-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.press-lede {
+  margin: 0.7rem 0 0;
+  max-width: 34rem;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.press-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.press-card {
+  margin: 0;
+  padding: 1.3rem 1.4rem;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: #fbfcfd;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.press-card::marker {
+  content: none;
+}
+
+.press-card:hover {
+  border-color: #cdd6e0;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 20px rgba(16, 24, 40, 0.06);
+  transform: translateY(-2px);
+}
+
+.press-source {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--faint);
+  font-weight: 600;
+}
+
+.press-card-title {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.press-card-desc {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.press-card-link {
+  display: inline-block;
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: none;
+}
+
+.press-card-link:hover {
+  text-decoration: underline;
+}
+
+.press-card--feature {
+  grid-column: 1 / -1;
+}
+
+.press-figure {
+  margin: 1rem 0 0;
+}
+
+.press-figure a {
+  display: block;
+  border: none;
+}
+
+.press-figure img {
+  display: block;
+  width: 100%;
+  max-width: 30rem;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+}
+
+.press-figure figcaption {
+  margin-top: 0.55rem;
+  max-width: 30rem;
+  font-size: 0.8rem;
+  color: var(--faint);
+}
+
+@media (max-width: 640px) {
+  .press-list {
+    grid-template-columns: 1fr;
+  }
+
+  .press-title {
+    font-size: 1.6rem;
+  }
+}
+
 /* The Summary paragraph sits right under the header with no h2. */
 .cv-body > p:first-child {
   margin-top: 0;
