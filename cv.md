@@ -1,7 +1,7 @@
 ---
 name: Harley Adams
 title: Architect · Xbox Developer Organization
-tagline: Xbox · PlayFab · Building Progression and Multiplayer gaming services at XBOX.
+tagline: Building progression and multiplayer services for the Xbox Network.
 github: https://github.com/Harley-Adams
 website: https://harleyadams.dev
 email: harley.g.adams@gmail.com
@@ -11,7 +11,7 @@ location: Seattle, WA
 
 ## Summary
 
-Cloud architect for global gaming services on Xbox and PlayFab — a network of over a billion players. I set the technical direction for modernizing Xbox Live's live-service platform onto a cloud-native AKS stack. Along the way I've personally designed, built, and operated the Achievements, Leaderboards, Stats, and Time Played systems that sustain 200,000 requests per second across the Xbox Network.
+I'm a cloud architect working on Xbox and PlayFab. I built and run the Achievements, Leaderboards, Stats and Time Played services, which serve 200,000 requests per second across the Xbox Network. Right now my focus is Xbox's next platform generation.
 
 ## Experience
 
@@ -21,19 +21,19 @@ Cloud architect for global gaming services on Xbox and PlayFab — a network of 
 
 #### Architect, Xbox Developer Organization · 2025 – Present
 
-- Lead the architecture for modernizing legacy Xbox Live services onto a cloud-native [AKS](https://azure.microsoft.com/products/kubernetes-service) stack, setting the technical direction for the wider organization.
-- Designing the next generation of Achievements — enriching the semantic meaning of an Achievement with AI-driven enhancements.
+- Leading the migration of legacy Xbox Live services onto a cloud-native [AKS](https://azure.microsoft.com/products/kubernetes-service) stack, and setting the direction other teams build against.
+- Designing the next generation of Achievements, using AI to give players more meaning behind the achievements they earn.
 
 #### Tech Lead & Senior Software Engineer, Xbox / PlayFab · 2020 – 2025
 
-- Tech lead for gaming cloud services across the Xbox Network ecosystem and Microsoft's [PlayFab](https://playfab.com/) offering.
-- Key engineer driving the design, delivery, and operation of the Achievements, Leaderboards, Stats, and Time Played services — owning architecture decisions and leading the implementation efforts end to end.
-- Re-architected the Achievements backend to eliminate critical player data loss, applying at-least-once delivery guarantees so achievement unlocks survive failures and are never silently dropped.
+- Tech lead for Xbox Time Played and [PlayFab](https://playfab.com/) Stats and Leaderboards v2.
+- Owned the architecture decisions and led the implementation, from design through to running these services in production.
+- Re-architected the Achievements backend to eliminate player data loss, moving it to at-least-once delivery so unlocks survive failures.
 
 #### Software Engineer II, Microsoft Sway · 2016 – 2020
 
-- Designed and shipped the full-stack Sway Author Analytics platform end to end — client-side tracking, ingestion endpoints, Azure Stream Analytics processing, and SQL storage — giving authors visibility into how their content is consumed.
-- Drove accessibility across [Sway](https://sway.office.com/) and hardened the service by triaging and fixing publicly reported security vulnerabilities.
+- Built [Sway](https://sway.office.com/)'s Author Analytics platform: client-side tracking, ingestion endpoints, Azure Stream Analytics, SQL storage. Authors could see how people read their Sways.
+- Worked on accessibility across Sway, and triaged and fixed externally reported security vulnerabilities.
 
 ### Fiserv · 2015 – 2016
 
@@ -41,7 +41,7 @@ Cloud architect for global gaming services on Xbox and PlayFab — a network of 
 
 #### Junior Software Engineer
 
-- Wrote backend services in C# / .NET for mobile banking applications, along with the deployment pipelines for those services.
+- Wrote C# / .NET backend services for mobile banking apps, plus the pipelines that deployed them.
 
 ### Ninja Kiwi · 2013
 
@@ -49,24 +49,24 @@ Cloud architect for global gaming services on Xbox and PlayFab — a network of 
 
 #### Game Developer
 
-- Junior developer contributing to the Bloons Monkey City and SAS: Zombie Assault 4 games.
+- Junior developer on Bloons Monkey City and SAS: Zombie Assault 4.
 
 ## Projects
 
-### PuzzleTime — Web Edition
+### PuzzleTime (Web)
 
-- A web port of my iOS "PuzzleTime" puzzle app, starting with a fully-featured Wordle: daily and random modes, on-screen and physical keyboard, per-key coloring, hints, stats and streaks with a guess distribution, and shareable results. Local-first — no backend or account required. Built with React and TypeScript. [Play it](/games/wordle).
+- A web version of my iOS puzzle app, starting with Wordle: daily and random modes, on-screen and physical keyboard input, hints, stats, streaks and shareable results. No backend and no account — it all lives in your browser. React and TypeScript. [Play it](/games/wordle).
 
 ### Run Box Run
 
-- An Android game published to the Google Play Store, written during university with no frameworks beyond built-in Java and Android APIs.
+- An Android game I wrote at university and put on the Play Store. No engine, no frameworks, just Java and the Android APIs.
 
 ## Skills
 
 - **Programming:** C# / .NET 8 · Python · JavaScript / TypeScript · PowerShell · Bash
 - **Architecture & Leadership:** Distributed systems design · live-service reliability · technical direction · mentorship
 - **Cloud & Infra:** Azure Kubernetes Service · Docker · Bicep · Terraform · Cosmos DB · Event Hubs · Redis · Grafana · Prometheus · Locust · Azure Load Testing
-- **AI:** Leading AI adoption for engineers across the Xbox Developer organization — driving practices that lift team velocity while holding the line on service reliability across multiple teams.
+- **AI:** Leading AI adoption for engineers across the Xbox Developer organization.
 
 ## Education
 
