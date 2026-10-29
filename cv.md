@@ -29,7 +29,7 @@ I'm a cloud architect on Xbox, where I built and run the Achievements, Leaderboa
 #### Tech Lead & Senior Software Engineer, Xbox / PlayFab · 2020 – 2025
 
 - Tech lead for Xbox Time Played and [PlayFab](https://playfab.com/) Stats and Leaderboards v2, from design through to running in production. Both now power titles including Microsoft Flight Simulator 2024.
-- Re-architected the Achievements backend to eliminate player data loss, moving it to at-least-once delivery so unlocks survive failures.
+- Stopped player data loss in the legacy Achievements service by introducing eventual consistency with at-least-once delivery, so unlocks survive failures.
 
 #### Software Engineer II, Microsoft Sway · 2016 – 2020
 
