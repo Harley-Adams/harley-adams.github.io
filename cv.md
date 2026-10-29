@@ -1,7 +1,7 @@
 ---
 name: Harley Adams
 title: Architect · Xbox Developer Organization
-tagline: Architecting Xbox player services, and the AI engineering practices behind them.
+tagline: Architecting Xbox Gameplay Services, and the AI engineering practices behind them.
 github: https://github.com/Harley-Adams
 website: https://harleyadams.dev
 email: harley.g.adams@gmail.com
