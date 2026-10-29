@@ -13,13 +13,13 @@ tagline: Coverage and announcements featuring my work.
   <li class="press-card press-card--feature">
     <p class="press-source">Xbox Wire</p>
     <h2 class="press-card-title">Introducing Mythic Achievements</h2>
-    <p class="press-card-desc">The official announcement of Mythic Achievements, which I led engineering on. Finish every original achievement in a game and it reaches Mythic status. It applies retroactively to games you completed years ago, back to Xbox 360, and you keep it even when DLC adds new achievements later.</p>
+    <p class="press-card-desc">The official announcement of Mythic Achievements. I was the lead engineer: we rewrote the Achievements backend and backfilled Mythic status for more than 1 billion players across more than 16,000 titles with zero downtime. Finish every original achievement in a game and it reaches Mythic status, back to Xbox 360, and you keep it even when DLC adds new achievements later.</p>
     <a class="press-card-link" href="https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/">Read the announcement &rarr;</a>
   </li>
   <li class="press-card">
     <p class="press-source">Pure Xbox</p>
     <h2 class="press-card-title">Mythic Achievements roll out to every player</h2>
-    <p class="press-card-desc">Mythic Achievements headline the October 2026 Xbox console update, moving from Insiders to every player.</p>
+    <p class="press-card-desc">Mythic Achievements, which I led engineering on, headline the October 2026 Xbox console update as they move from Insiders to every player.</p>
     <a class="press-card-link" href="https://www.purexbox.com/news/2026/10/xbox-adds-10-new-features-in-october-28th-update-now-available-to-download">Read the coverage &rarr;</a>
   </li>
   <li class="press-card">
@@ -29,39 +29,33 @@ tagline: Coverage and announcements featuring my work.
     <a class="press-card-link" href="https://news.xbox.com/en-us/2026/07/22/xbox-backward-compatibility-on-pc/">Read the announcement &rarr;</a>
   </li>
   <li class="press-card">
-    <p class="press-source">TrueAchievements</p>
-    <h2 class="press-card-title">&ldquo;The wizard at Xbox HQ&rdquo;</h2>
-    <p class="press-card-desc">My first major project &mdash; surfacing time played across every Xbox title &mdash; delighted millions of players and the wider community.</p>
-    <a class="press-card-link" href="https://www.trueachievements.com/n45338/xbox-games-time-played">Read the coverage &rarr;</a>
+    <p class="press-source">Xbox Wire</p>
+    <h2 class="press-card-title">Achievements: highlighting 100% completed games</h2>
+    <p class="press-card-desc">Xbox Insiders tested a set of Achievements improvements: highlighting titles where you&rsquo;ve earned all available Gamerscore, new completion filters, and the option to hide games from your profile.</p>
+    <a class="press-card-link" href="https://news.xbox.com/en-us/2026/04/08/xbox-insiders-may-2026-console-features/">Read the announcement &rarr;</a>
   </li>
   <li class="press-card">
     <p class="press-source">Microsoft for Developers</p>
     <h2 class="press-card-title">PlayFab Statistics &mdash; General Availability</h2>
-    <p class="press-card-desc">Launch announcement for the new Statistics and Leaderboards offering, now shipped in titles including Microsoft Flight Simulator 2024.</p>
+    <p class="press-card-desc">Launch announcement for the new PlayFab Statistics service, which I designed and shipped. It now powers titles including Minecraft and Microsoft Flight Simulator 2024.</p>
     <a class="press-card-link" href="https://developer.microsoft.com/en-us/games/articles/2025/03/new-playfab-statistics-general-availability">Read the announcement &rarr;</a>
   </li>
   <li class="press-card">
     <p class="press-source">Microsoft for Developers</p>
     <h2 class="press-card-title">PlayFab Leaderboards &mdash; General Availability</h2>
-    <p class="press-card-desc">Launch announcement for the redesigned Leaderboards service, built for planet-scale player ranking.</p>
+    <p class="press-card-desc">Launch announcement for the redesigned Leaderboards service, which I designed and shipped to rank players at any scale. Minecraft and Microsoft Flight Simulator 2024 rank players on it.</p>
     <a class="press-card-link" href="https://developer.microsoft.com/en-us/games/articles/2025/03/leverage-new-features-with-playfab-leaderboards/">Read the announcement &rarr;</a>
   </li>
   <li class="press-card">
-    <p class="press-source">Xbox Wire</p>
-    <h2 class="press-card-title">Achievements: highlighting 100% completed games</h2>
-    <p class="press-card-desc">Xbox Insiders begin testing a set of Achievements improvements &mdash; including highlighting titles where you&rsquo;ve earned all available Gamerscore, new completion filters, and the option to hide games from your profile.</p>
-    <a class="press-card-link" href="https://news.xbox.com/en-us/2026/04/08/xbox-insiders-may-2026-console-features/">Read the announcement &rarr;</a>
-  </li>
-  <li class="press-card press-card--feature">
     <p class="press-source">X &middot; @Pilestedt</p>
-    <h2 class="press-card-title">Arrowhead CEO thanks PlayFab</h2>
-    <p class="press-card-desc">Johan Pilestedt, CEO of Arrowhead Game Studios, publicly thanked PlayFab for its role in <em>Helldivers 2</em> as the game raced past 12M units sold.</p>
-    <figure class="press-figure">
-      <a href="https://x.com/Pilestedt/status/1760082636205175136">
-        <img src="helldivers-tweet.png" width="1080" height="705" loading="lazy" decoding="async" alt="Tweet from Arrowhead CEO Johan Pilestedt celebrating Helldivers 2 surpassing 12M units sold and thanking the community." />
-      </a>
-      <figcaption>Johan Pilestedt (@Pilestedt) celebrating Helldivers 2 passing 12M units sold.</figcaption>
-    </figure>
-    <a class="press-card-link" href="https://x.com/Pilestedt/status/1760082636205175136">Read the tweet &rarr;</a>
+    <h2 class="press-card-title">Arrowhead CEO names PlayFab</h2>
+    <p class="press-card-desc">During the <em>Helldivers 2</em> launch, Arrowhead Game Studios CEO Johan Pilestedt named PlayFab alongside Azure, PSN and Steam as partners who were &ldquo;super helpful and really attentive.&rdquo; I built PlayFab services the game used.</p>
+    <a class="press-card-link" href="https://x.com/Pilestedt/status/1760082636205175136">Read the post &rarr;</a>
+  </li>
+  <li class="press-card">
+    <p class="press-source">TrueAchievements</p>
+    <h2 class="press-card-title">&ldquo;The wizards at Xbox HQ&rdquo;</h2>
+    <p class="press-card-desc">TrueAchievements&rsquo; nod to the team that restored time played for Xbox games and backfilled the missing data. I designed and shipped that service, Xbox Time Played.</p>
+    <a class="press-card-link" href="https://www.trueachievements.com/n45338/xbox-games-time-played">Read the coverage &rarr;</a>
   </li>
 </ul>
