@@ -11,7 +11,7 @@ location: Seattle, WA
 
 ## Summary
 
-I'm a cloud architect working on Xbox and PlayFab. I built and run the Achievements, Leaderboards, Stats and Time Played services, which serve 200,000 requests per second across the Xbox Network. Most recently I was lead engineer on [Mythic Achievements](https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/), which we built AI-native from day one. I also lead AI adoption across the Xbox Developer organization, from the tools engineers use every day to agents that help run our services in production.
+I'm a cloud architect on Xbox, where I built and run the Achievements, Leaderboards, Stats and Time Played services, which handle 200,000 requests per second across the Xbox Network. Lately I've been leading the shift to AI-native engineering, from how we write and review code to agents that help run our services in production.
 
 ## Experience
 
@@ -21,56 +21,38 @@ I'm a cloud architect working on Xbox and PlayFab. I built and run the Achieveme
 
 #### Architect, Xbox Developer Organization · 2025 – Present
 
-- Lead engineer for [Mythic Achievements](https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/), shipped to every Xbox player in October 2026. Rewrote the Achievements backend on a modern cloud-native architecture, and backfilled Mythic status for more than 1 billion players across more than 16,000 titles, going back to Xbox 360, all with zero downtime for the live service.
-- Built Mythic AI-native: AI validated designs and plans before any code was written, and 100% of the code committed was generated with [GitHub Copilot](https://github.com/features/copilot).
+- Lead engineer for [Mythic Achievements](https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/), shipped to every Xbox player in October 2026. Rewrote the Achievements backend on a modern cloud-native architecture and backfilled Mythic status for more than 1 billion players across more than 16,000 titles, with zero downtime. Built AI-native: AI validated designs and plans before any code was written, and 100% of the committed code was generated with [GitHub Copilot](https://github.com/features/copilot).
 - Led the 300-person Xbox Developer organization's adoption of AI tooling in service engineering: code generation, code review and plan validation. Ran technical demos for the whole organization and personally onboarded 6 teams. Every pull request now gets an AI review before a human looks at it.
-- Set the skill and agent development practices 6 teams now follow. Engineers use these agents day to day, and they run as autonomous on-call SRE agents with production read access on the [Azure SRE Agent](https://learn.microsoft.com/azure/sre-agent/) platform.
-- An AI agent is now first responder on every incident, correlating logs, metrics, Kubernetes state and Azure resource health. Time-to-mitigate is down 80%, because both investigating and acting take far less time.
+- Set the skill and agent development practices those 6 teams follow, including autonomous on-call SRE agents with production read access on [Azure SRE Agent](https://learn.microsoft.com/azure/sre-agent/). An agent is now first responder on every incident, correlating logs, metrics, Kubernetes state and Azure resource health, and time-to-mitigate is down 80%.
 - Leading the migration of legacy Xbox Live services onto a cloud-native [AKS](https://azure.microsoft.com/products/kubernetes-service) stack, and setting the direction other teams build against.
 
 #### Tech Lead & Senior Software Engineer, Xbox / PlayFab · 2020 – 2025
 
-- Tech lead for Xbox Time Played and [PlayFab](https://playfab.com/) Stats and Leaderboards v2.
-- Owned the architecture decisions and led the implementation, from design through to running these services in production.
+- Tech lead for Xbox Time Played and [PlayFab](https://playfab.com/) Stats and Leaderboards v2, from design through to running in production. Both now power titles including Microsoft Flight Simulator 2024.
 - Re-architected the Achievements backend to eliminate player data loss, moving it to at-least-once delivery so unlocks survive failures.
 
 #### Software Engineer II, Microsoft Sway · 2016 – 2020
 
-- Built [Sway](https://sway.office.com/)'s Author Analytics platform: client-side tracking, ingestion endpoints, Azure Stream Analytics, SQL storage. Authors could see how people read their Sways.
-- Worked on accessibility across Sway, and triaged and fixed externally reported security vulnerabilities.
+- Built [Sway](https://sway.office.com/)'s Author Analytics platform end to end, from client-side tracking and ingestion through Azure Stream Analytics to SQL storage.
 
-### Fiserv · 2015 – 2016
-
-*Auckland, New Zealand*
-
-#### Junior Software Engineer
-
-- Wrote C# / .NET backend services for mobile banking apps, plus the pipelines that deployed them.
-
-### Ninja Kiwi · 2013
+### Earlier · 2013 – 2016
 
 *Auckland, New Zealand*
 
-#### Game Developer
-
-- Junior developer on Bloons Monkey City and SAS: Zombie Assault 4.
+- **Fiserv:** C# / .NET backend services and deployment pipelines for mobile banking apps.
+- **Ninja Kiwi:** Game developer on Bloons Monkey City and SAS: Zombie Assault 4.
 
 ## Projects
 
-### PuzzleTime (Web)
+### PuzzleTime
 
-- A web version of my iOS puzzle app, starting with Wordle: daily and random modes, on-screen and physical keyboard input, hints, stats, streaks and shareable results. No backend and no account — it all lives in your browser. React and TypeScript. [Play it](/games/wordle).
-
-### Run Box Run
-
-- An Android game I wrote at university and put on the Play Store. No engine, no frameworks, just Java and the Android APIs.
+- A web and iOS puzzle game with real-time online versus, cross-play and leaderboards built on PlayFab, with no game server of my own. React and TypeScript. [Play it](/games/wordle).
 
 ## Skills
 
-- **Programming:** C# / .NET 8 · Python · JavaScript / TypeScript · PowerShell · Bash
-- **Architecture & Leadership:** Distributed systems design · live-service reliability · technical direction · mentorship
-- **Cloud & Infra:** Azure Kubernetes Service · Docker · Bicep · Terraform · Cosmos DB · Event Hubs · Redis · Grafana · Prometheus · Locust · Azure Load Testing
-- **AI Engineering:** Org-wide AI adoption · AI-native development workflows · AI code review & plan validation · agent & skill authoring · Azure SRE Agent · GitHub Copilot · MCP · guardrails for production-access agents
+- **Programming:** C# / .NET 8 · Python · JavaScript / TypeScript
+- **Cloud & Infra:** Azure Kubernetes Service · Docker · Bicep · Terraform · Cosmos DB · Event Hubs · Redis · Grafana · Prometheus
+- **AI Engineering:** AI-native development workflows · AI code review & plan validation · agent & skill authoring · Azure SRE Agent · GitHub Copilot · MCP · guardrails for production-access agents
 
 ## Education
 
