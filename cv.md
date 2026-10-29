@@ -21,7 +21,7 @@ I'm a cloud architect working on Xbox and PlayFab. I built and run the Achieveme
 
 #### Architect, Xbox Developer Organization · 2025 – Present
 
-- Lead engineer for [Mythic Achievements](https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/), shipped to every Xbox player in October 2026. Rewrote the Achievements backend on a modern cloud-native architecture, and backfilled Mythic status across N players and N titles, going back to Xbox 360.
+- Lead engineer for [Mythic Achievements](https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/), shipped to every Xbox player in October 2026. Rewrote the Achievements backend on a modern cloud-native architecture, and backfilled Mythic status for more than 1 billion players across more than 16,000 titles, going back to Xbox 360, all with zero downtime for the live service.
 - Built Mythic AI-native: AI validated designs and plans before any code was written, generated code, and reviewed pull requests. N% of the code was AI-generated, and we went from design to launch in N months.
 - Led the Xbox Developer organization's adoption of AI tooling in service engineering: code generation, code review and plan validation. Now used by N engineers across N teams, with AI reviewing N% of pull requests.
 - Set the skill and agent development practices N teams now follow. Engineers use these agents day to day, and they run as autonomous on-call SRE agents with production read access on the [Azure SRE Agent](https://learn.microsoft.com/azure/sre-agent/) platform, triaging N% of incidents and cutting time-to-mitigate by N%.
