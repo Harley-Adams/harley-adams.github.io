@@ -22,9 +22,10 @@ I'm a cloud architect working on Xbox and PlayFab. I built and run the Achieveme
 #### Architect, Xbox Developer Organization · 2025 – Present
 
 - Lead engineer for [Mythic Achievements](https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/), shipped to every Xbox player in October 2026. Rewrote the Achievements backend on a modern cloud-native architecture, and backfilled Mythic status for more than 1 billion players across more than 16,000 titles, going back to Xbox 360, all with zero downtime for the live service.
-- Built Mythic AI-native: AI validated designs and plans before any code was written, generated code, and reviewed pull requests. N% of the code was AI-generated, and we went from design to launch in N months.
-- Led the 300-person Xbox Developer organization's adoption of AI tooling in service engineering: code generation, code review and plan validation. Ran technical demos for the whole organization and personally onboarded 6 teams, with AI now reviewing N% of pull requests.
-- Set the skill and agent development practices 6 teams now follow. Engineers use these agents day to day, and they run as autonomous on-call SRE agents with production read access on the [Azure SRE Agent](https://learn.microsoft.com/azure/sre-agent/) platform, triaging N% of incidents and cutting time-to-mitigate by N%.
+- Built Mythic AI-native: AI validated designs and plans before any code was written, and 100% of the code committed was generated with [GitHub Copilot](https://github.com/features/copilot).
+- Led the 300-person Xbox Developer organization's adoption of AI tooling in service engineering: code generation, code review and plan validation. Ran technical demos for the whole organization and personally onboarded 6 teams. Every pull request now gets an AI review before a human looks at it.
+- Set the skill and agent development practices 6 teams now follow. Engineers use these agents day to day, and they run as autonomous on-call SRE agents with production read access on the [Azure SRE Agent](https://learn.microsoft.com/azure/sre-agent/) platform.
+- An AI agent is now first responder on every incident, correlating logs, metrics, Kubernetes state and Azure resource health. Time-to-mitigate is down 80%, because both investigating and acting take far less time.
 - Leading the migration of legacy Xbox Live services onto a cloud-native [AKS](https://azure.microsoft.com/products/kubernetes-service) stack, and setting the direction other teams build against.
 
 #### Tech Lead & Senior Software Engineer, Xbox / PlayFab · 2020 – 2025
