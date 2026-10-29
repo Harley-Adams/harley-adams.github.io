@@ -23,16 +23,10 @@ tagline: Coverage and announcements featuring my work.
     <a class="press-card-link" href="https://www.purexbox.com/news/2026/10/xbox-adds-10-new-features-in-october-28th-update-now-available-to-download">Read the coverage &rarr;</a>
   </li>
   <li class="press-card">
-    <p class="press-source">TrueAchievements</p>
-    <h2 class="press-card-title">Xbox officially announces Mythic Achievements</h2>
-    <p class="press-card-desc">The achievement-hunting community&rsquo;s take on Mythic Achievements, one of its longest-running requests.</p>
-    <a class="press-card-link" href="https://www.trueachievements.com/news/xbox-mythic-achievements">Read the coverage &rarr;</a>
-  </li>
-  <li class="press-card">
-    <p class="press-source">Hypebeast</p>
-    <h2 class="press-card-title">Xbox Mythic Achievements</h2>
-    <p class="press-card-desc">Mythic Achievements reach mainstream culture coverage beyond the gaming press.</p>
-    <a class="press-card-link" href="https://hypebeast.com/2026/9/microsoft-xbox-mythic-achievements-announcement-info">Read the coverage &rarr;</a>
+    <p class="press-source">Xbox Wire</p>
+    <h2 class="press-card-title">Achievements are coming to original Xbox games</h2>
+    <p class="press-card-desc">Alongside Xbox Backward Compatibility on PC, Xbox announced achievements for original Xbox games for the first time, one of the most-requested fan features. I consulted on the product and service design to support it.</p>
+    <a class="press-card-link" href="https://news.xbox.com/en-us/2026/07/22/xbox-backward-compatibility-on-pc/">Read the announcement &rarr;</a>
   </li>
   <li class="press-card">
     <p class="press-source">TrueAchievements</p>
