@@ -1,7 +1,7 @@
 ---
 name: Harley Adams
 title: Architect · Xbox Developer Organization
-tagline: Architecting Xbox Gameplay Services, and the AI engineering practices behind them.
+tagline: Architecting Xbox Gameplay Services and the AI engineering practices behind them.
 github: https://github.com/Harley-Adams
 website: https://harleyadams.dev
 email: harley.g.adams@gmail.com
@@ -11,7 +11,7 @@ location: Seattle, WA
 
 ## Summary
 
-I'm a cloud architect on Xbox, where I built and run the Achievements, Leaderboards, Stats and Time Played services, which handle 200,000 requests per second across the Xbox Network. Lately I've been leading the shift to AI-native engineering, from how we write and review code to agents that help run our services in production.
+I architect the Xbox services behind Achievements, Leaderboards, Stats and Time Played, which handle 200,000 requests per second across the Xbox Network. I also lead AI-native engineering across the 300-person Xbox Developer organization: AI reviews every pull request, and autonomous agents are first responders on our production incidents.
 
 ## Experience
 
@@ -21,19 +21,19 @@ I'm a cloud architect on Xbox, where I built and run the Achievements, Leaderboa
 
 #### Architect, Xbox Developer Organization · 2025 – Present
 
-- Lead engineer for [Mythic Achievements](https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/), shipped to every Xbox player in October 2026. Rewrote the Achievements backend on a modern cloud-native architecture and backfilled Mythic status for more than 1 billion players across more than 16,000 titles, with zero downtime. Built AI-native: AI validated designs and plans before any code was written, and 100% of the committed code was generated with [GitHub Copilot](https://github.com/features/copilot).
-- Led AI adoption across the 300-person Xbox Developer organization, making AI code generation, code review and plan validation the default way we build services. I ran technical demos and walkthroughs for the whole organization, and every pull request now gets an AI review before a human sees it.
-- Set the skill and agent development practices used by 6 teams, including autonomous on-call SRE agents with production read access on [Azure SRE Agent](https://learn.microsoft.com/azure/sre-agent/). An agent is now first responder on every incident, correlating logs, metrics, Kubernetes state and Azure resource health, and time-to-mitigate is down 80%.
-- Leading the migration of legacy Xbox Live services onto a cloud-native [AKS](https://azure.microsoft.com/products/kubernetes-service) platform. I set up the Kubernetes clusters, Istio ingress and service mesh, and Prometheus and Grafana observability, and tuned them as production load scaled up. A dozen other services now run at Xbox scale on the infrastructure I set up and maintain.
+- Shipped [Mythic Achievements](https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/) to every Xbox player in October 2026 as lead engineer of a team of N, rewriting the Achievements backend and backfilling Mythic status for more than 1 billion players across more than 16,000 titles with zero downtime. Built AI-native: AI reviewed designs and plans before coding started, and [GitHub Copilot](https://github.com/features/copilot) generated 100% of the committed code.
+- Made AI code generation, code review and plan validation the default way the 300-person Xbox Developer organization builds services. Every pull request now gets an AI review before a human sees it.
+- Cut incident time-to-mitigate by 80% by making autonomous SRE agents the first responder on every incident. Built on [Azure SRE Agent](https://learn.microsoft.com/azure/sre-agent/) with production read access, the agents correlate logs, metrics, Kubernetes state and Azure resource health. 6 teams now follow the skill and agent practices I set.
+- Built and run the [AKS](https://azure.microsoft.com/products/kubernetes-service) platform that a dozen Xbox services now run on at Xbox scale, as part of leading the migration of legacy Xbox Live services. I set up the Kubernetes clusters, Istio ingress and service mesh, and Prometheus and Grafana observability, and tuned them as production load scaled up.
 
 #### Tech Lead & Senior Software Engineer, Xbox / PlayFab · 2020 – 2025
 
-- Tech lead for Xbox Time Played and [PlayFab](https://playfab.com/) Stats and Leaderboards v2, from design through to running in production. Both now power titles including Minecraft and Microsoft Flight Simulator 2024.
-- Drastically reduced player data loss in the legacy Achievements service by introducing eventual consistency with at-least-once delivery, so unlocks survive failures.
+- Designed and shipped Xbox Time Played, which tracks play time for every title on Xbox, and [PlayFab](https://playfab.com/) Stats and Leaderboards v2, which now power titles including Minecraft and Microsoft Flight Simulator 2024.
+- Drastically reduced player data loss in the legacy Achievements service by introducing eventual consistency with at-least-once delivery.
 
 #### Software Engineer II, Microsoft Sway · 2016 – 2020
 
-- Built [Sway](https://sway.office.com/)'s Author Analytics platform end to end, from client-side tracking and ingestion through Azure Stream Analytics to SQL storage.
+- Built [Sway](https://sway.office.com/)'s Author Analytics end to end so authors could see how people read their Sways, from client-side tracking through Azure Stream Analytics to SQL storage.
 
 ### Earlier · 2013 – 2016
 
@@ -46,11 +46,11 @@ I'm a cloud architect on Xbox, where I built and run the Achievements, Leaderboa
 
 ### PuzzleTime
 
-- A web and iOS puzzle game with real-time online versus, cross-play and leaderboards built on PlayFab, with no game server of my own. React and TypeScript. [Play it](/games/wordle).
+- Real-time online versus and cross-play between web and iOS, built entirely on PlayFab with no custom game server. React and TypeScript. [Play it](/games/wordle).
 
 ## Skills
 
-- **Programming:** C# / .NET 8 · Python · JavaScript / TypeScript
+- **Programming:** C# / .NET · Python · JavaScript / TypeScript
 - **Cloud & Infra:** Azure Kubernetes Service · Istio · Docker · Bicep · Terraform · Cosmos DB · Event Hubs · Redis · Grafana · Prometheus
 - **AI Engineering:** AI-native development workflows · AI code review & plan validation · agent & skill authoring · Azure SRE Agent · GitHub Copilot · MCP · guardrails for production-access agents
 
