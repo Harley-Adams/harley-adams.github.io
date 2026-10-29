@@ -10,6 +10,30 @@ tagline: Coverage and announcements featuring my work.
 </header>
 
 <ul class="press-list">
+  <li class="press-card press-card--feature">
+    <p class="press-source">Xbox Wire</p>
+    <h2 class="press-card-title">Introducing Mythic Achievements</h2>
+    <p class="press-card-desc">The official announcement of Mythic Achievements, which I led engineering on. Finish every original achievement in a game and it reaches Mythic status. It applies retroactively to games you completed years ago, back to Xbox 360, and you keep it even when DLC adds new achievements later.</p>
+    <a class="press-card-link" href="https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/">Read the announcement &rarr;</a>
+  </li>
+  <li class="press-card">
+    <p class="press-source">Pure Xbox</p>
+    <h2 class="press-card-title">Mythic Achievements roll out to every player</h2>
+    <p class="press-card-desc">Mythic Achievements headline the October 2026 Xbox console update, moving from Insiders to every player.</p>
+    <a class="press-card-link" href="https://www.purexbox.com/news/2026/10/xbox-adds-10-new-features-in-october-28th-update-now-available-to-download">Read the coverage &rarr;</a>
+  </li>
+  <li class="press-card">
+    <p class="press-source">TrueAchievements</p>
+    <h2 class="press-card-title">Xbox officially announces Mythic Achievements</h2>
+    <p class="press-card-desc">The achievement-hunting community&rsquo;s take on Mythic Achievements, one of its longest-running requests.</p>
+    <a class="press-card-link" href="https://www.trueachievements.com/news/xbox-mythic-achievements">Read the coverage &rarr;</a>
+  </li>
+  <li class="press-card">
+    <p class="press-source">Hypebeast</p>
+    <h2 class="press-card-title">Xbox Mythic Achievements</h2>
+    <p class="press-card-desc">Mythic Achievements reach mainstream culture coverage beyond the gaming press.</p>
+    <a class="press-card-link" href="https://hypebeast.com/2026/9/microsoft-xbox-mythic-achievements-announcement-info">Read the coverage &rarr;</a>
+  </li>
   <li class="press-card">
     <p class="press-source">TrueAchievements</p>
     <h2 class="press-card-title">&ldquo;The wizard at Xbox HQ&rdquo;</h2>

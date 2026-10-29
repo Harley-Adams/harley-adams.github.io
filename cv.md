@@ -1,7 +1,7 @@
 ---
 name: Harley Adams
 title: Architect · Xbox Developer Organization
-tagline: Building progression and multiplayer services for the Xbox Network.
+tagline: Architecting Xbox player services, and the AI engineering practices behind them.
 github: https://github.com/Harley-Adams
 website: https://harleyadams.dev
 email: harley.g.adams@gmail.com
@@ -11,7 +11,7 @@ location: Seattle, WA
 
 ## Summary
 
-I'm a cloud architect working on Xbox and PlayFab. I built and run the Achievements, Leaderboards, Stats and Time Played services, which serve 200,000 requests per second across the Xbox Network. Right now my focus is Xbox's next platform generation.
+I'm a cloud architect working on Xbox and PlayFab. I built and run the Achievements, Leaderboards, Stats and Time Played services, which serve 200,000 requests per second across the Xbox Network. Most recently I was lead engineer on [Mythic Achievements](https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/), which we built AI-native from day one. I also lead AI adoption across the Xbox Developer organization, from the tools engineers use every day to agents that help run our services in production.
 
 ## Experience
 
@@ -21,8 +21,11 @@ I'm a cloud architect working on Xbox and PlayFab. I built and run the Achieveme
 
 #### Architect, Xbox Developer Organization · 2025 – Present
 
+- Lead engineer for [Mythic Achievements](https://news.xbox.com/en-us/2026/09/29/xbox-insiders-october-2026-console-features-4/), shipped to every Xbox player in October 2026. Rewrote the Achievements backend on a modern cloud-native architecture, and backfilled Mythic status across N players and N titles, going back to Xbox 360.
+- Built Mythic AI-native: AI validated designs and plans before any code was written, generated code, and reviewed pull requests. N% of the code was AI-generated, and we went from design to launch in N months.
+- Led the Xbox Developer organization's adoption of AI tooling in service engineering: code generation, code review and plan validation. Now used by N engineers across N teams, with AI reviewing N% of pull requests.
+- Set the skill and agent development practices N teams now follow. Engineers use these agents day to day, and they run as autonomous on-call SRE agents with production read access on the [Azure SRE Agent](https://learn.microsoft.com/azure/sre-agent/) platform, triaging N% of incidents and cutting time-to-mitigate by N%.
 - Leading the migration of legacy Xbox Live services onto a cloud-native [AKS](https://azure.microsoft.com/products/kubernetes-service) stack, and setting the direction other teams build against.
-- Designing the next generation of Achievements, using AI to give players more meaning behind the achievements they earn.
 
 #### Tech Lead & Senior Software Engineer, Xbox / PlayFab · 2020 – 2025
 
@@ -66,7 +69,7 @@ I'm a cloud architect working on Xbox and PlayFab. I built and run the Achieveme
 - **Programming:** C# / .NET 8 · Python · JavaScript / TypeScript · PowerShell · Bash
 - **Architecture & Leadership:** Distributed systems design · live-service reliability · technical direction · mentorship
 - **Cloud & Infra:** Azure Kubernetes Service · Docker · Bicep · Terraform · Cosmos DB · Event Hubs · Redis · Grafana · Prometheus · Locust · Azure Load Testing
-- **AI:** Leading AI adoption for engineers across the Xbox Developer organization.
+- **AI Engineering:** Org-wide AI adoption · AI-native development workflows · AI code review & plan validation · agent & skill authoring · Azure SRE Agent · GitHub Copilot · MCP · guardrails for production-access agents
 
 ## Education
 
