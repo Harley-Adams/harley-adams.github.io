@@ -1,5 +1,5 @@
 ---
-title: "GUIDs, Damn GUIDs and Microsoft Entra"
+title: "GUIDs, Damned GUIDs and Microsoft Entra"
 date: 2025-04-27
 draft: true
 summary: "A Entra Id cheat sheet for dummies, by a dummy."
