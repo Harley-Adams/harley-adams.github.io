@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 import MarkdownIt from 'markdown-it';
+import { bundledLanguages, createHighlighter } from 'shiki';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const srcDir = path.join(root, 'src');
@@ -11,7 +12,25 @@ const gamesBuildDir = path.join(root, 'web-ui', 'build');
 
 const BRAND = 'Harley Adams';
 
-const md = new MarkdownIt({ html: true, linkify: false, typographer: false });
+const highlighter = await createHighlighter({ themes: ['github-light'], langs: [] });
+const md = new MarkdownIt({
+  html: true,
+  linkify: false,
+  typographer: false,
+  highlight(code, language) {
+    if (!highlighter.getLoadedLanguages().includes(language)) return '';
+    return highlighter.codeToHtml(code, { lang: language, theme: 'github-light' });
+  },
+});
+
+async function renderMarkdown(content) {
+  const languages = md.parse(content, {})
+    .filter((token) => token.type === 'fence')
+    .map((token) => token.info.trim().split(/\s+/)[0])
+    .filter((language) => Object.hasOwn(bundledLanguages, language));
+  await highlighter.loadLanguage(...new Set(languages));
+  return md.render(content);
+}
 
 // Render ```mermaid fences as <pre class="mermaid"> so they render client-side.
 const defaultFence = md.renderer.rules.fence.bind(md.renderer.rules);
@@ -202,11 +221,11 @@ function rightAlignDates(html) {
   });
 }
 
-function buildCV(styles) {
+async function buildCV(styles) {
   const raw = fs.readFileSync(path.join(root, 'cv.md'), 'utf8');
   const { data, content } = matter(raw);
 
-  let bodyHtml = md.render(content);
+  let bodyHtml = await renderMarkdown(content);
   // Standalone emphasised lines (e.g. "*2017 - Present*") become muted meta lines.
   bodyHtml = bodyHtml.replace(/<p><em>([\s\S]*?)<\/em><\/p>/g, '<p class="meta">$1</p>');
   // Pull a trailing " · <date>" out of entry headings and right-align it.
@@ -231,11 +250,11 @@ function buildCV(styles) {
   console.log('Built dist/index.html');
 }
 
-function buildPress(styles) {
+async function buildPress(styles) {
   const raw = fs.readFileSync(path.join(root, 'press.md'), 'utf8');
   const { data, content } = matter(raw);
 
-  const bodyHtml = md.render(content);
+  const bodyHtml = await renderMarkdown(content);
   const template = fs.readFileSync(path.join(srcDir, 'press.html'), 'utf8');
 
   const html = template
@@ -260,7 +279,7 @@ function buildPress(styles) {
   console.log('Built dist/press/index.html');
 }
 
-function buildThoughts(styles, siteUrl) {
+async function buildThoughts(styles, siteUrl) {
   const postsDir = path.join(root, 'posts');
   if (!fs.existsSync(postsDir)) return;
 
@@ -281,7 +300,7 @@ function buildThoughts(styles, siteUrl) {
 
   const base = '../../';
   for (const post of posts) {
-    const bodyHtml = md.render(post.content);
+    const bodyHtml = await renderMarkdown(post.content);
     const hasMermaid = bodyHtml.includes('class="mermaid"');
     const canonical = siteUrl
       ? `${siteUrl}/thoughts/${post.slug}/`
@@ -416,7 +435,7 @@ function writeRoot404() {
   console.log('Built dist/404.html');
 }
 
-function main() {
+async function main() {
   const styles = fs.readFileSync(path.join(srcDir, 'styles.css'), 'utf8');
 
   let siteUrl = '';
@@ -426,9 +445,9 @@ function main() {
     if (host) siteUrl = `https://${host}`;
   }
 
-  buildCV(styles);
-  buildPress(styles);
-  buildThoughts(styles, siteUrl);
+  await buildCV(styles);
+  await buildPress(styles);
+  await buildThoughts(styles, siteUrl);
   copyGames();
   writeRoot404();
 
@@ -438,4 +457,4 @@ function main() {
   }
 }
 
-main();
+await main();

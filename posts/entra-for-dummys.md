@@ -1,7 +1,6 @@
 ---
 title: "GUIDs, Damned GUIDs and Microsoft Entra"
 date: 2025-04-27
-draft: true
 summary: "A Entra Id cheat sheet for dummies, by a dummy."
 tags:
   - azure
@@ -120,7 +119,7 @@ The caveat here is in s2s auth, where the callee is validating the token of the 
 
 ### Assigning a User Assigned Identity to an AKS deployment
 
-Use Infra as code when creating your cluster.
+Use infrastructure as code when creating your cluster. This example uses Bicep to create a user-assigned managed identity and assign it to the AKS cluster.
 
 ```bicep
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {

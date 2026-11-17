@@ -32,8 +32,13 @@ Build output (`dist/`):
 Edit the CV by editing **`cv.md`**. Add a blog post by dropping a Markdown file in
 **`posts/`** (front-matter `title`, `date`, optional `draft: true`).
 
+Code fences with a language label (such as `csharp`, `bicep`, or `jsonc`) get
+GitHub-style syntax highlighting at build time using Shiki, with no browser
+JavaScript required. Unlabelled or unsupported languages remain plain text;
+`mermaid` fences still render as diagrams.
+
 ```bash
-npm install                 # install generator deps (gray-matter, markdown-it)
+npm install                 # install generator deps
 npm run dev                 # watch cv.md/posts/src, live-reload at http://localhost:4178
 npm run build:cv            # build only the CV + thoughts (fast)
 npm run build               # full build: games + CV -> dist/
